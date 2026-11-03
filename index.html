@@ -7,13 +7,13 @@
 <div style="max-width:1180px;margin:0 auto;display:grid;gap:10px">
 <b style="font-size:19px">Install this list as an app</b>
 <button id="installBtn" style="justify-self:start;font:700 17px system-ui;padding:12px 22px;border:0;border-radius:10px;background:#fff;color:#2f3f8f">Install app</button>
-<div id="installSteps" hidden>
+<details id="installSteps"><summary style="cursor:pointer;font-size:14px;opacity:.9">Button didn't work? Show the taps</summary>
 <div data-os="android-samsung" hidden><b>Samsung Internet:</b> 1. Tap the <b>menu (three lines ☰)</b> at the bottom right. 2. Tap <b>Add page to</b>. 3. Tap <b>Home screen</b>. 4. Tap <b>Add</b>.</div>
 <div data-os="android" hidden><b>Chrome on Android:</b> 1. Tap the <b>three dots ⋮</b> at the top right. 2. Tap <b>Add to Home screen</b> (or <b>Install app</b>). 3. Tap <b>Install</b>.</div>
 <div data-os="ios" hidden><b>iPhone or iPad (Safari):</b> 1. Tap the <b>Share</b> button (square with an arrow). 2. Scroll down and tap <b>Add to Home Screen</b>. 3. Tap <b>Add</b>.</div>
 <div data-os="desktop" hidden><b>Computer (Chrome or Edge):</b> click the <b>install icon</b> at the right end of the address bar, then <b>Install</b>.</div>
-</div>
-<span style="opacity:.85;font-size:14px">Then open it from the new church icon on your home screen. It opens full screen and works without signal.</span>
+</details>
+<span style="opacity:.85;font-size:14px">It adds a church icon to your home screen. It opens full screen and works without signal.</span>
 <button id="installHide" style="justify-self:start;background:none;border:1px solid #fff;color:#fff;border-radius:8px;padding:6px 12px;font:14px system-ui">Hide this</button>
 </div></div>
 
@@ -904,8 +904,7 @@ if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catc
   // the button is always there: one tap installs where the browser allows it; otherwise it shows this browser's own 2 or 3 taps
   btn.onclick = async () => {
     if (ask) { ask.prompt(); const r = await ask.userChoice; ask = null; if (r.outcome === "accepted") bar.hidden = true; return; }
-    const st = document.getElementById("installSteps"); st.hidden = false; st.scrollIntoView({behavior: "smooth", block: "center"});
-    btn.textContent = "Your browser needs these taps:";
+    const st = document.getElementById("installSteps"); st.open = true; st.scrollIntoView({behavior: "smooth", block: "center"});
   };
   addEventListener("appinstalled", () => { bar.hidden = true; });
   document.getElementById("installHide").onclick = () => { bar.hidden = true; try { localStorage.setItem("prl-install-hidden", "1"); } catch (e) {} };
