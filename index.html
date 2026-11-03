@@ -338,7 +338,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{ou
       <select id="mLang" aria-label="Language"><option value="">All languages</option><option value="English">English</option><option value="Spanish">Spanish</option><option value="Hmong">Hmong</option><option value="Other">Other languages</option></select>
       <label class="pill" style="display:inline-flex;gap:8px;align-items:center"><input type="checkbox" id="mOther"> Include other Hmong churches (not Adventist)</label>
       <select id="mState" aria-label="State"></select>
-      <select id="mRadius" aria-label="Distance"><option value="25">Within 25 miles</option><option value="50" selected>Within 50 miles</option><option value="100">Within 100 miles</option><option value="250">Within 250 miles</option></select>
+      <select id="mStart" aria-label="Map opens at"></select><select id="mStyle" aria-label="Map style" hidden><option value="3d">Map style: 3D</option><option value="flat">Map style: Flat</option></select><select id="mRadius" aria-label="Distance"><option value="25">Within 25 miles</option><option value="50" selected>Within 50 miles</option><option value="100">Within 100 miles</option><option value="250">Within 250 miles</option></select>
     </div>
     <div class="maplegend" id="legend"></div>
     <p class="note" id="mOnline"></p>
@@ -686,7 +686,10 @@ function mapFail(why){
 }
 const loadScript = src => new Promise((ok, no) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = no; document.head.append(s); });
 // phones and tablets get the light flat map; computers with WebGL2 get the 3D map (Daniel: still picture on the phone, 3D on the computer)
-const WANT3D = matchMedia("(pointer: fine)").matches && innerWidth >= 900 && !!document.createElement("canvas").getContext("webgl2");
+const pref = k => { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } };
+const savePref = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+const CAN3D = matchMedia("(pointer: fine)").matches && !!document.createElement("canvas").getContext("webgl2");  // computers only; phones keep the light flat map
+const WANT3D = CAN3D && (pref("prl-map3d") ? pref("prl-map3d") === "3d" : innerWidth >= 900);
 async function initMap(){
   if (!WANT3D) return initFlat();
   try { await Promise.race([loadScript("https://unpkg.com/deck.gl@9.0.38/dist.min.js"), new Promise((_, no) => setTimeout(() => no(new Error("slow")), 12000))]); }
@@ -705,7 +708,7 @@ async function initMap(){
     getCursor: ({isHovering, isDragging}) => isDragging ? "grabbing" : isHovering ? "pointer" : "grab"});
   } catch (e) { return mapFail(e && e.message); }
   $("mapbox").querySelector("canvas")?.addEventListener("webglcontextlost", () => mapFail("the device stopped the 3D drawing"));
-  setTimeout(() => MAP && fly(HOME, 2600), 250);   // opening move: from flat overview into the tilted view
+  setTimeout(() => MAP && !STATES[pref("prl-mapstart")] && fly(HOME, 2600), 250);   // opening move: from flat overview into the tilted view
 }
 const TIP = {background:"rgba(16,20,36,.92)", color:"#eef2ff", border:"1px solid rgba(150,170,255,.35)", borderRadius:"10px", padding:"8px 10px", fontSize:"13px", maxWidth:"260px", fontFamily:"Atkinson Hyperlegible, system-ui, sans-serif"};
 function boundsOf(f){ let a = [180, 90], b = [-180, -90]; const walk = c => typeof c[0] === "number" ? (a = [Math.min(a[0], c[0]), Math.min(a[1], c[1])], b = [Math.max(b[0], c[0]), Math.max(b[1], c[1])]) : c.forEach(walk); walk(f.geometry.coordinates); return [a, b]; }
@@ -725,7 +728,7 @@ function areaPanel(title, sub, items){
   const by = {}; items.forEach(x => (by[groupOf(x)] ||= []).push(x));
   const order = Object.keys(by).sort((a,b) => by[b].length - by[a].length);
   $("near").innerHTML = `<div class="bignum"><span class="mono">${fmt(items.length)}</span><span>${esc(sub)}</span></div><h3>${esc(title)}</h3>` +
-    (items.length ? order.map((g, i) => `<details class="grp" ${i < 2 ? "open" : ""}><summary><span>${esc(g)}</span><b class="mono">${fmt(by[g].length)}</b></summary>${by[g].sort((a,b) => a.n.localeCompare(b.n)).slice(0, 60).map(x => `<button class="nearitem" data-any="${DATA.items.indexOf(x)}"><i style="background:${x.k ? `rgb(${KCOL[x.k]})` : "var(--muted)"}"></i><span><b>${esc(x.n)}</b>${esc(x.c)}${cityOf(x) ? " · " + esc(cityOf(x)) : ""}</span></button>`).join("")}${by[g].length > 60 ? `<p class="note">And ${fmt(by[g].length - 60)} more. Zoom in to narrow it.</p>` : ""}</details>`).join("")
+    (items.length ? order.map((g, i) => `<details class="grp" ${i < 2 ? "open" : ""}><summary><span>${esc(g)}</span><b class="mono">${fmt(by[g].length)}</b></summary>${by[g].sort((a,b) => a.n.localeCompare(b.n)).slice(0, 1500).map(x => `<button class="nearitem" data-any="${DATA.items.indexOf(x)}"><i style="background:${x.k ? `rgb(${KCOL[x.k]})` : "var(--muted)"}"></i><span><b>${esc(x.n)}</b>${esc(x.c)}${cityOf(x) ? " · " + esc(cityOf(x)) : ""}</span></button>`).join("")}${by[g].length > 1500 ? `<p class="note">And ${fmt(by[g].length - 1500)} more. Pick a state to narrow it.</p>` : ""}</details>`).join("")
       : `<p class="note">Nothing here yet. Zoom out or move the map.</p>`);
   stagger("#near .nearitem");
 }
@@ -788,6 +791,9 @@ function showPoint(p){
   nearList();
 }
 function mapControls(){
+  $("mStart").innerHTML = `<option value="">Map opens at: whole US</option>` + Object.keys(STATES).sort((a,b) => STATES[a].localeCompare(STATES[b])).map(s => `<option value="${s}">Map opens at: ${esc(STATES[s])}</option>`).join("");
+  $("mStart").value = STATES[pref("prl-mapstart")] ? pref("prl-mapstart") : "";
+  $("mStyle").hidden = !CAN3D; $("mStyle").value = WANT3D ? "3d" : "flat";
   $("mOnline").textContent = `${fmt(DATA.items.filter(x => !x.ll).length)} entries have no city, mostly online sermons, podcasts, studies and statewide conferences, so they are on the Resources tab only.`;
   $("mKind").innerHTML = `<option value="">Show: all types</option>` + Object.keys(KINDS).map(k => `<option value="${k}">Only ${esc(KINDS[k].toLowerCase())} (${fmt(kindN(k))})</option>`).join("");
   const sc = count(onMap, x => states(x).filter(s => STATES[s]));
@@ -826,7 +832,7 @@ function tab(which){
   const map = which === "map";
   $("tabRes").setAttribute("aria-selected", !map); $("tabMap").setAttribute("aria-selected", map);
   $("paneRes").hidden = map; $("paneMap").hidden = !map;
-  if (map && !mapReady) { mapReady = true; mapControls(); initMap().then(nearList, nearList); nearList(); }
+  if (map && !mapReady) { mapReady = true; mapControls(); const go = () => { const st = pref("prl-mapstart"); if (STATES[st] && !here) showState(st); else nearList(); }; initMap().then(go, go); nearList(); }
 }
 $("tabRes").onclick = () => tab("res"); $("tabMap").onclick = () => tab("map"); $("toMap").onclick = () => { tab("map"); scrollTo(0, 0); };
 $("q").addEventListener("input", e => {
@@ -848,6 +854,9 @@ $("placeForm").addEventListener("submit", e => {
   if (r.type === "state") { $("placeMsg").textContent = `Showing ${STATES[r.st]}.`; showState(r.st); }
   else { $("placeMsg").textContent = `Showing places near ${r.label}.${r.many ? " More than one place has this name; add the state, like “Fresno CA”." : ""}`; showPoint(r); }
 });
+$("mStart").onchange = e => { savePref("prl-mapstart", e.target.value); e.target.value ? showState(e.target.value) : $("zReset").click(); };
+$("mStyle").onchange = e => { savePref("prl-map3d", e.target.value); try { sessionStorage.setItem("prl-open-map", "1"); } catch (x) {} location.reload(); };  // the map is rebuilt for the new style
+try { if (sessionStorage.getItem("prl-open-map")) { sessionStorage.removeItem("prl-open-map"); setTimeout(() => tab("map"), 0); } } catch (x) {}
 $("mState").onchange = e => e.target.value ? showState(e.target.value) : ($("zReset").click());
 $("mKind").onchange = e => { const k = e.target.value; kindOn = new Set(k ? [k] : Object.keys(KINDS)); mapControls(); nearList(); };
 $("mLang").onchange = e => { mLang = e.target.value; mapControls(); nearList(); };
