@@ -317,7 +317,7 @@ section{grid-template-columns:minmax(0,1fr)}.filterbar>select{min-width:0;max-wi
   <div class="glance" id="glance"></div>
   <div class="charts">
     <div class="box"><h3>Biggest topics</h3><div class="bars" id="setBars"></div></div>
-    <div class="box"><h3>Link check, 3 Nov 2026</h3><div class="stack" id="chkStack" role="img"></div><div class="legend" id="chkLegend"></div><p class="note">Every link was opened in a real browser and its page looked at. Sites that block automatic checks wait for a person.</p></div>
+    <div class="box" hidden><h3>Link check, 3 Nov 2026</h3><div class="stack" id="chkStack" role="img"></div><div class="legend" id="chkLegend"></div><p class="note">Every link was opened in a real browser and its page looked at. Sites that block automatic checks wait for a person.</p></div>
     <div class="box"><h3>Where entries are</h3><div class="bars" id="stateBars"></div><button class="pill" id="toMap" style="justify-self:start">Open the map</button></div>
   </div>
 </section>
@@ -523,7 +523,7 @@ function glance(){
   // DC and Puerto Rico are not states, so they are named beside the count
   const other = ["DC", "PR"].filter(s => st[s]).map(s => s === "DC" ? "DC" : "Puerto Rico");
   const stats = [[fmt(Object.keys(st).filter(s => s !== "DC" && s !== "PR").length), "states" + (other.length ? ", plus " + other.join(" and ") : "")], [fmt(it.length), "resources"], [fmt(Object.keys(DATA.sets).length), "topics"],
-    [Math.round((cc.ok||0) / withUrl * 100) + "%", "links opened and looked at", "good"], [fmt(DATA.items.filter(x => x.ll).length), "places on the map"]];
+    [fmt(DATA.items.filter(x => x.ll).length), "places on the map"]];
   $("glance").innerHTML = stats.map(([n,k,c]) => `<div class="stat ${c||""}"><span class="n">${n}</span><span class="k">${k}</span></div>`).join("");
   const sets = Object.entries(DATA.sets).sort((a,b) => b[1]-a[1]).slice(0, 10), smax = sets[0][1];
   $("setBars").innerHTML = sets.map(([k,v]) => `<button class="bar" data-topic="${esc(k)}"><span class="lbl">${esc(k)}</span><span class="track"><span class="fill" style="width:${v/smax*100}%"></span></span><span class="mono">${fmt(v)}</span></button>`).join("");
@@ -979,7 +979,7 @@ if ("serviceWorker" in navigator) {
   // a new version took over: show it right away (once), so people never sit on an old copy
   navigator.serviceWorker.addEventListener("controllerchange", () => { if (had && !sessionStorage.getItem("prl-reloaded")) { sessionStorage.setItem("prl-reloaded", "1"); location.reload(); } });
 }
-document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 03 Nov 2026, 16:23"; document.body.appendChild(f); });
+document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 03 Nov 2026, 16:25"; document.body.appendChild(f); });
 (() => {
   const bar = document.getElementById("installBar"), btn = document.getElementById("installBtn");
   const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone;
