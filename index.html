@@ -6,8 +6,8 @@
 </head><body><div id="installBar" style="background:#2f3f8f;color:#fff;padding:14px max(16px,env(safe-area-inset-left,0px));font:16px/1.45 system-ui,sans-serif">
 <div style="max-width:1180px;margin:0 auto;display:grid;gap:10px">
 <b style="font-size:19px">Install this list as an app</b>
-<button id="installBtn" hidden style="justify-self:start;font:700 17px system-ui;padding:12px 22px;border:0;border-radius:10px;background:#fff;color:#2f3f8f">Install app</button>
-<div id="installSteps">
+<button id="installBtn" style="justify-self:start;font:700 17px system-ui;padding:12px 22px;border:0;border-radius:10px;background:#fff;color:#2f3f8f">Install app</button>
+<div id="installSteps" hidden>
 <div data-os="android-samsung" hidden><b>Samsung Internet:</b> 1. Tap the <b>menu (three lines ☰)</b> at the bottom right. 2. Tap <b>Add page to</b>. 3. Tap <b>Home screen</b>. 4. Tap <b>Add</b>.</div>
 <div data-os="android" hidden><b>Chrome on Android:</b> 1. Tap the <b>three dots ⋮</b> at the top right. 2. Tap <b>Add to Home screen</b> (or <b>Install app</b>). 3. Tap <b>Install</b>.</div>
 <div data-os="ios" hidden><b>iPhone or iPad (Safari):</b> 1. Tap the <b>Share</b> button (square with an arrow). 2. Scroll down and tap <b>Add to Home Screen</b>. 3. Tap <b>Add</b>.</div>
@@ -900,8 +900,13 @@ if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catc
   const ua = navigator.userAgent, os = /iPhone|iPad|iPod/.test(ua) ? "ios" : /SamsungBrowser/.test(ua) ? "android-samsung" : /Android/.test(ua) ? "android" : "desktop";
   document.querySelector(`[data-os="${os}"]`).hidden = false;
   let ask = null;
-  addEventListener("beforeinstallprompt", e => { e.preventDefault(); ask = e; btn.hidden = false; });  // one-tap install where the browser allows it
-  btn.onclick = async () => { if (!ask) return; ask.prompt(); await ask.userChoice; ask = null; btn.hidden = true; };
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); ask = e; });  // one-tap install where the browser allows it
+  // the button is always there: one tap installs where the browser allows it; otherwise it shows this browser's own 2 or 3 taps
+  btn.onclick = async () => {
+    if (ask) { ask.prompt(); const r = await ask.userChoice; ask = null; if (r.outcome === "accepted") bar.hidden = true; return; }
+    const st = document.getElementById("installSteps"); st.hidden = false; st.scrollIntoView({behavior: "smooth", block: "center"});
+    btn.textContent = "Your browser needs these taps:";
+  };
   addEventListener("appinstalled", () => { bar.hidden = true; });
   document.getElementById("installHide").onclick = () => { bar.hidden = true; try { localStorage.setItem("prl-install-hidden", "1"); } catch (e) {} };
 })();
