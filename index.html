@@ -312,6 +312,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{ou
     <select id="fTopic" aria-label="Topic"></select>
     <select id="fFormat" aria-label="Format"></select>
     <select id="fState" aria-label="State or place"></select>
+    <select id="fPerson" aria-label="Person"></select>
     <span class="grow"></span>
     <select id="sort" aria-label="Sort"><option value="best">Best match</option><option value="az">Name A to Z</option><option value="place">By place</option></select>
   </div>
@@ -408,6 +409,9 @@ const LIST = DATA.items.filter(x => !x.extra);   // the pastor list; Hmong direc
 const states = x => (x.s || "").split(/,\s*/).filter(Boolean);
 const format = x => { const s = x.sets.join(" "); return /Watch|Evangelistic/.test(s) ? "Watch (video)" : /Listen|Podcast|Radio/.test(s) ? "Listen (audio)" : /Bible Stud|Bible Tools|Hmong Bibles/.test(s) ? "Study and Bible tools" : /Schools|Conferences|Organizations|Churches/.test(s) ? "Places and groups" : "Programs and help"; };
 const count = (arr, f) => arr.reduce((m, x) => { [].concat(f(x)).forEach(v => { if (v) m[v] = (m[v]||0) + 1; }); return m; }, {});
+const PEOPLE = {"Mark Finley": [], "Doug Batchelor": ["Pastor Doug"], "Ellen G. White": ["Ellen White", "E. G. White", "E.G. White"], "Neil Nedley": [], "Stephen Bohr": [], "Joe Crews": [], "Roy Ice": [], "Dick Duerksen": [], "Ivor Myers": [], "Ken Norton": [], "Adrian Webster": [], "William Arama": [], "Phil Mills": [], "William Earnhardt": [], "Shawn Boonstra": ["Pastor Shawn"], "Matthew J. Lucio": ["Matthew Lucio"], "Dave Gemmell": [], "Justin Kim": [], "Tom Kyser": [], "Jim Burr": [], "Phil Ammons": [], "Daniel Gouveia": [], "Tim Kosaka": [], "Jeff Taylor": [], "Brad Williams": [], "Joe Kidder": [], "David Shin": [], "Glenn Russell": [], "Tim Rumsey": [], "John Westerdahl": [], "James Marcum": [], "Fred Murphy": [], "Timothy Arnott": [], "Kyle Allen": [], "David Klinedinst": [], "David Asscherick": [], "Ty Gibson": [], "John Bradshaw": [], "Steve Case": [], "Ron Pickell": [], "Gary Gibbs": [], "Richard Davidson": [], "Tim Madding": [], "Scott Griswold": [], "Dan Vis": [], "Walter Veith": [], "Dwight Nelson": [], "Randy Skeete": [], "Danny Shelton": [], "Hans Diehl": [], "Clifford Goldstein": [], "Kenneth Cox": [], "Carlton Byrd": [], "Emily Weber": [], "Jon Remitera": [], "Heidi Olson": [], "Kyle Morrison": [], "Nicole Dominguez": [], "Alyssa Truman": [], "Lonnie Melashenko": [], "C.A. Murray": ["CA Murray"], "Jim Howard": [], "Mary Ann McNeilus": ["Dr. McNeilus", "MaryAnn McNeilus"]};  // speakers and authors; aliases count too
+const personRe = {}; Object.entries(PEOPLE).forEach(([n, a]) => personRe[n] = new RegExp("\\b(" + [n, ...a].map(s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")\\b", "i"));
+const isBy = (x, n) => personRe[n].test(x.n + " " + (x.why || "") + " " + (x.note || ""));
 const hay = x => (x._h ||= [x.n, x.c, x.p, x.s, x.why, x.note, x.lg, x.sets.join(" ")].join(" ").toLowerCase());
 const stem = w => { const v = w.replace(/(ing|ers|er|ed)$/, ""); return v.length >= 5 && v !== w ? v : w.length > 4 ? w.replace(/(es|s)$/, "") : w; };
 const flat = s => s.replace(/[^a-z0-9]/g, "");
@@ -424,7 +428,7 @@ function countUp(el){
 function grow(sel){ if (calm) return; document.querySelectorAll(sel).forEach(f => { const w = f.style.width; f.style.width = "0"; requestAnimationFrame(() => requestAnimationFrame(() => f.style.width = w)); }); }
 function stagger(sel){ document.querySelectorAll(sel).forEach((e, i) => e.style.setProperty("--i", Math.min(i, 16))); }
 /* ---------- Resources tab ---------- */
-let q = "", topic = "", fmtSel = "", stSel = "", group = null, sort = "best", shown = 30;
+let person = "", q = "", topic = "", fmtSel = "", stSel = "", group = null, sort = "best", shown = 30;
 const GROUPS = (() => { const g = []; let cur = null; Object.keys(DATA.sets).forEach(n => { if (DATA.heads[n] || !cur) { cur = {title: DATA.heads[n] || "Start here", sets: []}; g.push(cur); } cur.sets.push(n); }); return g; })();
 // Daniel: "Ministry" was too broad, so it becomes three smaller doors
 const SPLIT = {Ministry: [["Evangelism", ["Evangelistic Series"]], ["Bible study", ["Bible Studies", "Bible Tools"]], ["Training", ["Pastor and Leader Training", "Discipleship and Church Training"]]]};
@@ -434,6 +438,7 @@ function match(x, skip){
   if (skip !== "topic" && topic && !x.sets.includes(topic)) return false;
   if (skip !== "fmt" && fmtSel && format(x) !== fmtSel) return false;
   if (skip !== "st" && stSel && !states(x).includes(stSel)) return false;
+  if (skip !== "person" && person && !isBy(x, person)) return false;
   return true;
 }
 function rows(){
@@ -460,6 +465,8 @@ function renderSelects(){
   const s = count(LIST.filter(x => match(x, "st")), states);
   const keys = Object.keys(s).sort((a,b) => (a === "Online" ? -1 : b === "Online" ? 1 : (STATES[a]||a).localeCompare(STATES[b]||b)));
   fillSelect($("fState"), "Any state or place", keys, s, stSel, v => STATES[v] || v);
+  { const base = LIST.filter(x => match(x, "person")), pc = {}; Object.keys(PEOPLE).forEach(n => { const c = base.filter(x => isBy(x, n)).length; if (c) pc[n] = c; });
+    fillSelect($("fPerson"), "Any person", Object.keys(pc).sort((a, b) => pc[b] - pc[a] || a.localeCompare(b)), pc, person); }
 }
 function badges(x){ return `<span class="b ${x.chk}">${x.chk === "ok" ? "✓ " : ""}${CHK[x.chk][0]}</span>${x.un ? `<span class="b un">Not confirmed</span>` : ""}`; }
 const card = (x, i) => `<button class="card" data-i="${i}"><span class="nm">${esc(x.n)}</span><span class="meta"><span class="tag">${esc(x.c)}</span>${esc([x.p, x.s].filter(Boolean).join(", "))}</span><span class="wh">${esc(x.why || x.note)}</span><span class="badges">${badges(x)}</span></button>`;
@@ -491,7 +498,7 @@ function render(){
       group.sets.map(s => `<button role="tab" data-sub="${esc(s)}" aria-selected="${topic === s}">${esc(s)}<span class="c">${fmt(c[s]||0)}</span></button>`).join(""); }
   renderSelects();
 }
-function clearAll(){ q = topic = fmtSel = stSel = ""; group = null; $("q").value = ""; shown = 30; }
+function clearAll(){ person = q = topic = fmtSel = stSel = ""; group = null; $("q").value = ""; shown = 30; }
 function goList(){ shown = 30; render(); $("finder").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"}); }
 function glance(){
   const it = LIST, cc = count(it, x => x.chk), withUrl = it.filter(x => x.u).length;
@@ -845,6 +852,7 @@ $("q").addEventListener("keydown", e => { if (e.key === "Enter") { $("sug").hidd
 $("fTopic").onchange = e => { topic = e.target.value; shown = 30; render(); };
 $("fFormat").onchange = e => { fmtSel = e.target.value; shown = 30; render(); };
 $("fState").onchange = e => { stSel = e.target.value; shown = 30; render(); };
+$("fPerson").onchange = e => { person = e.target.value; shown = 30; render(); };
 $("sort").onchange = e => { sort = e.target.value; render(); };
 $("more").onclick = () => { shown += 30; render(); };
 $("placeForm").addEventListener("submit", e => {
