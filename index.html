@@ -353,8 +353,8 @@ section{grid-template-columns:minmax(0,1fr)}.filterbar>select{min-width:0;max-wi
     <p class="note" id="placeMsg">Type a ZIP code, a city, or a state. The map zooms there and lists the closest places.</p>
     <div class="filterbar">
       <select id="mKind" aria-label="Show"></select>
-      <select id="mLang" aria-label="Language"><option value="">All languages</option><option value="English">English</option><option value="Spanish">Spanish</option><option value="Hmong">Hmong</option><option value="Other">Other languages</option></select>
-      <label class="pill" style="display:inline-flex;gap:8px;align-items:center"><input type="checkbox" id="mOther"> Include other Hmong churches (not Adventist)</label>
+      <select id="mLang" aria-label="Language"><option value="English">Language: English</option><option value="Spanish">Language: Spanish</option><option value="Hmong">Language: Hmong</option><option value="Other">Other languages</option><option value="all">All languages</option></select>
+      
       <select id="mState" aria-label="State"></select>
       <select id="mStart" aria-label="Map opens at"></select><select id="mStyle" aria-label="Map style" hidden><option value="3d">Map style: 3D</option><option value="flat">Map style: Flat</option></select><select id="mRadius" aria-label="Distance"><option value="25">Within 25 miles</option><option value="50" selected>Within 50 miles</option><option value="100">Within 100 miles</option><option value="250">Within 250 miles</option></select>
     </div>
@@ -629,7 +629,9 @@ function flatFly(to, ms){
 const PTS = DATA.items.filter(x => x.ll);
 const LANG_OF = {esp:"Spanish", hsda:"Hmong", hchurch:"Hmong", hserv:"Hmong"};
 PTS.forEach(x => { x.lang = LANG_OF[x.k] || (["Spanish", "Hmong"].includes(x.lng) ? x.lng : x.lng && x.lng !== "English" ? "Other" : "English"); x.sda = x.k !== "hchurch"; x.k = /^(esp|hsda|hchurch|sda)$/.test(x.k) ? "church" : x.k === "ministry" && /print/i.test(x.c) ? "print" : x.k; });
-let mLang = "";
+let mLang = "English";
+// entries off the map (no dot) get a language too, for the state lists
+DATA.items.forEach(x => { x.lang ||= LANG_OF[x.k] || (["Spanish", "Hmong"].includes(x.lng) ? x.lng : x.lng && x.lng !== "English" ? "Other" : "English"); x.sda ??= x.k !== "hchurch"; });
 const KIND_COUNT = count(PTS, x => x.k);
 Object.keys(KINDS).forEach(k => { if (!KIND_COUNT[k]) delete KINDS[k]; });   // no empty choices
 // one strong colour per kind on a dark map (YouTube study: Amit Tripathi teal columns, Fireship glow)
@@ -641,10 +643,10 @@ let style3d = true, bars = true, view = {...HOME, pitch:0, bearing:0, zoom:2.6};
 const MI = 1609.34;
 function miles(a, b){ const r = Math.PI / 180, dl = (b[0]-a[0]) * r, dn = (b[1]-a[1]) * r; const h = Math.sin(dl/2)**2 + Math.cos(a[0]*r) * Math.cos(b[0]*r) * Math.sin(dn/2)**2; return 3958.8 * 2 * Math.asin(Math.sqrt(h)); }
 // churches are Adventist only unless the visitor ticks "Include other Hmong churches" (Daniel's default)
-let allChurches = false;
-const shownAny = x => allChurches || !(x.sda === false || x.k === "hchurch");
+// only the chosen language; other (not Adventist) Hmong churches show when Hmong is chosen
+const shownAny = x => (mLang === "all" || x.lang === mLang) && (x.sda !== false || mLang === "Hmong");
 const kindN = k => onMap.filter(x => x.k === k && shownAny(x)).length;
-const visible = () => onMap.filter(x => kindOn.has(x.k) && (!mLang || x.lang === mLang) && shownAny(x));
+const visible = () => onMap.filter(x => kindOn.has(x.k) && shownAny(x));
 const ABBR = Object.fromEntries(Object.entries(STATES).map(([k, v]) => [v, k]));
 const cityOf = x => (x.p || "").split(/[(,;]/)[0].trim();
 // one label per city that has entries, so people can zoom in on cities
@@ -765,7 +767,7 @@ function nearList(){
     NEAR3 = []; areaPanel("On the map right now", mState ? `places in view in ${STATES[mState]}` : "places in view", inView); draw(); return;
   }
   if (!here && mState) {
-    NEAR3 = []; areaPanel(`${STATES[mState]} resources by category`, `resources in ${STATES[mState]}`, DATA.items.filter(x => states(x).includes(mState) && shownAny(x) && (kindOn.size === Object.keys(KINDS).length && !mLang || x.ll && visible().includes(x)))); draw(); return;
+    NEAR3 = []; areaPanel(`${STATES[mState]} resources by category`, `resources in ${STATES[mState]}`, DATA.items.filter(x => states(x).includes(mState) && shownAny(x) && (kindOn.size === Object.keys(KINDS).length || x.ll && visible().includes(x)))); draw(); return;
   }
   if (here){
     const all = vis.map(x => [miles(here.ll, x.ll), x]).sort((a,b) => a[0]-b[0]);
@@ -923,7 +925,7 @@ try { if (sessionStorage.getItem("prl-open-map")) { sessionStorage.removeItem("p
 $("mState").onchange = e => e.target.value ? showState(e.target.value) : ($("zReset").click());
 $("mKind").onchange = e => { const k = e.target.value; kindOn = new Set(k ? [k] : Object.keys(KINDS)); mapControls(); nearList(); };
 $("mLang").onchange = e => { mLang = e.target.value; mapControls(); nearList(); };
-$("mOther").onchange = e => { allChurches = e.target.checked; mapControls(); nearList(); };
+
 $("mRadius").onchange = () => here ? showPoint(here) : nearList();
 $("zIn").onclick = () => fly({zoom: view.zoom + 1}, 500);
 $("zOut").onclick = () => fly({zoom: Math.max(2, view.zoom - 1)}, 500);
@@ -979,7 +981,7 @@ if ("serviceWorker" in navigator) {
   // a new version took over: show it right away (once), so people never sit on an old copy
   navigator.serviceWorker.addEventListener("controllerchange", () => { if (had && !sessionStorage.getItem("prl-reloaded")) { sessionStorage.setItem("prl-reloaded", "1"); location.reload(); } });
 }
-document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 03 Nov 2026, 16:25"; document.body.appendChild(f); });
+document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 03 Nov 2026, 16:31"; document.body.appendChild(f); });
 (() => {
   const bar = document.getElementById("installBar"), btn = document.getElementById("installBtn");
   const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone;
