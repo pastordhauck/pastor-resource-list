@@ -614,7 +614,7 @@ const SUBS = {
   school: [["Colleges and universities", x => /universit|college/i.test(x.c)], ["High schools and academies", x => /high school/i.test(x.c)], ["K-10 and K-12", x => /K-1[02]/i.test(x.c)], ["Elementary", /./]],   // by school type, not name ("College View Elementary")
   ministry: [["Canvassing", /canvass|literature evangel|youth rush/i], ["Kids and youth", /kids|youth|pathfinder/i], ["Translators", /translat|interpret/i],
     ["Health and help", /health|crisis|money|giving|nonprofit|professional/i], ["Other ministries", /./]],
-  hserv: [["Vegan restaurants", /vegan/i], ["Hmong restaurants", x => /restaurant/i.test(x.c) && x.lang === "Hmong"], ["Other restaurants", /restaurant/i], ["Groceries", /grocer|food/i], ["Shipping and mailing", /mailing|shipping/i], ["Event rentals", /event rental/i],
+  hserv: [["Hmong businesses and services", x => x.lang === "Hmong"], ["Vegan restaurants", /vegan/i], ["Other restaurants", /restaurant/i], ["Shipping and mailing", /mailing|shipping/i], ["Event rentals", /event rental/i],
     ["Audio and video", /audio|video/i], ["Health", /doctor|health/i], ["Legal, tax and money", /law|tax|insurance|real estate|bank/i],
     ["Translators", /translat|interpret/i], ["Shops", /cloth|dress|shop|store|jewel/i], ["Community", /./]],
   print: [["Print and copy shops", /print and copy|copy shop/i], ["Apparel and wristbands", /apparel|shirt|wristband|band\b|embroider|merch/i],
@@ -756,7 +756,7 @@ function placeInfo(x, i, open, pt){
   if (!x) { $("roomInfo").innerHTML = `<p>Nothing here with these boxes. Turn a box back on or widen the circle.</p>`; focus = null; drawPin(); return; }
   if (open) return openPlace(x, pt);
   focus = x; drawPin(); $("recenter").hidden = !(miles && anchor && anchor !== focus);
-  $("roomInfo").innerHTML = `<span class="k">${esc(MAP.kinds[x.k] || x.c)}</span><h3>${esc(x.n)}</h3><p>${esc([x.p, x.st].filter(Boolean).join(", "))}${x.lang !== "English" ? " · " + esc(x.lang) : ""}${x.svc ? " · " + esc(x.svc) : ""}</p>
+  $("roomInfo").innerHTML = `<span class="k">${esc(MAP.kinds[x.k] || x.c)}${x.lang === "Hmong" && x.k !== "church" ? " · Hmong community business" : ""}</span><h3>${esc(x.n)}</h3><p>${esc([x.p, x.st].filter(Boolean).join(", "))}${x.lang !== "English" ? " · " + esc(x.lang) : ""}${x.svc ? " · " + esc(x.svc) : ""}</p>
     <div class="acts"><button class="btn gold" data-open="${i}">Go deeper →</button>${x.u ? `<a class="btn" href="${esc(x.u)}" target="_blank" rel="noopener">Website ↗</a>` : ""}</div>`;
 }
 $("roomInfo").onclick = e => { const a = e.target.closest("[data-inst]"); if (a) return goLevel({level: "state", st: a.dataset.inst}, NAME[a.dataset.inst]);
@@ -852,7 +852,7 @@ function openPlace(x, pt){
   const about = x.k === "church" ? [`${x.n} is ${x.sda === false ? "a Hmong church (not Adventist)" : "a Seventh-day Adventist " + kind} in ${place}.`, x.lang !== "English" ? `Worship is in ${x.lang}.` : "",
     x.svc ? `Service times from the church directory: ${x.svc.replace(/\.$/, "")}.` : "", x.addr ? `It meets at ${x.addr}.` : "", "Times can change, so call or check the website before you visit."].filter(Boolean).join(" ") : (x.why || `${x.n} is in ${place}.`);
   cur = {pages: []};
-  $("facts").innerHTML = `<span class="eyebrow" data-rise>${esc(MAP.kinds[x.k] || x.c)}${x.adv ? " · ✓ Adventist" : ""}</span><h1 data-rise style="--k:1">${esc(x.n)}</h1>${x.u ? `<a class="url" href="${esc(x.u)}" target="_blank" rel="noopener" data-rise style="--k:2">${esc(host(x.u))} ↗</a>` : ""}
+  $("facts").innerHTML = `<span class="eyebrow" data-rise>${esc(MAP.kinds[x.k] || x.c)}${x.lang === "Hmong" && x.k !== "church" ? " · Hmong community business" : ""}${x.adv ? " · ✓ Adventist" : ""}</span><h1 data-rise style="--k:1">${esc(x.n)}</h1>${x.u ? `<a class="url" href="${esc(x.u)}" target="_blank" rel="noopener" data-rise style="--k:2">${esc(host(x.u))} ↗</a>` : ""}
     <p data-rise style="--k:3">${esc(about)}</p>${x.u ? `<a class="go" href="${esc(x.u)}" target="_blank" rel="noopener" data-rise style="--k:4">Visit website ↗</a>` : `<p class="hint" style="text-align:left">No website listed. Call before you go.</p>`}
     <dl data-rise style="--k:5"><dt>Place</dt><dd>${esc(place)}</dd>${x.addr ? `<dt>Address</dt><dd>${esc(x.addr)}</dd>` : ""}${x.svc ? `<dt>Service times</dt><dd>${esc(x.svc)}</dd>` : ""}${x.ph ? `<dt>Phone</dt><dd>${esc(x.ph)}</dd>` : ""}<dt>Language</dt><dd>${esc(x.lang)}</dd></dl>`;
   const W = 220, H = W * 610 / 975, [cx, cy] = x.xy, near = P.filter(y => y !== x && match(y) && Math.abs(y.xy[0] - cx) < W / 2 && Math.abs(y.xy[1] - cy) < H / 2);
@@ -937,7 +937,7 @@ if ("serviceWorker" in navigator) {
   // a new version took over: show it right away (once), so people never sit on an old copy
   navigator.serviceWorker.addEventListener("controllerchange", () => { if (had && !sessionStorage.getItem("prl-reloaded")) { sessionStorage.setItem("prl-reloaded", "1"); location.reload(); } });
 }
-document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 03 Nov 2026, 22:18"; document.body.appendChild(f); });
+document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 03 Nov 2026, 22:19"; document.body.appendChild(f); });
 (() => {
   const bar = document.getElementById("installBar"), btn = document.getElementById("installBtn");
   const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone;
