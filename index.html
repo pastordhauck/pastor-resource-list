@@ -3,6 +3,7 @@
 <meta name="theme-color" content="#2f3f8f"><link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
 <style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<script>window.__bip=null;addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.__bip=e;});</script>
 </head><body><div id="installBar" style="background:#2f3f8f;color:#fff;padding:14px max(16px,env(safe-area-inset-left,0px));font:16px/1.45 system-ui,sans-serif">
 <div style="max-width:1180px;margin:0 auto;display:grid;gap:10px">
 <b style="font-size:19px">Install this list as an app</b>
@@ -1380,7 +1381,7 @@ if ("serviceWorker" in navigator) {
   // a new version took over: show it right away (once), so people never sit on an old copy
   navigator.serviceWorker.addEventListener("controllerchange", () => { if (had && !sessionStorage.getItem("prl-reloaded")) { sessionStorage.setItem("prl-reloaded", "1"); location.reload(); } });
 }
-document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 05 Nov 2026, 17:32"; document.body.appendChild(f); });
+document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 05 Nov 2026, 17:49"; document.body.appendChild(f); });
 (() => {
   const bar = document.getElementById("installBar"), btn = document.getElementById("installBtn");
   const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone;
@@ -1390,12 +1391,22 @@ document.addEventListener("DOMContentLoaded", () => { const f = document.createE
   // this device's steps first, then the others, all shown (no folding)
   const mine = document.querySelector(`[data-os="${os}"]`); mine.parentNode.insertBefore(mine, mine.parentNode.children[1]);
   document.querySelectorAll("[data-os]").forEach(d => { d.hidden = false; d.style.opacity = d === mine ? "1" : ".8"; });
-  let ask = null;
+  let ask = window.__bip;   // caught in the head (Daniel, 5 Nov 2026: "works on pc but not phone")
   addEventListener("beforeinstallprompt", e => { e.preventDefault(); ask = e; });  // one-tap install where the browser allows it
   // the button is always there: one tap installs where the browser allows it; otherwise it shows this browser's own 2 or 3 taps
   btn.onclick = async () => {
     if (ask) { ask.prompt(); const r = await ask.userChoice; ask = null; if (r.outcome === "accepted") bar.hidden = true; return; }
-    const st = document.getElementById("installSteps"); st.scrollIntoView({behavior: "smooth", block: "center"}); mine.style.outline = "2px solid #fff"; mine.style.borderRadius = "6px"; mine.style.padding = "4px 6px";
+    ask = ask || window.__bip; if (ask) { ask.prompt(); const r = await ask.userChoice; ask = null; window.__bip = null; if (r.outcome === "accepted") bar.hidden = true; return; }
+    const w = document.createElement("div");
+    w.style.cssText = "position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.6);display:grid;place-items:center;padding:20px";
+    w.innerHTML = `<div style="background:#fff;color:#111;border-radius:16px;max-width:440px;width:100%;padding:20px;font:17px/1.5 system-ui,sans-serif;display:grid;gap:12px">
+      <b style="font-size:20px">Add it to your home screen</b>
+      <div>This phone wants you to do it from its own menu. It only takes a few taps:</div>
+      <div style="background:#f2f2f6;border-radius:10px;padding:12px">${mine.innerHTML}</div>
+      <div style="font-size:14px;color:#555">It installs the real app: its own icon, full screen, works without signal.</div>
+      <button style="justify-self:end;font:700 16px system-ui;padding:10px 20px;border:0;border-radius:10px;background:${getComputedStyle(bar).backgroundColor};color:#fff">OK</button></div>`;
+    w.onclick = e => { if (e.target === w || e.target.tagName === "BUTTON") w.remove(); };
+    document.body.appendChild(w);
   };
   addEventListener("appinstalled", () => { bar.hidden = true; });
   document.getElementById("installHide").onclick = () => { bar.hidden = true; try { localStorage.setItem("prl-install-hidden", "1"); } catch (e) {} };
