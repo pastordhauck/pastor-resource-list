@@ -311,6 +311,7 @@ html[data-style="light"] .btn.gold,html[data-style="light"] .go,html[data-style=
 #wCities path{fill:rgba(170,190,255,.05);stroke:rgba(190,205,255,.45);stroke-width:.8;vector-effect:non-scaling-stroke}
 #wCities path.on{fill:rgba(224,182,90,.12);stroke:var(--gold);stroke-width:2}
 .placephoto{width:100%;max-width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:16px;border:1px solid var(--edge);box-shadow:0 20px 50px rgba(0,0,0,.45)}
+.xst{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted);margin-top:8px;cursor:pointer}.xst input{width:16px;height:16px;accent-color:var(--gold)}
 .appslot{margin-bottom:30px}.appbox{display:grid;gap:8px;padding:18px;max-width:640px}.appbox b{font:600 22px var(--serif)}.appbox .mono{font:13px ui-monospace,Consolas,monospace;color:var(--muted);overflow-wrap:anywhere}.appbox .acts{display:flex;gap:8px;flex-wrap:wrap}
 #appSlot #installBar{border-radius:16px;margin-bottom:14px}
 #person{max-width:100%}
@@ -572,6 +573,7 @@ html:is([data-style="linen"],[data-style="dusk"],[data-style="gray"]) #wStates p
           <label class="wtitle srow" for="miles">Miles circle <b id="milesV">Off</b></label>
           <input class="miles" id="miles" type="range" min="0" max="150" step="5" value="0" aria-label="Miles circle">
           <button class="recenter" id="recenter" hidden>Move the circle to the lit place</button>
+          <label class="xst" id="xstRow" hidden><input type="checkbox" id="xst"> Include places across state lines</label>
           <div class="wtitle srow" style="margin-top:14px">Zoom</div>
           <div class="zoomwrap"><div class="vtrack" id="vtrack" role="slider" aria-label="Zoom" tabindex="0" aria-valuemin="0" aria-valuemax="100"><div class="vfill" id="vfill"></div><div class="vknob" id="vknob"><span class="vlab" id="vlab">State</span></div></div>
             <div class="zl"><span>Close</span><span>Far</span></div></div>
@@ -795,7 +797,8 @@ const ZMAX = 40, MI = 2800 / 975;   // shortcut: miles from the US drawing (abou
 const dist = (a, b) => Math.hypot(a.xy[0] - b.xy[0], a.xy[1] - b.xy[1]) * MI;
 // where we are: the whole US, a region, a state or a city. The miles circle wins when it is on: only places inside it count, in any state.
 function inPlace(x){
-  if (miles && anchor && deep()) return dist(x, anchor) <= miles;
+  // the circle stays inside the state or city you are in, unless "Include places across state lines" is ticked (Daniel, 4 Nov 2026)
+  if (miles && anchor && deep()) return dist(x, anchor) <= miles && (crossSt || x.st === LV.st);
   if (LV.level === "region") return REGIONS[LV.reg].includes(x.st);
   if (LV.level === "state") return x.st === LV.st;
   if (LV.level === "city") return x.st === LV.st && cityKey(x.p) === cityKey(LV.city);
@@ -953,8 +956,9 @@ function drawPin(){
   const sx = ox + (x - (view.x - w / 2)) * k, sy = oy + (y - h - (view.y - hh / 2)) * k;
   const tag = $("ptag"); tag.hidden = sx < 0 || sy < 0 || sx > r.width || sy > r.height; tag.style.left = sx + "px"; tag.style.top = sy - 6 + "px"; tag.textContent = focus.n;
 }
+let crossSt = false; try { crossSt = localStorage.getItem("hcd-xst") === "1"; } catch (e) {}
 function setMiles(v){
-  miles = v; $("milesV").textContent = miles ? miles + " mi" : "Off";
+  miles = v; $("milesV").textContent = miles ? miles + " mi" : "Off"; $("xstRow").hidden = !miles; $("xst").checked = crossSt;
   if (!miles) anchor = null; else if (!anchor) anchor = focus || deskItems[0] || null;
   let n = 0; P.forEach(x => { if (!x.el) return; const on = match(x) && inPlace(x); x.el.classList.toggle("out", !on); if (on) n++; });
   drawPin(); $("recenter").hidden = !(miles && anchor && focus && anchor !== focus);
@@ -979,6 +983,7 @@ function wireWall(){
     if (deep() && p.dataset.st === LV.st) return;
     goLevel({level: "state", st: p.dataset.st}, NAME[p.dataset.st]); });
   $("miles").oninput = e => setMiles(+e.target.value);
+  $("xst").onchange = e => { crossSt = e.target.checked; try { localStorage.setItem("hcd-xst", crossSt ? "1" : "0"); } catch (er) {} setMiles(miles); };
   $("recenter").onclick = () => { anchor = focus; setMiles(miles); };
 }
 
@@ -1202,7 +1207,7 @@ if ("serviceWorker" in navigator) {
   // a new version took over: show it right away (once), so people never sit on an old copy
   navigator.serviceWorker.addEventListener("controllerchange", () => { if (had && !sessionStorage.getItem("hmong-dir-reloaded")) { sessionStorage.setItem("hmong-dir-reloaded", "1"); location.reload(); } });
 }
-document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 04 Nov 2026, 17:58"; document.body.appendChild(f); });
+document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 04 Nov 2026, 18:11"; document.body.appendChild(f); });
 (() => {
   const bar = document.getElementById("installBar"), btn = document.getElementById("installBtn");
   const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone;
