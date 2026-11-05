@@ -1026,7 +1026,7 @@ function openPlace(x, pt){
 }
 
 /* ---------- Settings: rows at one time and a color style, kept on this device ---------- */
-const STYLES = [["light", "Light", "#f4f1ea", "#b8892c"], ["story", "Story Cloth", "#f7f3ec", "#b0304a"], ["dark", "Dark", "#0b1222", "#e0b65a"], ["warm", "Warm", "#1a120b", "#e8a85a"], ["coral", "Coral", "#0e0a0a", "#ff7a59"], ["mountain", "Mountain Green", "#15241e", "#d4a24c"], ["pajntaub", "Paj Ntaub", "#1a1020", "#db6284"], ["velvet", "New Year Velvet", "#17141b", "#db6086"], ["sash", "Turquoise and Red Sash", "#111b20", "#42a9bb"], ["gray", "Black and white", "#f6f6f6", "#3d3d3d"], ["contrast", "High contrast", "#000", "#ffd60a"]];
+const STYLES = [["dark", "Dark", "#0b1222", "#e0b65a"], ["light", "Light", "#f4f1ea", "#b8892c"], ["story", "Story Cloth", "#f7f3ec", "#b0304a"], ["warm", "Warm", "#1a120b", "#e8a85a"], ["coral", "Coral", "#0e0a0a", "#ff7a59"], ["mountain", "Mountain Green", "#15241e", "#d4a24c"], ["pajntaub", "Paj Ntaub", "#1a1020", "#db6284"], ["velvet", "New Year Velvet", "#17141b", "#db6086"], ["sash", "Turquoise and Red Sash", "#111b20", "#42a9bb"], ["gray", "Black and white", "#f6f6f6", "#3d3d3d"], ["contrast", "High contrast", "#000", "#ffd60a"]];
 function setStyle(v){ document.documentElement.dataset.style = v; try { localStorage.setItem("hcd-style", v); } catch (e) {} document.querySelectorAll("#setStyle button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.s === v))); }
 $("setRows").innerHTML = [1, 2, 3, 4, 5, 6].map(n => `<button data-n="${n}" aria-pressed="${n === ROWN}">${n}</button>`).join("");
 $("setStyle").innerHTML = STYLES.map(([v, l, bg, ac]) => `<button data-s="${v}"><i style="background:radial-gradient(circle,${ac} 0 38%,${bg} 40%)"></i>${l}</button>`).join("");
@@ -1034,7 +1034,7 @@ $("setRows").onclick = e => { const b = e.target.closest("[data-n]"); if (!b) re
   document.querySelectorAll("#setRows button").forEach(x => x.setAttribute("aria-pressed", String(+x.dataset.n === ROWN)));
   PAGE.h = 0; drawRows($("lineups"), "h"); if (ROWSETS.g && !$("tRows").hidden) { PAGE.g = 0; drawRows($("tRows"), "g"); } };
 $("setStyle").onclick = e => { const b = e.target.closest("[data-s]"); if (b) setStyle(b.dataset.s); };
-let st0 = "dark"; try { st0 = (v => ["light","story","dark","warm","coral","mountain","pajntaub","velvet","sash","gray","contrast"].includes(v) ? v : "light")(localStorage.getItem("hcd-style")); } catch (e) {} setStyle(st0);
+let st0 = "dark"; try { st0 = (v => ["light","story","dark","warm","coral","mountain","pajntaub","velvet","sash","gray","contrast"].includes(v) ? v : "dark")   /* Daniel, 5 Nov 2026: dark is the default for now */(localStorage.getItem("hcd-style")); } catch (e) {} setStyle(st0);
 $("setStart").innerHTML = `<option value="">Whole US</option>` + Object.keys(NAME).filter(s => MAP.states.some(r => r[0] === s)).sort((a, b) => NAME[a].localeCompare(NAME[b])).map(s => `<option value="${s}">${esc(NAME[s])}</option>`).join("");
 $("setStart").options[0].textContent = "None (whole US)";
 $("setStart").value = homeSt();
@@ -1196,7 +1196,7 @@ if ("serviceWorker" in navigator) {
   // a new version took over: show it right away (once), so people never sit on an old copy
   navigator.serviceWorker.addEventListener("controllerchange", () => { if (had && !sessionStorage.getItem("hmong-dir-reloaded")) { sessionStorage.setItem("hmong-dir-reloaded", "1"); location.reload(); } });
 }
-document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 04 Nov 2026, 20:49"; document.body.appendChild(f); });
+document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 05 Nov 2026, 01:40"; document.body.appendChild(f); });
 (() => {
   const bar = document.getElementById("installBar"), btn = document.getElementById("installBtn");
   const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone;
