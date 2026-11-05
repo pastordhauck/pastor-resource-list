@@ -610,17 +610,21 @@ let ROWN = 3; try { ROWN = Math.max(1, Math.min(6, +localStorage.getItem("prl-ro
 const ROWSETS = {}, PAGE = {};
 const card = x => x.pages && x.pages[0] ? `<img src="${x.pages[0].src}" alt="" loading="lazy">` : `<span class="nc"><b>${esc((x.n.match(/[A-Za-z0-9]/) || ["•"])[0])}</b><small>${esc(host(x.u).split("/")[0] || x.c)}</small></span>`;
 function rowsBlock(box, key, rows){ ROWSETS[key] = rows; PAGE[key] = 0; drawRows(box, key); }
+// one row's carousel; the A–Z button redraws a single row with it (5 Nov 2026)
+function rowCar(key, i, r){
+  CARS[key + i] = carousel($(`${key}t${i}`), r.items.slice(0, 60), x => `<div class="th">${card(x)}</div><b>${esc(x.n)}</b><small>${esc(x.c)}</small>`, (x, j, open, pt) => {
+      if (!x) { $(`${key}i${i}`).innerHTML = `<p>Nothing here yet.</p>`; return; }
+      if (open) return openDetail(x, pt);
+      $(`${key}i${i}`).innerHTML = `<span class="k">${esc(x.c)}</span><h3>${esc(x.n)}</h3><p>${esc(x.line)}</p><div class="acts"><button class="btn gold" data-deep="${key}:${i}:${j}">Go deeper →</button>${x.u ? `<a class="btn" href="${esc(x.u)}" target="_blank" rel="noopener">Website ↗</a>` : ""}</div>`;
+    }, "big");;
+}
 function drawRows(box, key){
   const rows = ROWSETS[key], p = PAGE[key], from = p * ROWN, show = rows.slice(from, from + ROWN), pages = Math.ceil(rows.length / ROWN);
   box.innerHTML = show.map((r, k) => { const i = from + k; return `<section class="lineup" data-rise style="--k:${k}"><div class="lh"><h2>${esc(r.title)}</h2><button class="all" data-all="${key}:${i}">See all ${fmt(r.count ?? r.items.length)} →</button></div>
     <div class="dwrap"><div class="car"><button class="carbtn l" data-car="${key}${i}" data-d="-1" aria-label="Previous">‹</button><div class="track" id="${key}t${i}"></div><button class="carbtn r" data-car="${key}${i}" data-d="1" aria-label="Next">›</button></div><div class="info glass" id="${key}i${i}"></div></div></section>`; }).join("")
     + (pages > 1 ? `<div class="rpager" data-rise style="--k:${show.length}"><span>Rows ${from + 1}–${from + show.length} of ${rows.length}</span><button class="btn gold" data-more="${key}">${p + 1 < pages ? "Next rows →" : "Back to the first rows ↺"}</button></div>` : "");
   show.forEach((r, k) => { const i = from + k;
-    CARS[key + i] = carousel($(`${key}t${i}`), r.items.slice(0, 60), x => `<div class="th">${card(x)}</div><b>${esc(x.n)}</b><small>${esc(x.c)}</small>`, (x, j, open, pt) => {
-      if (!x) { $(`${key}i${i}`).innerHTML = `<p>Nothing here yet.</p>`; return; }
-      if (open) return openDetail(x, pt);
-      $(`${key}i${i}`).innerHTML = `<span class="k">${esc(x.c)}</span><h3>${esc(x.n)}</h3><p>${esc(x.line)}</p><div class="acts"><button class="btn gold" data-deep="${key}:${i}:${j}">Go deeper →</button>${x.u ? `<a class="btn" href="${esc(x.u)}" target="_blank" rel="noopener">Website ↗</a>` : ""}</div>`;
-    }, "big"); });
+    rowCar(key, i, r); });
 }
 document.addEventListener("click", e => {
   const d = e.target.closest("[data-deep]"); if (d) { const [key, i, j] = d.dataset.deep.split(":"); return openDetail(ROWSETS[key][+i].items[+j], at(e)); }
@@ -1165,7 +1169,8 @@ document.head.insertAdjacentHTML("beforeend", `<style>
 .card .cardnew{margin-bottom:4px}
 .qwhere{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
 .tile{position:relative}
-.lh .qsort{margin:0 0 0 auto;font-size:12px} .lh .qsort button{padding:4px 10px}
+.lh .qaz{margin:0 0 0 8px;font-size:12px;padding:4px 12px;border:1px solid var(--edge);border-radius:999px;background:var(--glass2);color:var(--ink);cursor:pointer}
+.lh .qaz[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:#1b1404}
 .qdot{position:absolute;right:8px;bottom:6px;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--ink);opacity:.92;pointer-events:none}
 .qdot i{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold)}
 #qtoast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);opacity:0;pointer-events:none;background:var(--glass2);color:var(--ink);border:1px solid var(--edge);border-radius:12px;padding:10px 16px;font-size:14px;z-index:99;transition:opacity .3s,transform .3s;max-width:90vw;text-align:center}
@@ -1290,18 +1295,27 @@ $("facts").addEventListener("click", e => {
 { const oc = carousel; carousel = function(track, items){ const r = oc.apply(this, arguments);
     if (track && track.id !== "roomTrack") [...track.children].forEach((t, i) => { const d = dotText(items[i]); if (d) t.insertAdjacentHTML("beforeend", `<span class="qdot"><i><\/i>${esc(d)}<\/span>`); });
     return r; }; }
-/* ---------- home rows: Nearest first (the default once a location is saved; online ones after) or A to Z (Daniel, 5 Nov 2026) ---------- */
-const rowSort = () => lsGet("prl-rowsort", "near");
+/* ---------- home rows: nearest first automatically (from the location in Settings; online ones after), and one A–Z button per row
+   that only changes that row and turns off with a second tap (Daniel, 5 Nov 2026) ---------- */
+const azRows = () => new Set(qGet("prl-az-rows"));
 const sortNear = a => !(typeof homeGet === "function" && homeGet()) ? a : a.map((x, i) => [qMiles(x), i, x]).sort((p, q) => (p[0] ?? 1e9) - (q[0] ?? 1e9) || p[1] - q[1]).map(p => p[2]);
 { const dr = drawRows; drawRows = function(box, key){
-    const mode = rowSort();
-    (ROWSETS[key] || []).forEach(r => { r._o = r._o || r.items; r.items = mode === "az" ? [...r._o].sort((a, b) => a.n.localeCompare(b.n)) : sortNear(r._o); });
+    const az = azRows();
+    (ROWSETS[key] || []).forEach(r => { r._o = r._o || r.items; r.items = az.has(r.title) ? [...r._o].sort((a, b) => a.n.localeCompare(b.n)) : sortNear(r._o); });
     const out = dr.apply(this, arguments);
-    box.querySelectorAll(".lineup .lh").forEach(h => h.querySelector(".qsort") || h.insertAdjacentHTML("beforeend",
-      `<span class="segn qsort">${[["near", "Nearest"], ["az", "A–Z"]].map(([v, l]) => `<button data-rs="${v}" aria-pressed="${v === mode}"${v === "near" && !(typeof homeGet === "function" && homeGet()) ? ' title="Save your address, ZIP or city in Settings to sort by distance"' : ""}>${l}<\/button>`).join("")}<\/span>`));
+    box.querySelectorAll(".lineup").forEach(sec => { const h = sec.querySelector(".lh"), all = sec.querySelector("[data-all]"); if (!h || !all || h.querySelector(".qaz")) return;
+      const [k, i] = all.dataset.all.split(":"), r = ROWSETS[k][+i];
+      h.insertAdjacentHTML("beforeend", `<button class="segn qaz" data-az="${k}:${i}" aria-pressed="${az.has(r.title)}" title="Sort this row A to Z; tap again to turn it off">A–Z<\/button>`); });
     return out; }; }
-document.addEventListener("click", e => { const b = e.target.closest("[data-rs]"); if (!b) return;
-  lsSet("prl-rowsort", b.dataset.rs); drawRows($("lineups"), "h"); if (ROWSETS.g && !$("tRows").hidden) drawRows($("tRows"), "g"); });
+document.addEventListener("click", e => { const b = e.target.closest("[data-az]"); if (!b) return; e.preventDefault(); e.stopPropagation();
+  const [k, i] = b.dataset.az.split(":"), r = ROWSETS[k][+i], az = azRows();
+  az.has(r.title) ? az.delete(r.title) : az.add(r.title); qSet("prl-az-rows", [...az]);
+  // redraw only this row's tiles, and keep the page exactly where it is
+  const L = document.querySelector(".layer.on"), y = L ? L.scrollTop : 0, wy = scrollY;
+  r.items = az.has(r.title) ? [...r._o].sort((a, b) => a.n.localeCompare(b.n)) : sortNear(r._o);
+  rowCar(k, +i, r);
+  b.setAttribute("aria-pressed", String(az.has(r.title)));
+  if (L) L.scrollTop = y; scrollTo(0, wy); }, true);
 if (ROWSETS.h) drawRows($("lineups"), "h");   // the home rows were drawn before this file loaded
 
 /* ---------- ♥ Saved, Recent and New on the home page ---------- */
@@ -1381,7 +1395,7 @@ if ("serviceWorker" in navigator) {
   // a new version took over: show it right away (once), so people never sit on an old copy
   navigator.serviceWorker.addEventListener("controllerchange", () => { if (had && !sessionStorage.getItem("prl-reloaded")) { sessionStorage.setItem("prl-reloaded", "1"); location.reload(); } });
 }
-document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 05 Nov 2026, 17:53"; document.body.appendChild(f); });
+document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 05 Nov 2026, 17:59"; document.body.appendChild(f); });
 (() => {
   const bar = document.getElementById("installBar"), btn = document.getElementById("installBtn");
   const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone;
