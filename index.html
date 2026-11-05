@@ -656,13 +656,14 @@ function drawFilt(){
   const view = lsGet("prl-sview", "grid");
   f.innerHTML = (sts.length > 1 ? `<label>State <select data-f="st"><option value="">All states</option>${sts.map(([s, n]) => opt(s, s ? NAME[s] || s : "Nationwide / no state", n, LIST.st)).join("")}</select></label>` : "")
     + (tps.length > 1 ? `<label>Topic <select data-f="tp"><option value="">All topics</option>${tps.map(([c, n]) => opt(c, c, n, LIST.tp)).join("")}</select></label>` : "")
-    + `<label>Sort <select data-f="sort">${[["best", "Best match"], ["az", "A to Z"], ["state", "By state"]].map(([v, l]) => `<option value="${v}"${v === LIST.sort ? " selected" : ""}>${l}</option>`).join("")}</select></label>`
+    + `<label>Sort <select data-f="sort">${[["best", "Best match"], ["az", "A to Z"], ["state", "By state"]].concat(typeof qMiles === "function" && homeGet() ? [["near", "Nearest first"]] : []).map(([v, l]) => `<option value="${v}"${v === LIST.sort ? " selected" : ""}>${l}</option>`).join("")}</select></label>`
     + `<div class="segn">${[["grid", "Grid"], ["carousel", "Carousel"], ["list", "List"]].map(([v, l]) => `<button data-v="${v}" aria-pressed="${v === view}">${l}</button>`).join("")}</div>`
     + (LIST.st || LIST.tp ? `<button class="clr" data-f="clear">Clear filters</button>` : "");
 }
 function drawCards(){
   let list = LIST.items.filter(x => (!LIST.st || stOf(x) === LIST.st) && (!LIST.tp || tpOf(x) === LIST.tp));
   if (LIST.sort === "az") list = [...list].sort((a, b) => a.n.localeCompare(b.n));
+  if (LIST.sort === "near" && typeof qMiles === "function") list = [...list].sort((a, b) => (qMiles(a) ?? 1e9) - (qMiles(b) ?? 1e9));   // online ones last
   if (LIST.sort === "state") list = [...list].sort((a, b) => (NAME[stOf(a)] || "~").localeCompare(NAME[stOf(b)] || "~") || a.n.localeCompare(b.n));
   const view = lsGet("prl-sview", "grid"), c = $("tCards");
   c.className = "cards" + (view === "carousel" ? " carousel" : view === "list" ? " listv" : "");
@@ -1196,6 +1197,13 @@ function whereText(x){
   return m !== null ? miText(m) : town;
 }
 
+// miles from the saved home, or null (for "Nearest first")
+function qMiles(x){
+  const pl = x.place || (isPlace(x) ? x : null);
+  const xy = pl ? pl.xy : (x.p && x.s && typeof HCITY !== "undefined" ? HCITY[`${qFlat(x.p)}|${x.s}`] : null);
+  return xy && typeof homeMi === "function" ? homeMi({xy}) : null;
+}
+
 /* ---------- the action bar on every entry ---------- */
 function actionBar(x){
   const k = keyOf(x), saved = qGet("prl-saved").includes(k);
@@ -1323,7 +1331,7 @@ if ("serviceWorker" in navigator) {
   // a new version took over: show it right away (once), so people never sit on an old copy
   navigator.serviceWorker.addEventListener("controllerchange", () => { if (had && !sessionStorage.getItem("prl-reloaded")) { sessionStorage.setItem("prl-reloaded", "1"); location.reload(); } });
 }
-document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 05 Nov 2026, 05:43"; document.body.appendChild(f); });
+document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 05 Nov 2026, 05:46"; document.body.appendChild(f); });
 (() => {
   const bar = document.getElementById("installBar"), btn = document.getElementById("installBtn");
   const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone;
