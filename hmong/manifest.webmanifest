@@ -1,6 +1,7 @@
 {
   "name": "Hmong Community Directory",
   "short_name": "Hmong Directory",
+  "id": "hmong-dir",
   "start_url": "./",
   "scope": "./",
   "display": "fullscreen",

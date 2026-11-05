@@ -1,6 +1,7 @@
 {
   "name": "My Pastor Resource List",
   "short_name": "Pastor List",
+  "id": "pastor-list",
   "start_url": "./",
   "scope": "./",
   "display": "fullscreen",
