@@ -5,7 +5,7 @@
 <style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head><body><div id="installBar" style="background:#1d1846;color:#fff;padding:14px max(16px,env(safe-area-inset-left,0px));font:16px/1.45 system-ui,sans-serif">
 <div style="max-width:1180px;margin:0 auto;display:grid;gap:10px">
-<b style="font-size:19px">Install this list as an app</b>
+<b style="font-size:19px">Install the Hmong Directory as an app</b>
 <button id="installBtn" style="justify-self:start;font:700 17px system-ui;padding:12px 22px;border:0;border-radius:10px;background:#fff;color:#1d1846">Install app</button>
 <details id="installSteps"><summary style="cursor:pointer;font-size:14px;opacity:.9">Button didn't work? Show the taps</summary>
 <div data-os="android-samsung" hidden><b>Samsung Internet:</b> 1. Tap the <b>menu (three lines ☰)</b> at the bottom right. 2. Tap <b>Add page to</b>. 3. Tap <b>Home screen</b>. 4. Tap <b>Add</b>.</div>
@@ -13,7 +13,7 @@
 <div data-os="ios" hidden><b>iPhone or iPad (Safari):</b> 1. Tap the <b>Share</b> button (square with an arrow). 2. Scroll down and tap <b>Add to Home Screen</b>. 3. Tap <b>Add</b>.</div>
 <div data-os="desktop" hidden><b>Computer (Chrome or Edge):</b> click the <b>install icon</b> at the right end of the address bar, then <b>Install</b>.</div>
 </details>
-<span style="opacity:.85;font-size:14px">It adds an icon to your home screen. It opens full screen and works without signal.</span>
+<span style="opacity:.85;font-size:14px">It adds a Hmong Directory icon to your home screen. It opens full screen and works without signal.</span>
 <button id="installHide" style="justify-self:start;background:none;border:1px solid #fff;color:#fff;border-radius:8px;padding:6px 12px;font:14px system-ui">Hide this</button>
 </div></div><title>Hmong Community Directory</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -1196,7 +1196,7 @@ if ("serviceWorker" in navigator) {
   // a new version took over: show it right away (once), so people never sit on an old copy
   navigator.serviceWorker.addEventListener("controllerchange", () => { if (had && !sessionStorage.getItem("hmong-dir-reloaded")) { sessionStorage.setItem("hmong-dir-reloaded", "1"); location.reload(); } });
 }
-document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 05 Nov 2026, 01:43"; document.body.appendChild(f); });
+document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 05 Nov 2026, 01:45"; document.body.appendChild(f); });
 (() => {
   const bar = document.getElementById("installBar"), btn = document.getElementById("installBtn");
   const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone;
