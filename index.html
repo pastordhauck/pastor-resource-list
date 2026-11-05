@@ -1251,6 +1251,13 @@ function addBar(x){
   const hn = hmongNote(x); if (hn) f.querySelector(".qbar").insertAdjacentHTML("afterend", `<p class="hint qhm">${esc(hn)}<\/p>`);
   const wh = isPlace(x) ? "" : whereText(x);   // map places already say how far they are
   if (wh) f.querySelector(".qbar").insertAdjacentHTML("afterend", `<p class="qph">📍 ${esc(wh)}${/miles? away/.test(wh) && homeGet() ? ` from ${esc(homeGet().label)}` : ""}<\/p>`);
+  // the report form opens with this entry's name and link already filled in; the person only writes the problem (Daniel, 5 Nov 2026).
+  // Both forms use the same question ids: entry.56849535 = name, entry.2133501379 = website or link.
+  const nm = isPlace(x) ? [x.n, [x.p, x.st].filter(Boolean).join(", ")].filter(Boolean).join(" — ") : x.n;
+  f.querySelectorAll('a[href*="docs.google.com/forms/"]').forEach(a => {
+    const base = a.href.split("?")[0];
+    a.href = `${base}?usp=pp_url&entry.56849535=${encodeURIComponent(nm)}${x.u ? `&entry.2133501379=${encodeURIComponent(x.u)}` : ""}`;
+  });
   const r = qGet("prl-recent").filter(v => v !== keyOf(x)); r.unshift(keyOf(x)); qSet("prl-recent", r.slice(0, 10));
   pillCounts();
 }
@@ -1373,7 +1380,7 @@ if ("serviceWorker" in navigator) {
   // a new version took over: show it right away (once), so people never sit on an old copy
   navigator.serviceWorker.addEventListener("controllerchange", () => { if (had && !sessionStorage.getItem("prl-reloaded")) { sessionStorage.setItem("prl-reloaded", "1"); location.reload(); } });
 }
-document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 05 Nov 2026, 17:30"; document.body.appendChild(f); });
+document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 05 Nov 2026, 17:32"; document.body.appendChild(f); });
 (() => {
   const bar = document.getElementById("installBar"), btn = document.getElementById("installBtn");
   const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone;
