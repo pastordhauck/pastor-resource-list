@@ -1017,13 +1017,27 @@ const stem = w => { const v = w.replace(/(ing|ers|er|ed)$/, ""); return v.length
 function search(q, pt){
   q = q.trim(); if (!q) return;
   const words = q.toLowerCase().split(/\s+/).filter(w => w.length > 1).map(stem), qf = flat(q);
-  const score = (name, hay) => { const hf = flat(hay); if (!words.every(w => hay.includes(w) || hf.includes(flat(w)))) return -1;
-    const nf = flat(name); return (nf === qf ? 100 : qf.length > 3 && nf.includes(qf) ? 50 : 0) + words.filter(w => name.toLowerCase().includes(w)).length * 5; };
+  // ranked, typo-tolerant: whole word > starts with > inside a word > one or two letters off; the name counts most
+  const ed = (a, b, m) => { if (Math.abs(a.length - b.length) > m) return m + 1; let p = Array.from({length: b.length + 1}, (_, j) => j);
+    for (let i = 1; i <= a.length; i++) { const c = [i]; let lo = i; for (let j = 1; j <= b.length; j++) { c[j] = Math.min(p[j] + 1, c[j - 1] + 1, p[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); lo = Math.min(lo, c[j]); } if (lo > m) return m + 1; p = c; }
+    return p[b.length]; };
+  const toks = s => s.split(/[^a-z0-9]+/).filter(Boolean);
+  const wscore = (w, tk) => { let best = 0; const m = w.length >= 8 ? 2 : w.length >= 4 ? 1 : 0;
+    for (const k of tk) { if (k === w) return 10; if (k.startsWith(w)) best = Math.max(best, 7); else if (w.length > 3 && k.includes(w)) best = Math.max(best, 4);
+      else if (m && best < 2 && k[0] === w[0] && ed(w, k.length > w.length + m ? k.slice(0, w.length) : k, m) <= m) best = 2; }
+    return best; };
+  const score = (name, hay) => { const hl = hay.toLowerCase(), hf = flat(hl), nl = name.toLowerCase(), nt = toks(nl), ht = toks(hl); let s = 0;
+    for (const w of words) { const wn = wscore(w, nt), wh = wn || wscore(w, ht) || (hf.includes(flat(w)) && flat(w).length > 1 ? 3 : 0); if (!wh) return -1; s += wn ? wn * 3 : wh; }
+    const nf = flat(name); return s + (nf === qf ? 100 : qf.length > 3 && nf.includes(qf) ? 50 : 0); };
   const hits = [];
   ITEMS.forEach(x => { const s = score(x.n, `${x.n} ${x.c} ${x.about} ${x.sets.join(" ")} ${x.p} ${x.s} ${NAME[x.s] || ""}`.toLowerCase()); if (s >= 0) hits.push([s, x]); });
   const listed = new Set(ITEMS.map(x => flat(x.n) + "|" + flat(x.p)));   // Spanish churches are list entries too: show them once
   CH.forEach(x => { if (listed.has(flat(x.n) + "|" + flat(x.p))) return; const s = score(x.n, `${x.n} ${x.c} ${x.p} ${x.st} ${NAME[x.st] || ""} church ${x.lang}`.toLowerCase());
     if (s >= 0) hits.push([s + (x.p && q.toLowerCase().includes(x.p.toLowerCase()) ? 10 : 0), {n: x.n, c: x.c || "Adventist church", line: `${[x.p, x.st].filter(Boolean).join(", ")}${x.svc ? " · " + x.svc : ""}`, about: "", pages: [], place: x}]); });
+  if (!hits.length && !pt.syn) { // nothing found: try everyday words that mean the same (small list, works offline)
+    const SYN = {preparer: "accountant", taxes: "tax", bereavement: "grief", dying: "grief", widow: "grief", sad: "depression", anxious: "anxiety", doctor: "health", sick: "health", diet: "vegetarian", cook: "recipe", cooking: "recipe", food: "recipe", lawyer: "legal", attorney: "legal", kid: "children", youth: "teen", teenager: "teen", baptism: "bible study", sermon: "preaching", song: "music", songs: "music", hymn: "music", donate: "giving", offering: "giving", tithe: "stewardship", budget: "money", loan: "money", retire: "pastor care", burnout: "pastor care", addiction: "recovery", drugs: "recovery", sabbath: "sabbath school"};
+    const q2 = q.toLowerCase().split(/\s+/).map(w => SYN[w] || SYN[stem(w)] || w).join(" ");
+    if (q2 !== q.toLowerCase()) { const p2 = [...pt]; p2.syn = 1; return search(q2, p2); } }
   hits.sort((a, b) => b[0] - a[0]);
   const list = hits.slice(0, 400).map(h => h[1]);
   openList("Search", `“${q}”`, hits.length ? `${fmt(hits.length)} found${hits.length > 400 ? "; showing the best 400" : ""}. Churches open on their own map page.` : "Nothing found. Try fewer words, or a town or state name.", [], list, pt);
@@ -1402,7 +1416,7 @@ if ("serviceWorker" in navigator) {
   // a new version took over: show it right away (once), so people never sit on an old copy
   navigator.serviceWorker.addEventListener("controllerchange", () => { if (had && !sessionStorage.getItem("prl-reloaded")) { sessionStorage.setItem("prl-reloaded", "1"); location.reload(); } });
 }
-document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 07 Nov 2026, 17:48"; document.body.appendChild(f); });
+document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 07 Nov 2026, 17:52"; document.body.appendChild(f); });
 (() => {
   const bar = document.getElementById("installBar"), btn = document.getElementById("installBtn");
   const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone;
