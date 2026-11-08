@@ -1852,6 +1852,8 @@ const MLABELS = [["New York",871.1,216.6,8478072,"NY"],["Los Angeles",83.6,363.1
     };
     raf = requestAnimationFrame(glide);
   };
+  // for map_touch.js: move the map with the cheap transform while a finger or mouse drags it, then draw it sharp
+  window.__mapMove = {show: v => { cancelAnimationFrame(raf); raf = 0; show(v); }, finish: v => finish(v), get cur(){ return cur; }};
   // the old per-frame chase is gone; make sure a drag-to-pan never fights a glide
   svg.addEventListener("pointerdown", () => { if (!cur) return; finish({...cur}); goal.x = view.x; goal.y = view.y; goal.z = view.z; }, true);   // capture: runs before the pan handler reads goal
 })();
@@ -2008,7 +2010,7 @@ const MLABELS = [["New York",871.1,216.6,8478072,"NY"],["Los Angeles",83.6,363.1
       spotInfo({n: `Near ${nearTown(xy)}`, xy}, -1);
     }, 550);
   });
-  addEventListener("pointermove", e => { if (start && Math.abs(e.clientX - start.x) + Math.abs(e.clientY - start.y) > 6) { clearTimeout(hold); start = null; pinHit = null; } });
+  addEventListener("pointermove", e => { if (start && Math.abs(e.clientX - start.x) + Math.abs(e.clientY - start.y) > 6) { clearTimeout(hold); start = null; pinHit = null; } }, true);   // capture: runs even when a finger's move is kept from panning the old way
   addEventListener("pointerup", e => {
     clearTimeout(hold); start = null;
     if (held) { held = false; return; }
@@ -2016,6 +2018,7 @@ const MLABELS = [["New York",871.1,216.6,8478072,"NY"],["Los Angeles",83.6,363.1
       if (id[0] === "p") { const x = P[+id.slice(1)], i = deskItems.indexOf(x); if (i >= 0) CARS.room.to(i); else placeInfo(x, -1); }
       else { const i = +id.slice(1), s = spots()[i]; if (s) spotInfo(s, i); } }
   }, true);
+  addEventListener("pointercancel", () => { clearTimeout(hold); start = null; held = false; pinHit = null; });   // the page started scrolling
   svg.addEventListener("contextmenu", e => { if (!deep()) return; e.preventDefault(); const xy = toMap(e); spotInfo({n: `Near ${nearTown(xy)}`, xy}, -1); });
   // say so on the wall
   if (typeof paint === "function") { const _p = paint; paint = function () { const r = _p.apply(this, arguments); if (deep() && !miles && $("wHint")) $("wHint").textContent = "Tap a dot or a town. Hold the map to save a spot."; return r; }; }
@@ -2024,6 +2027,135 @@ const MLABELS = [["New York",871.1,216.6,8478072,"NY"],["Los Angeles",83.6,363.1
   document.getElementById("miles")?.addEventListener("change", () => setTimeout(drawLabels, 0));
   // refresh pins when a heart is tapped anywhere
   document.addEventListener("click", () => setTimeout(drawSaved, 50));
+})();
+
+/* ---- moving the map: phones and computers (main chat, 8 Nov 2026) ----
+   Daniel: "on a phone it's really buggy ... super laggy ... hard for me to scroll down the page because I accidentally hit the map ...
+   I want to be able to move the map, but I want to be able to scroll down too."
+   - Phone: one finger scrolls the page (a short note says to use two fingers); two fingers move and pinch-zoom the map. Taps still pick.
+   - Computer: dragging with the mouse moves the map with a cheap slide and draws it sharp when you let go (no redraw on every move). */
+(() => {
+  const svg = document.getElementById("wsvg"), wmap = document.getElementById("wmap");
+  if (!svg || !wmap || !window.__mapMove) return;
+  const M = window.__mapMove;
+  const css = document.createElement("style");
+  css.textContent = "#wsvg,#wmap{touch-action:pan-x pan-y}" +
+    "#twoHint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(8,12,28,.82);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;pointer-events:none;opacity:0;transition:opacity .25s;z-index:5;white-space:nowrap}#twoHint.on{opacity:1}";
+  document.head.append(css);
+  if (getComputedStyle(wmap).position === "static") wmap.style.position = "relative";
+  const hint = document.createElement("div"); hint.id = "twoHint"; hint.textContent = "Use two fingers to move the map"; wmap.append(hint);
+  let hintT = 0; const sayTwo = () => { hint.classList.add("on"); clearTimeout(hintT); hintT = setTimeout(() => hint.classList.remove("on"), 1300); };
+  const S = () => { const r = svg.getBoundingClientRect(); return Math.min(r.width / 975, r.height / 610) || 1; };
+  const now = () => M.cur ? {...M.cur} : {x: view.x, y: view.y, z: view.z};
+  const settle = v => { Object.assign(goal, v); M.finish(v); };
+
+  // ---- mouse (and pen): drag to pan with the cheap slide ----
+  let drag = null;
+  svg.addEventListener("pointerdown", e => {
+    if (e.pointerType === "touch" || e.defaultPrevented || e.button > 0 || !deep()) return;   // the circle handles its own drag
+    drag = {x: e.clientX, y: e.clientY, v: now(), moved: false};
+  }, true);
+  addEventListener("pointermove", e => {
+    if (e.pointerType === "touch") { e.stopImmediatePropagation(); return; }   // a finger never pans the old way (it was scrolling the page)
+    if (!drag) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.moved && Math.abs(dx) + Math.abs(dy) <= 6) return;
+    drag.moved = true; e.stopImmediatePropagation();
+    const k = S() * drag.v.z; M.show({x: drag.v.x - dx / k, y: drag.v.y - dy / k, z: drag.v.z});
+  }, true);
+  addEventListener("pointerup", e => {
+    if (!drag) return; const d = drag; drag = null;
+    if (d.moved) { e.stopImmediatePropagation(); settle(now()); }   // a drag is not a tap
+  }, true);
+
+  // ---- fingers: one scrolls the page, two move and zoom the map ----
+  let two = null;
+  const mid = t => ({x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2, d: Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY) || 1});
+  wmap.addEventListener("touchstart", e => {
+    if (!deep() || e.touches.length !== 2) return;
+    const m = mid(e.touches), r = svg.getBoundingClientRect(), v = now(), k = S() * v.z;
+    two = {m, v, cx: r.left + r.width / 2, cy: r.top + r.height / 2, px: v.x + (m.x - (r.left + r.width / 2)) / k, py: v.y + (m.y - (r.top + r.height / 2)) / k};
+    dispatchEvent(new PointerEvent("pointercancel"));   // a second finger: not a press-and-hold
+    e.preventDefault();
+  }, {passive: false});
+  wmap.addEventListener("touchmove", e => {
+    if (e.touches.length === 1 && !two && deep()) { sayTwo(); return; }   // one finger: let the page scroll
+    if (!two || e.touches.length !== 2) return;
+    e.preventDefault();
+    const m = mid(e.touches), z = Math.max(1, Math.min(ZMAX, two.v.z * m.d / two.m.d)), k = S() * z;
+    M.show({x: two.px - (m.x - two.cx) / k, y: two.py - (m.y - two.cy) / k, z});   // the spot under your fingers stays under them
+  }, {passive: false});
+  const end = e => { if (two && e.touches.length < 2) { two = null; settle(now()); } };
+  wmap.addEventListener("touchend", end); wmap.addEventListener("touchcancel", end);
+})();
+
+/* ---- sub-topics for the big topics (main chat, 8 Nov 2026) ----
+   Daniel: "church office and tools ... that's like so many subtopics. We need to have another main topic list for those."
+   A big topic now opens to a short list of sub-topics; each sub-topic opens its own rows. "See everything" keeps the old view.
+   Any heading not named here lands in "More", so new headings never get lost. */
+(() => {
+  if (typeof openGroup !== "function" || typeof GROUPS === "undefined") return;
+  const SUB = {
+    "Ministry": [
+      ["Outreach and Bible study", "Evangelistic Series, Canvassing and Literature Evangelism, Bible Studies, Bible Tools"],
+      ["Training", "Pastor and Leader Training, Discipleship and Church Training"]],
+    "Family and health": [
+      ["Kids and youth", "Kids Programs, Youth and Pathfinders"],
+      ["Marriage, family and money", "Marriage and Family, Money and Giving"],
+      ["Health and food", "Health, SDA Recipes, Vegan Restaurants"],
+      ["Support and professionals", "Crisis and Mental Health, Adventist Professionals"]],
+    "Church help": [
+      ["Design, media and tech", "Graphics and Design, Video, Audio and Website Tools, Audio and Video Equipment"],
+      ["Printing and merch", "Printing and Event Supplies, Local Print and Copy Shops, Custom Apparel and Merch"],
+      ["Events and shipping", "Event Rentals, Mailing and Shipping"],
+      ["Nonprofit and community", "Nonprofit Help, Chambers of Commerce"]],
+    "Church office and tools": [
+      ["Office and admin", "Nonprofit and Church Discounts, Church Admin Templates, Music and Video Licenses, Translation and Listening Equipment, Books and Bibles in Bulk"],
+      ["Preaching and outreach", "Sermon Preparation, Community Outreach"],
+      ["Serve and help others", "Help for People in Need, Serve:"],
+      ["Camps, clubs and events", "Conference event calendars, Adventist summer camps, Pathfinder clubs"]],
+    "Hmong": [
+      ["Church, Bible and news", "Hmong SDA Churches and Ministries, Hmong Bibles and Studies, Hmong Radio, TV and News"],
+      ["Food, health and shops", "Hmong Food, Hmong Health, Hmong Shops and Services"],
+      ["Help and community", "Hmong Legal, Tax and Housing, Hmong Translators, Hmong Community and Education"]]
+  };
+  // heading names contain commas ("Video, Audio and Website Tools"), so match each heading against the list text instead of splitting it
+  const subsOf = g => {
+    const def = SUB[g.title]; if (!def) return null;
+    const used = new Set(), out = def.map(([name, list]) => {
+      const sets = g.sets.filter(([n]) => !used.has(n) && (list.includes(n) || (list.endsWith(":") && n.startsWith(list)) || list.split(", ").some(p => p.endsWith(":") && n.startsWith(p))));
+      sets.forEach(([n]) => used.add(n)); return {name, sets};
+    }).filter(s => s.sets.length);
+    const rest = g.sets.filter(([n]) => !used.has(n)); if (rest.length) out.push({name: "More", sets: rest});
+    return out.length > 1 ? out : null;
+  };
+  const total = sets => sets.reduce((a, s) => a + s[1], 0);
+  const _open = openGroup;
+  function showSubs(g, subs, pt){
+    $("tEye").textContent = "Topic"; $("tTitle").textContent = g.title;
+    $("tSub").textContent = `${subs.length} parts, ${fmt(total(g.sets))} on the list. Pick one to go deeper.`;
+    $("tChips").innerHTML = ""; $("tCards").innerHTML = ""; $("tFilt").hidden = true; $("tCarNav").hidden = true; $("tRows").hidden = false;
+    $("tRows").innerHTML = `<div class="groups subgroups">${subs.map((s, i) => `<button class="grp" data-subg="${i}"><b>${esc(s.name)}<\/b><small>${s.sets.map(x => esc(x[0])).join(" · ")}<\/small><em>${fmt(total(s.sets))} on the list · Go deeper →<\/em><\/button>`).join("")}<\/div>
+      <div class="rpager"><span>Or see every heading at once<\/span><button class="btn" data-suball>See everything →<\/button><\/div>`;
+    $("tRows").onclick = e => {
+      const b = e.target.closest("[data-subg]"); if (b) return openSub(g, subs, subs[+b.dataset.subg], at(e));
+      if (e.target.closest("[data-suball]")) { $("tRows").onclick = null; return _open(g, at(e)); }
+    };
+    go("L-topic", g.title, pt);
+  }
+  function openSub(g, subs, s, pt){
+    $("tRows").onclick = null;
+    _open({...g, sets: s.sets}, pt);
+    $("tEye").textContent = g.title; $("tTitle").textContent = s.name;
+    $("tChips").innerHTML = `<button class="chip" data-subback>← All of ${esc(g.title)}<\/button>`;
+    $("tChips").querySelector("[data-subback]").onclick = e => showSubs(g, subs, at(e));
+  }
+  openGroup = function (g, pt) { const subs = subsOf(g); return subs ? showSubs(g, subs, pt) : _open(g, pt); };
+  // the home list says what is inside each big topic by its parts
+  document.querySelectorAll("#groups [data-g]").forEach(b => { const g = GROUPS[+b.dataset.g], subs = g && subsOf(g), sm = b.querySelector("small"); if (subs && sm) sm.textContent = subs.map(s => s.name).join(" · "); });
+  const css = document.createElement("style");
+  css.textContent = ".subgroups{margin-top:6px}#tChips .chip[data-subback]{cursor:pointer;border:1px solid var(--edge);background:var(--glass);color:var(--ink);font:inherit}";
+  document.head.append(css);
 })();
 
 /* ---- "See all" in Carousel view: rows like the main page, plus a "Filter this list" box (draft, main chat, 8 Nov 2026) ----
@@ -2367,7 +2499,7 @@ if ("serviceWorker" in navigator) {
   // a new version took over: show it right away (once), so people never sit on an old copy
   navigator.serviceWorker.addEventListener("controllerchange", () => { if (had && !sessionStorage.getItem("prl-reloaded")) { sessionStorage.setItem("prl-reloaded", "1"); location.reload(); } });
 }
-document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 08 Nov 2026, 14:45"; document.body.appendChild(f); });
+document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 08 Nov 2026, 14:51"; document.body.appendChild(f); });
 (() => {
   const bar = document.getElementById("installBar"), btn = document.getElementById("installBtn");
   const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone;
