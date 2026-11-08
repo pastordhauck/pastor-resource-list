@@ -2102,7 +2102,10 @@ const PROS = [];
   const takeOut = (title, test) => { const g = GROUPS.find(x => x.title === title); if (!g) return []; const out = g.sets.filter(([n]) => test(n)); g.sets = g.sets.filter(([n]) => !test(n)); return out; };
   const serveSets = takeOut("Church office and tools", n => /^Serve:/.test(n));
   const helpSets = takeOut("Church office and tools", n => n === "Help for People in Need");
-  const proSets = takeOut("Family and health", n => n === "Adventist Professionals");
+  // Daniel, 8 Nov 2026: "Take off the Adventist Professionals tab until we can figure everything out" - the tab is off and the
+  // directory links stay under Family and health as before. Turn PRO_TAB back on only when he says so.
+  const PRO_TAB = false;
+  const proSets = PRO_TAB ? takeOut("Family and health", n => n === "Adventist Professionals") : [];
   // people by name (work/professionals/adventist_pros.csv): one part per field, rows by state; directories stay as their own part
   const PRO_SUB = proSets.length ? [["Directories and associations", proSets.map(s => s[0])]] : [];
   if (typeof PROS !== "undefined" && PROS.length) {
@@ -2141,7 +2144,7 @@ const PROS = [];
     items.sort((a, b) => (b.pages && b.pages.length ? 1 : 0) - (a.pages && a.pages.length ? 1 : 0)); return {title: `Explore ${g.title.toLowerCase()}.`, count: items.length, items}; }));
   $("groups").innerHTML = GROUPS.map((g, i) => `<button class="grp" data-g="${i}"><b>${esc(g.title)}<\/b><small>${g.sets.map(s => esc(s[0])).join(" · ")}<\/small><em>${fmt(g.sets.reduce((a, s) => a + s[1], 0))} on the list · Go deeper →<\/em><\/button>`).join("");
   // top tabs: Resources · Serve · Adventist professionals · Map room (Daniel, 8 Nov 2026)
-  const TABS = [["serve", "Serve", {title: "Serve", sets: serveSets}], ["pro", "Adventist professionals", {title: "Adventist professionals", sets: proSets}]].filter(t => t[2].sets.length);
+  const TABS = [["serve", "Serve", {title: "Serve", sets: serveSets}], ["pro", "Adventist professionals", {title: "Adventist professionals", sets: proSets}]].filter(t => t[2].sets.length && (t[0] !== "pro" || PRO_TAB));
   if (TABS.length && $("seg")) {
     const seg = $("seg"), mapBtn = seg.querySelector('[data-sec="L-room"]'), btns = {};
     TABS.forEach(([key, label, grp]) => {
@@ -2565,7 +2568,7 @@ if ("serviceWorker" in navigator) {
   // a new version took over: show it right away (once), so people never sit on an old copy
   navigator.serviceWorker.addEventListener("controllerchange", () => { if (had && !sessionStorage.getItem("prl-reloaded")) { sessionStorage.setItem("prl-reloaded", "1"); location.reload(); } });
 }
-document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 08 Nov 2026, 15:30"; document.body.appendChild(f); });
+document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 08 Nov 2026, 15:37"; document.body.appendChild(f); });
 (() => {
   const bar = document.getElementById("installBar"), btn = document.getElementById("installBtn");
   const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone;
