@@ -1929,7 +1929,8 @@ const MLABELS = [["New York",871.1,216.6,8478072,"NY"],["Los Angeles",83.6,363.1
   const css = document.createElement("style");
   css.textContent = "#wCities path{fill:rgba(205,218,255,.13);stroke:rgba(228,236,255,.85);stroke-width:1.3}" +
     "#wLabels{pointer-events:none}#wLabels text{fill:var(--ink,#eef2ff);stroke:rgba(8,12,28,.9);stroke-width:3px;paint-order:stroke;vector-effect:non-scaling-stroke;font-family:var(--sans,system-ui);font-weight:600;letter-spacing:.01em}" +
-    "#wLabels text.big{font-weight:700}#wLabels circle{fill:var(--ink,#eef2ff);stroke:rgba(8,12,28,.9);stroke-width:1px;vector-effect:non-scaling-stroke}" +
+    "#wLabels text.big{font-weight:700}#wLabels .soft{opacity:.5}#wLabels text.soft{font-weight:500}" +
+    "#wHint{white-space:normal;overflow-wrap:anywhere}#wLabels circle{fill:var(--ink,#eef2ff);stroke:rgba(8,12,28,.9);stroke-width:1px;vector-effect:non-scaling-stroke}" +
     "#wSaved g{cursor:pointer}#wSaved .pl{fill:#19b6c9}#wSaved .sp{fill:#ffd166}#wSaved circle{stroke:#fff;stroke-width:2px;vector-effect:non-scaling-stroke}#wSaved .dot{fill:#fff;stroke:none}";
   document.head.append(css);
   const mk = (tag, id) => { const g = document.createElementNS(NS, tag); if (id) g.id = id; return g; };
@@ -1945,16 +1946,22 @@ const MLABELS = [["New York",871.1,216.6,8478072,"NY"],["Los Angeles",83.6,363.1
     if (!deep() || !LV.st) { labelsG.innerHTML = ""; return; }
     const z = view.z, k = pxPer(), w = 975 / z / 2, h = 610 / z / 2;
     const minPop = z < 3 ? 40000 : z < 5 ? 12000 : z < 9 ? 4000 : 1500;
-    const boxes = [], out = [];
-    for (const [n, x, y, pop, st] of MLABELS) {
+    // very close in (Daniel, 8 Nov 2026): a few more towns, any state, in soft small type, so they help without filling the map
+    const close = z >= 9, MAIN = close ? 12 : 110, SOFT = close ? 6 : 0;
+    const boxes = [], out = []; let nMain = 0, nSoft = 0;
+    // two passes: this state's towns claim their spots first, then the soft extras fill gaps
+    for (const pass of [0, 1]) for (const [n, x, y, pop, st] of MLABELS) {
       if (pop < minPop) break;                                     // sorted biggest first
-      if (st !== LV.st && !(crossSt && miles)) continue;
+      const home = st === LV.st || (crossSt && miles);
+      if (pass === 0 ? !home || nMain >= MAIN : home || !close || nSoft >= SOFT) continue;
+      const soft = pass === 1;
       if (x < view.x - w || x > view.x + w || y < view.y - h || y > view.y + h) continue;
-      const big = pop >= 100000, fs = big ? 13 : 11.5, bw = n.length * fs * .58 + 10, sx = (x - view.x) * k, sy = (y - view.y) * k;
+      const big = pop >= 100000 && !soft, fs = soft ? 10.5 : big ? 13 : 11.5, bw = n.length * fs * .58 + 10, sx = (x - view.x) * k, sy = (y - view.y) * k;
       const b = [sx - bw / 2, sy - fs - 6, sx + bw / 2, sy + 4];
       if (b[0] < -w * k + 4 || b[2] > w * k - 4 || b[1] < -h * k + 4) continue;   // never cut a name off at the map's edge
       if (boxes.some(o => b[0] < o[2] && b[2] > o[0] && b[1] < o[3] && b[3] > o[1])) continue;
-      boxes.push(b); out.push(`<circle cx="${x}" cy="${y}" r="${(big ? 2.4 : 1.8) / k}"/><text class="${big ? "big" : ""}" x="${x}" y="${y - 5 / k}" font-size="${fs / k}" text-anchor="middle">${esc(n)}<\/text>`);
+      boxes.push(b); soft ? nSoft++ : nMain++;
+      out.push(`<circle class="${soft ? "soft" : ""}" cx="${x}" cy="${y}" r="${(big ? 2.4 : soft ? 1.4 : 1.8) / k}"/><text class="${soft ? "soft" : big ? "big" : ""}" x="${x}" y="${y - 5 / k}" font-size="${fs / k}" text-anchor="middle">${esc(n)}<\/text>`);
       if (out.length >= 110) break;
     }
     labelsG.innerHTML = out.join("");
@@ -2011,7 +2018,7 @@ const MLABELS = [["New York",871.1,216.6,8478072,"NY"],["Los Angeles",83.6,363.1
   }, true);
   svg.addEventListener("contextmenu", e => { if (!deep()) return; e.preventDefault(); const xy = toMap(e); spotInfo({n: `Near ${nearTown(xy)}`, xy}, -1); });
   // say so on the wall
-  if (typeof paint === "function") { const _p = paint; paint = function () { const r = _p.apply(this, arguments); if (deep() && !miles && $("wHint")) $("wHint").textContent = "Tap a dot or a town. Press and hold the map to save a spot."; return r; }; }
+  if (typeof paint === "function") { const _p = paint; paint = function () { const r = _p.apply(this, arguments); if (deep() && !miles && $("wHint")) $("wHint").textContent = "Tap a dot or a town. Hold the map to save a spot."; return r; }; }
   // the across-state-lines box and the miles slider change which names show
   document.getElementById("xst")?.addEventListener("change", () => setTimeout(drawLabels, 0));
   document.getElementById("miles")?.addEventListener("change", () => setTimeout(drawLabels, 0));
@@ -2360,7 +2367,7 @@ if ("serviceWorker" in navigator) {
   // a new version took over: show it right away (once), so people never sit on an old copy
   navigator.serviceWorker.addEventListener("controllerchange", () => { if (had && !sessionStorage.getItem("prl-reloaded")) { sessionStorage.setItem("prl-reloaded", "1"); location.reload(); } });
 }
-document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 08 Nov 2026, 14:43"; document.body.appendChild(f); });
+document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 08 Nov 2026, 14:45"; document.body.appendChild(f); });
 (() => {
   const bar = document.getElementById("installBar"), btn = document.getElementById("installBtn");
   const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone;
