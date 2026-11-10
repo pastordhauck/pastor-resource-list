@@ -763,22 +763,61 @@ draw();
       + "--ink:#18202c;--muted:#5a6577;--fade:#5a6577;--dim:#8590a0;--gold:#2c4a7a;--gold2:#1f3760;--goldlight:#1f3760;"
       + "--card1:#e2e7ee;--card2:#ffffff;--topbg:rgba(236,239,243,.94);--homebg:#dfe5ee;--roombg:#e2e7ee;--side:rgba(255,255,255,.8);"
       + "--fx-p1:#e2e7ee;--fx-p2:#ffffff;--fx-p2a:rgba(255,255,255,.95);--fx-p3:#dde3eb;--fx-topbg:rgba(236,239,243,.94)"};
+  // DRAFT styles from ChatGPT and Gemini (Daniel, 11 Nov 2026: "give me a draft with the 10 colors from ChatGPT and 10 from Gemini ... to
+  // look at and decide"). They are built from their 7 colors and show in Settings only after opening the site with ?colors=draft.
+  // [id, name, light?, page, panel, text, muted, buttons, button text]
+  const DRAFTS = [
+    ["d_ivory", "Editorial Ivory (ChatGPT)", 1, "#f5f3ee", "#ffffff", "#1d2832", "#53616c", "#254f67", "#ffffff"],
+    ["d_sage", "Sage & Stone (ChatGPT)", 1, "#e8ede8", "#fafcfa", "#172820", "#4c5d54", "#265e49", "#ffffff"],
+    ["d_oat", "Oat & Walnut (ChatGPT)", 1, "#eadfcc", "#f8f2e7", "#282219", "#5f5344", "#754824", "#ffffff"],
+    ["d_midnight", "Midnight Library (ChatGPT)", 0, "#0d1522", "#172437", "#f2f3ef", "#afbbc8", "#deb961", "#171a23"],
+    ["d_evergreen", "Deep Evergreen (ChatGPT)", 0, "#121d1b", "#20302d", "#f3f0e8", "#b6c1b9", "#cf9675", "#17221f"],
+    ["d_sanctuary", "Sanctuary Stone (Gemini)", 1, "#f4f4f2", "#ffffff", "#2c2c2c", "#5f5f5f", "#4a6572", "#ffffff"],
+    ["d_vespers", "Vespers (Gemini)", 0, "#0f141e", "#1a2130", "#eaecef", "#8b99a8", "#c29b62", "#12161f"],
+    ["d_alabaster", "Alabaster and Sage (Gemini)", 1, "#f9f8f6", "#ffffff", "#2f332e", "#626760", "#587054", "#ffffff"],
+    ["d_crimson", "Midnight Crimson (Gemini)", 0, "#16161a", "#232329", "#f0f0f2", "#94949c", "#8c4a4a", "#ffffff"],
+    ["d_harvest", "Autumn Harvest (Gemini)", 1, "#fdfbf7", "#f4efe6", "#382e28", "#6b5f57", "#9e5b43", "#ffffff"],
+    // second round, 11 Nov 2026 (5 more each; Daniel asked for medium-strength, not near-white)
+    ["d_riverstone", "Riverstone Blue (ChatGPT)", 1, "#B8C9CF", "#E3ECEE", "#192B33", "#40535B", "#24556B", "#FFFFFF"],
+    ["d_cedar", "Cedar & Clay (ChatGPT)", 1, "#CBB6A5", "#EFE1D2", "#2B241F", "#534136", "#643D2B", "#FFFFFF"],
+    ["d_merlot", "Frost & Merlot (ChatGPT)", 1, "#F1F0EC", "#FFFFFF", "#242731", "#555963", "#6B3347", "#FFFFFF"],
+    ["d_petrol", "Petrol & Sand (ChatGPT)", 0, "#0F2930", "#20444B", "#F2F1EA", "#BBCFD0", "#E1B17C", "#1D2A30"],
+    ["d_aubergine", "Aubergine & Nickel (ChatGPT)", 0, "#1C1925", "#2D2A37", "#F3F0F6", "#C1B9CB", "#C9B5E0", "#251B30"],
+    ["d_mist", "Morning Mist (Gemini)", 1, "#D1D9E0", "#E8ECEF", "#1C2B36", "#4A5D6B", "#2E5A7A", "#FFFFFF"],
+    ["d_walnut", "Walnut Wood (Gemini)", 0, "#4A3C31", "#5C4A3D", "#F2EBE1", "#C2B4A6", "#D9A05B", "#261B12"],
+    ["d_olive", "Olive Branch (Gemini)", 1, "#F0F4EC", "#FAFCF8", "#223322", "#5B6B5B", "#446644", "#FFFFFF"],
+    ["d_covenant", "Midnight Covenant (Gemini)", 0, "#1A1A24", "#252533", "#E6E6EB", "#9A9AB3", "#7A6B8C", "#FFFFFF"],
+    ["d_desert", "Desert Clay (Gemini)", 1, "#DABAA3", "#EFE4DA", "#3A2314", "#6D4C38", "#8B4522", "#FFFFFF"]];
+  const rgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const hx = a => "#" + a.map(v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, "0")).join("");
+  const mix = (a, b, t) => hx(rgb(a).map((v, i) => v * (1 - t) + rgb(b)[i] * t));
+  const rgba = (h, a) => `rgba(${rgb(h).join(",")},${a})`;
+  const mk = (bg, pn, ink, mu, ac, light) => { const p2 = light ? mix(bg, ink, .07) : mix(pn, "#ffffff", .06), g2 = light ? mix(ac, "#000000", .22) : mix(ac, "#ffffff", .25);
+    return `--bg:${bg};--room:${p2};--wall:${mix(bg, pn, .5)};--surface:${pn};--surface2:${p2};--panel:${pn};--panel2:${p2};--glass:${rgba(pn, light ? .82 : .7)};--glass2:${rgba(pn, light ? .96 : .9)};`
+      + `--edge:${rgba(ink, .14)};--line:${rgba(ink, .14)};--ink:${ink};--muted:${mu};--fade:${mu};--dim:${mix(mu, bg, .35)};--gold:${ac};--gold2:${g2};--goldlight:${g2};`
+      + `--card1:${p2};--card2:${pn};--topbg:${rgba(bg, .94)};--homebg:${p2};--roombg:${p2};--side:${rgba(pn, .8)};--fx-p1:${p2};--fx-p2:${pn};--fx-p2a:${rgba(pn, .94)};--fx-p3:${p2};--fx-topbg:${rgba(bg, .94)}`; };
+  const BTNTXT = {parchment: "#fff", bank: "#fff"}, DARKS = {};
+  const HERO0 = {}, HV0 = {};
+  for (const [id, , light, bg, pn, ink, mu, ac, bt] of DRAFTS) {
+    (light ? LIGHT : DARKS)[id] = mk(bg, pn, ink, mu, ac, light); BTNTXT[id] = bt;
+    HV0[id] = [ink, mu, light ? mix(ac, "#000000", .22) : ac]; if (light) HERO0[id] = [mix(ac, "#000000", .22), mu]; }
   const css = [`html:not([data-style]):root,html[data-style="dark"]:root{color-scheme:dark;${DARK}}`];
   for (const k in LIGHT) css.push(`html[data-style="${k}"]:root{color-scheme:light;${LIGHT[k]}}`);
+  for (const k in DARKS) css.push(`html[data-style="${k}"]:root{color-scheme:dark;${DARKS[k]}}`);
   // every rule written for Light (button text, borders, pictures ...) also applies to the two new light styles
   for (const sh of document.styleSheets) { let rs; try { rs = sh.cssRules; } catch (e) { continue; }
     for (const r of rs) { const s = r.selectorText; if (!s || !s.includes('[data-style="light"]') || /^html\[data-style="light"\](:root)?$/.test(s.trim())) continue;
       for (const k in LIGHT) css.push(r.cssText.split('[data-style="light"]').join(`[data-style="${k}"]`)); } }
   // the two new light styles have darker buttons (brown, navy): white button text reads better there
   const BTN = ".findbtn,.go,.btn.gold,.rgo,.rmdone,.rqinfo .btn.gold,.rhead .rqadd,#appKitN,.seg button[aria-pressed=true],.segn button[aria-pressed=true],.langs button[aria-pressed=true],.ptabs button.on,.ptabs button[aria-current=true],.kittabs+*,.hubbar .findbtn,#planForm .findbtn,form#searchForm .findbtn,.seg button.on,.rqtile.hot .k";
-  for (const k in LIGHT) css.push(`html[data-style="${k}"] :is(${BTN}){color:#fff!important}`);
+  for (const k in BTNTXT) css.push(`html[data-style="${k}"] :is(${BTN}){color:${BTNTXT[k]}!important}`);
   // Serve's opening picture: its small lines were a fixed pale gold that only reads on dark pages (also on Light, Soft linen, Black and white)
   // (the picture area sets its own pale gold, so each style gets its own darker colors here)
-  const HERO = {light: ["#7d5a18", "#4a4236"], linen: ["#6c5667", "#55515c"], gray: ["#222222", "#444444"], parchment: ["#6d4420", "#544a3a"], bank: ["#1f3760", "#47526a"]};
+  const HERO = {light: ["#7d5a18", "#4a4236"], linen: ["#6c5667", "#55515c"], gray: ["#222222", "#444444"], parchment: ["#6d4420", "#544a3a"], bank: ["#1f3760", "#47526a"], ...HERO0};
   // the picture area sets its own text, muted and gold colors (made for the old navy); give it each style's own instead
   const HV = {dark: ["#f2efe9", "#cfc9bf", "#d4af5a"], warm: ["#f6ece0", "#c9b49c", "#e8a85a"], forest: ["#e9f3ec", "#a3bfae", "#d9c27a"], coral: ["#fbeee9", "#d6b5ab", "#ff7a59"],
     dusk: ["#e7e4ea", "#aaa5b0", "#b897a9"], contrast: ["#ffffff", "#f0f0f0", "#ffd60a"], light: ["#1f1b16", "#4a4236", "#7d5a18"], linen: ["#2b2a31", "#55515c", "#6c5667"],
-    gray: ["#161616", "#444444", "#222222"], parchment: ["#2a2318", "#544a3a", "#6d4420"], bank: ["#18202c", "#47526a", "#1f3760"]};
+    gray: ["#161616", "#444444", "#222222"], parchment: ["#2a2318", "#544a3a", "#6d4420"], bank: ["#18202c", "#47526a", "#1f3760"], ...HV0};
   for (const k in HV) css.push(`${k === "dark" ? 'html:not([data-style]) .hero,' : ""}html[data-style="${k}"] .hero{--ink:${HV[k][0]}!important;--muted:${HV[k][1]}!important;--gold:${HV[k][2]}!important}`);
   for (const k in HERO) css.push(`html[data-style="${k}"] body .hero-links #heroPlan{background:rgba(255,255,255,.72)!important;color:${HERO[k][0]}!important}`);
   for (const k in HERO) css.push(`html[data-style="${k}"] .hero p{color:${HERO[k][1]}!important}html[data-style="${k}"] .hero :is(.eyebrow,.kicker,.text-btn,.text-btn *){color:${HERO[k][0]}!important}`);
@@ -789,13 +828,14 @@ draw();
     + `html #installBar{background:var(--glass2)!important;color:var(--ink)!important;border-color:var(--edge)!important}`);
   // Light styles: text Serve wrote in fixed pale colors (made for dark pages) now uses the style's own text colors, and small gold
   // labels use the deeper gold so they read on a light page
-  const LF = 'html:is([data-style="light"],[data-style="linen"],[data-style="gray"],[data-style="parchment"],[data-style="bank"])';
+  const LF = 'html:is(' + ["light", "linen", "gray", ...Object.keys(LIGHT)].map(k => `[data-style="${k}"]`).join(",") + ')';
   css.push(`${LF} :is(.kitsteps>div,.vcard p.mh,.ppanel li,.why li,.kitintro h2,.kitintro p,.pcard,.pcard :is(p,span,b,h4,label,li),#tellBox :is(h4,label),.irow span){color:var(--ink)!important}`
     + `${LF} :is(.meta,.tags>span,.tag,.pcard .hint,.pcard .note,.note,.hint,.wtitle,#rTitle,.subhint){color:var(--muted)!important}`
     + `${LF} :is(.eyebrow,.text-btn,.prbtn,#vRef,.pveye,.preview-label,#wEye,#tEye,.btn.outline,#churchLink,.save-btn,.kitactions .btn.outline,#mbLead .on){color:var(--gold2)!important}`
     + `${LF} #chCopy h1{color:var(--ink)!important}${LF} #chCopy .chtown{color:var(--muted)!important}`
     + `${LF} :is(#mbDays,#mbFmt,#mbLead) button{color:var(--ink)!important;border-color:var(--edge)!important}`);
   css.push(`html:is([data-style="light"],[data-style="linen"],[data-style="gray"]) .acts .btn.gold{color:#1b1404!important}html:is([data-style="parchment"],[data-style="bank"]) .acts .btn.gold{color:#fff!important}`
+    + Object.keys(BTNTXT).filter(k => k.startsWith("d_")).map(k => `html[data-style="${k}"] .acts .btn.gold{color:${BTNTXT[k]}!important}`).join("")
     + `html body form.sbar:not(.follow),html body #planForm.sbar{background:var(--glass)!important;border-color:var(--edge)!important}`);
   // ChatGPT's review (11 Nov 2026): the faded side cards in each row looked disabled. Keep them nearly full strength.
   css.push(".tile:not(.hot),.rqtile:not(.hot){opacity:.92!important}.rqtile:not(.hot):hover{opacity:1!important}");
@@ -805,6 +845,8 @@ draw();
     STYLES[0][2] = "#141414"; STYLES[0][3] = "#d4af5a";
     const li = STYLES.findIndex(s => s[0] === "light");
     STYLES.splice(li + 1, 0, ["parchment", "Study parchment", "#e3d8c4", "#8c5a2b"], ["bank", "Private bank slate", "#eceff3", "#2c4a7a"]);
+    let draft = false; try { const q = new URLSearchParams(location.search).get("colors"); if (q === "draft") localStorage.setItem("prl-colors-draft", "1"); if (q === "off") localStorage.removeItem("prl-colors-draft"); draft = localStorage.getItem("prl-colors-draft") === "1"; } catch (e) {}
+    if (draft) STYLES.push(...DRAFTS.map(([id, name, light, bg, , , , ac]) => [id, "Draft: " + name, bg, ac]));
     const cur = document.documentElement.dataset.style || "dark";
     ["setStyle", "pgStyle"].forEach(id => { const box = document.getElementById(id); if (!box) return;
       box.innerHTML = STYLES.map(([v, l, bg, ac]) => `<button type="button" data-s="${v}" aria-pressed="${v === cur}"><i style="background:radial-gradient(circle,${ac} 0 38%,${bg} 40%)"></i>${l}</button>`).join(""); });
