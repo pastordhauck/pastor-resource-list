@@ -2334,7 +2334,7 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     const placeBar = () => { const g = $("gear"), h = $("helpBtn"); if (!g) return; if (!bar.isConnected) g.before(bar);
       if (g.parentElement !== bar) bar.append(g); if (h && h !== bar.firstElementChild) bar.prepend(h); };
     placeBar(); setTimeout(placeBar, 0); setTimeout(placeBar, 800); addEventListener("load", placeBar);
-    const count = () => { const n = $("appKitN"); if (n) { const k = kitN(); n.textContent = k; n.toggleAttribute("data-z", !k); } };
+    const count = () => { const n = $("appKitN"); if (n) { const k = kitN(); n.textContent = k;  } };
     setInterval(count, 2000); addEventListener("storage", count); count();
     // open Serve, then run something inside it once it is ready
     const inServe = fn => { openServe(SERVE_URL); let t = 0; const tick = () => { const w = sv(); if (w && w.showSub) { try { fn(w); } catch (e) {} count(); } else if (t++ < 40) setTimeout(tick, 150); }; tick(); };
@@ -2366,16 +2366,22 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
       // hover (Daniel, 11 Nov 2026): pictures don't zoom; the card and the info box lift a little
       + "html body .card:hover .shot img{transform:none!important}.info.glass,#roomInfo{transition:transform .35s cubic-bezier(.22,.7,.18,1),box-shadow .35s,border-color .35s}"
       + "@media (hover:hover) and (prefers-reduced-motion:no-preference){.info.glass:hover,#roomInfo:hover{transform:translateY(-4px);border-color:rgba(224,182,90,.5);box-shadow:0 18px 40px rgba(0,0,0,.35)}}"
-      + "#gear>span{display:none!important}#appKitN{position:absolute;top:-6px;right:-7px;background:var(--gold);color:#111;border-radius:999px;font:700 10px system-ui;min-width:17px;height:17px;display:grid;place-items:center;padding:0 4px}#appKitN:empty,#appKitN[data-z]{display:none}"
+      + "#gear>span{display:none!important}#appKitN{position:absolute;top:-6px;right:-7px;background:var(--gold);color:#111;border-radius:999px;font:700 10px system-ui;min-width:17px;height:17px;display:grid;place-items:center;padding:0 4px}#appKitN:empty{display:none}"
       + "#setServeBody .segn,#setServeBody label{margin-top:6px}#setServeBody .row{display:flex;align-items:center;gap:8px;font-size:13px;margin:4px 0}"
       // the search bar follows you down (Daniel, 11 Nov 2026: "on any page, the search bar follows you all the way down")
+      + "#ssp.ssfollow{position:fixed;left:0;right:0;margin:0 auto;width:min(560px,calc(100% - 32px));z-index:41;max-height:calc(100vh - 160px);overflow:auto;box-shadow:0 18px 40px rgba(0,0,0,.4)}"
       + "#qform.sbar.follow{position:fixed;top:calc(72px + env(safe-area-inset-top,0px));left:0;right:0;margin-inline:auto;transform:none!important;animation:none!important;width:min(640px,calc(100% - 32px));z-index:40;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 12px 30px rgba(0,0,0,.35)}";
     document.head.append(css);
     // the search bar follows you down: once it scrolls out of view it rides at the top, and goes back in place when you scroll up
+    // search settings drop down right under the search bar, also while the bar is following you (Daniel, 11 Nov 2026)
+    const ssSync = () => { const f = $("qform"), p = document.getElementById("ssp"); if (!f || !p) return;
+      const on = !p.hidden && f.classList.contains("follow"); p.classList.toggle("ssfollow", on); p.style.top = on ? Math.round(f.getBoundingClientRect().bottom + 8) + "px" : ""; };
+    { const watch = () => { const p = document.getElementById("ssp"); if (!p) return setTimeout(watch, 500); new MutationObserver(ssSync).observe(p, {attributes: true, attributeFilter: ["hidden"]}); };
+      watch(); addEventListener("resize", ssSync); }
     { const f = $("qform"); if (f) { const ph = document.createElement("div"); f.before(ph);
         const home = () => document.getElementById("L-home");
         new IntersectionObserver(([en]) => { const away = !en.isIntersecting && en.boundingClientRect.top < 80 && home().classList.contains("on");
-          ph.style.height = away ? f.offsetHeight + "px" : ""; f.classList.toggle("follow", away); }, {rootMargin: "-72px 0px 0px 0px"}).observe(ph);
+          ph.style.height = away ? f.offsetHeight + "px" : ""; f.classList.toggle("follow", away); ssSync(); }, {rootMargin: "-72px 0px 0px 0px"}).observe(ph);
         new MutationObserver(() => { if (!home().classList.contains("on")) { f.classList.remove("follow"); ph.style.height = ""; } }).observe(home(), {attributes: true, attributeFilter: ["class"]}); } }
   }
 })();
