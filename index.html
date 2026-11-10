@@ -2425,6 +2425,10 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
       const spk = g ? GROUPS[+g.dataset.g].spk : a && /^Speakers, teachers/.test((ROWSETS[a.dataset.all.split(":")[0]] || [])[+a.dataset.all.split(":")[1]]?.title || "");
       if (spk) { e.stopImmediatePropagation(); e.preventDefault(); openSpeakers(); }
     }, true);
+    // easy to find (Daniel, 11 Nov 2026: "i should be able to see the speakers tab live"): a Speakers button in the quick row under the search bar
+    { const pills = document.querySelector(".pills"); if (pills && !pills.querySelector("[data-spk]")) { const b = document.createElement("button");
+        b.className = "pill"; b.dataset.spk = "1"; b.textContent = "🎙 Speakers"; b.onclick = e => { e.stopPropagation(); openSpeakers(); };
+        const cm = pills.firstElementChild; cm ? cm.after(b) : pills.prepend(b); } }
     if (SERVE_HERE) setTimeout(spkFrame, 4000);   // load quietly so the first tap zooms straight in
   }
 
