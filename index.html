@@ -2386,6 +2386,47 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
         new MutationObserver(() => { if (!home().classList.contains("on")) { f.classList.remove("follow"); ph.style.height = ""; } }).observe(home(), {attributes: true, attributeFilter: ["class"]}); } }
   }
 
+  // ---- Speakers inside Resources (Daniel, 11 Nov 2026: "Let's do option two") ----
+  // a layer of this app like Serve, holding speakers/?embed=1; the trail reads Resources › Speakers and it zooms in like Map room
+  {
+    let spkLayer = null;
+    const spkFrame = () => {
+      if (spkLayer) return spkLayer;
+      spkLayer = document.createElement("section"); spkLayer.className = "layer"; spkLayer.id = "L-spk"; spkLayer.setAttribute("aria-label", "Speakers");
+      spkLayer.innerHTML = `<iframe id="spkFrame" title="Speakers" src="speakers/?embed=1" loading="eager"><\/iframe>`;
+      $("L-home").after(spkLayer);
+      const css = document.createElement("style");
+      css.textContent = "#L-spk{display:flex;flex-direction:column;padding-left:0;padding-right:0;padding-bottom:0;overflow:hidden}#spkFrame{flex:1;width:100%;min-height:0;border:0;display:block;background:transparent}";
+      document.head.append(css); return spkLayer;
+    };
+    const openSpeakers = () => {
+      if (!SERVE_HERE) { location.href = "https://pastordhauck.github.io/pastor-resource-list/speakers/"; return; }
+      spkFrame();
+      const from = stack[stack.length - 1].id; if (from === "L-spk") return;
+      if (stack[0].id !== "L-home") stack = [{id: "L-home", name: "Resources"}];
+      stack.push({id: "L-spk", name: "Speakers"});
+      swap(from, "L-spk", "50% 30%", true);
+      document.querySelectorAll(".layer").forEach(l => { if (l.id !== "L-spk" && l.id !== from) l.classList.remove("past"); });
+      const d = $("spkFrame").contentDocument;   // the page's parts rise in after the zoom, like Serve
+      if (d && d.body) { if (!d.getElementById("zinCss")) { const st = d.createElement("style"); st.id = "zinCss";
+          st.textContent = "@keyframes zinrise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}@media (prefers-reduced-motion:no-preference){html.zin .wrap>*{animation:zinrise .8s cubic-bezier(.22,.7,.18,1) both}}"; d.head.append(st); }
+        const r = d.documentElement; r.classList.remove("zin"); void d.body.offsetWidth; r.classList.add("zin"); }
+      trail();
+    };
+    window.openSpeakers = openSpeakers;
+    // a "Speakers" card under Pick a topic, right after Watch and listen
+    // shortcut: the count is fixed at the 11 Nov build (1,831 speakers); update it when the speaker list grows a lot
+    const wl = GROUPS.findIndex(g => g.title === "Watch and listen");
+    GROUPS.splice(wl + 1, 0, {title: "Speakers", sets: [["Preachers, teachers and evangelists", 1831], ["Invite a speaker", 0], ["My speakers", 0]], spk: true});
+    $("groups").innerHTML = GROUPS.map((g, i) => `<button class="grp" data-g="${i}"><b>${esc(g.title)}<\/b><small>${g.sets.map(s => esc(s[0])).join(" · ")}<\/small><em>${fmt(g.sets.reduce((a, s) => a + s[1], 0))} ${g.spk ? "speakers" : "on the list"} · Go deeper →<\/em><\/button>`).join("");
+    document.addEventListener("click", e => {
+      const g = e.target.closest("#groups [data-g]"), a = e.target.closest("[data-all]");
+      const spk = g ? GROUPS[+g.dataset.g].spk : a && /^Speakers, teachers/.test((ROWSETS[a.dataset.all.split(":")[0]] || [])[+a.dataset.all.split(":")[1]]?.title || "");
+      if (spk) { e.stopImmediatePropagation(); e.preventDefault(); openSpeakers(); }
+    }, true);
+    if (SERVE_HERE) setTimeout(spkFrame, 4000);   // load quietly so the first tap zooms straight in
+  }
+
 })();
 /* ---- use note (Daniel, 8 Nov 2026: AI and robot rules) ---- */
 (() => {
