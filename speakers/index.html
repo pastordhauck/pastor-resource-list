@@ -700,8 +700,15 @@ draw();
     bar.querySelectorAll("button").forEach(x => { x.classList.toggle("on", x === b); x.setAttribute("aria-selected", String(x === b)); });
     st.tab = b.dataset.tab; st.shown = 24; $("spkH").textContent = TXT[st.tab][0]; $("spkSub").textContent = TXT[st.tab][1];
     draw(); scrollTo(0, 0); wrap.classList.remove("tzin"); void wrap.offsetWidth; wrap.classList.add("tzin"); };
+  // one kit (Daniel, 11 Nov 2026: "Yes, connect them"): the app's My kit reads the saved speakers from prl-kit-speakers-info
+  const info = () => { try { saved = new Set(JSON.parse(localStorage.getItem("prl-kit-speakers") || "[]")); } catch (e) {}
+    lsSet("prl-kit-speakers-info", JSON.stringify([...saved].map(n => { const x = D.find(y => y.n === n) || {n};
+      return {n, line: x.min || x.bio || "Speaker", u: x.web || x.yt || x.av || x.acm || ""}; }))); };
+  info();
+  // My kit can remove a speaker too: then the hearts and My speakers follow
+  addEventListener("storage", e => { if (e.key === "prl-kit-speakers") { info(); draw(); } });
   // My speakers: un-saving someone takes them off this tab right away
-  document.addEventListener("click", e => { if (st.tab === "mine" && e.target.closest(".heart,.heart2,[data-kitadd]")) setTimeout(draw, 0); });
+  document.addEventListener("click", e => { if (e.target.closest(".heart,.heart2,[data-kitadd]")) setTimeout(() => { info(); if (st.tab === "mine") draw(); }, 0); });
   if (new URLSearchParams(location.search).has("embed")) document.documentElement.classList.add("inapp");
 })();
 </script>

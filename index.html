@@ -2327,7 +2327,8 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
   {
     Object.assign(window, {qGet, qSet, keyOf, byKey});   // Serve's My kit reads and writes the same list
     const sv = () => { const f = document.getElementById("serveFrame"); try { return f && f.contentWindow && f.contentWindow.document.readyState !== "loading" ? f.contentWindow : null; } catch (e) { return null; } };
-    const kitN = () => { const w = sv(); let n = 0; try { if (w && w.kit) n = w.kit.ids.length; } catch (e) {} return Math.max(n, qGet("prl-saved").length); };
+    const kitN = () => { const w = sv(); let n = 0; try { if (w && w.kit) n = w.kit.ids.length; } catch (e) {} let sp = 0; try { sp = JSON.parse(localStorage.getItem("prl-kit-speakers") || "[]").length; } catch (e) {}
+      return Math.max(n, qGet("prl-saved").length + sp); };   // saved speakers count too (Speakers page, 11 Nov 2026)
     const bar = document.createElement("span"); bar.id = "appKitBar";
     bar.innerHTML = `<button type="button" id="appKit" class="appbtn" title="My kit" aria-label="My kit">🧺<b id="appKitN">0<\/b><\/button><button type="button" id="appPrint" class="appbtn" title="Print" aria-label="Print">🖨<\/button>`;
     // one tight group, evenly spaced: ? · My kit · Print · Settings (Daniel, 11 Nov: "just basically right next to each other")

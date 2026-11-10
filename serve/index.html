@@ -1565,7 +1565,15 @@ renderTell();
    if(typeof updateKitButtons==='function')updateKitButtons();if(typeof renderKitView==='function'&&document.body.dataset.sub==='recipes')renderKitView()};
   // kindOf already files ids that start with "res" under Resources
   if(typeof toggleSave==='function'){const _t=toggleSave;toggleSave=function(id){const r=_t.apply(this,arguments);if(id.startsWith(RK)){const k=id.slice(RK.length);let s=P.qGet('prl-saved');s=kit.ids.includes(id)?(s.includes(k)?s:[k,...s]):s.filter(v=>v!==k);P.qSet('prl-saved',s);if(P.pillCounts)P.pillCounts()}return r}}
-  sync();addEventListener('storage',e=>{if(e.key==='prl-saved')sync()});addEventListener('focus',sync);setInterval(sync,4000)})();
+  // saved speakers (Speakers page, prl-kit-speakers) show in My kit under Resources too; "res" prefix files them there
+  const SK='resspk-';const spkSync=()=>{let L=[];try{L=JSON.parse(localStorage.getItem('prl-kit-speakers-info')||'[]')}catch(e){}
+   L.forEach(s=>{const id=SK+s.n;if(!allItems.some(y=>y.id===id))allItems.push({id,title:s.n,summary:s.line||'Speaker',by:'Speaker',url:s.u||'',kind:'resource',tags:['Speaker'],time:'',distance:'',remote:true,tile:''});if(!kit.ids.includes(id))kit.ids.push(id)});
+   const names=L.map(s=>s.n);kit.ids=kit.ids.filter(id=>!id.startsWith(SK)||names.includes(id.slice(SK.length)))};
+  const _s0=sync;const sync2=()=>{_s0();spkSync();if(typeof updateKitButtons==='function')updateKitButtons();if(typeof renderKitView==='function'&&document.body.dataset.sub==='recipes')renderKitView()};
+  if(typeof toggleSave==='function'){const _t2=toggleSave;toggleSave=function(id){const r=_t2.apply(this,arguments);if(id.startsWith(SK)&&!kit.ids.includes(id)){const n=id.slice(SK.length);
+   try{const a=JSON.parse(localStorage.getItem('prl-kit-speakers')||'[]').filter(v=>v!==n);localStorage.setItem('prl-kit-speakers',JSON.stringify(a));
+    localStorage.setItem('prl-kit-speakers-info',JSON.stringify(JSON.parse(localStorage.getItem('prl-kit-speakers-info')||'[]').filter(s=>s.n!==n)))}catch(e){}}return r}}
+  sync2();addEventListener('storage',e=>{if(e.key==='prl-saved'||e.key==='prl-kit-speakers-info')sync2()});addEventListener('focus',sync2);setInterval(sync2,4000)})();
  // Daniel, 11 Nov: "This week, near you" shows 8 places, then "See more"
  (()=>{const N=8;let open=false;
   const cut=()=>{const tw=document.querySelector('#agenda .tw'),old=document.getElementById('twMore');if(old)old.remove();if(!tw)return;
