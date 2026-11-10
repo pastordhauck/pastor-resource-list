@@ -767,10 +767,7 @@ draw();
   // look at and decide"). They are built from their 7 colors and show in Settings only after opening the site with ?colors=draft.
   // [id, name, light?, page, panel, text, muted, buttons, button text]
   const DRAFTS = [
-    ["d_ivory", "Editorial Ivory (ChatGPT)", 1, "#f5f3ee", "#ffffff", "#1d2832", "#53616c", "#254f67", "#ffffff"],
-    ["d_sage", "Sage & Stone (ChatGPT)", 1, "#e8ede8", "#fafcfa", "#172820", "#4c5d54", "#265e49", "#ffffff"],
     ["d_oat", "Oat & Walnut (ChatGPT)", 1, "#eadfcc", "#f8f2e7", "#282219", "#5f5344", "#754824", "#ffffff"],
-    ["d_midnight", "Midnight Library (ChatGPT)", 0, "#0d1522", "#172437", "#f2f3ef", "#afbbc8", "#deb961", "#171a23"],
     ["d_evergreen", "Deep Evergreen (ChatGPT)", 0, "#121d1b", "#20302d", "#f3f0e8", "#b6c1b9", "#cf9675", "#17221f"],
     ["d_sanctuary", "Sanctuary Stone (Gemini)", 1, "#f4f4f2", "#ffffff", "#2c2c2c", "#5f5f5f", "#4a6572", "#ffffff"],
     ["d_vespers", "Vespers (Gemini)", 0, "#0f141e", "#1a2130", "#eaecef", "#8b99a8", "#c29b62", "#12161f"],
@@ -784,10 +781,8 @@ draw();
     ["d_petrol", "Petrol & Sand (ChatGPT)", 0, "#0F2930", "#20444B", "#F2F1EA", "#BBCFD0", "#E1B17C", "#1D2A30"],
     ["d_aubergine", "Aubergine & Nickel (ChatGPT)", 0, "#1C1925", "#2D2A37", "#F3F0F6", "#C1B9CB", "#C9B5E0", "#251B30"],
     ["d_mist", "Morning Mist (Gemini)", 1, "#D1D9E0", "#E8ECEF", "#1C2B36", "#4A5D6B", "#2E5A7A", "#FFFFFF"],
-    ["d_walnut", "Walnut Wood (Gemini)", 0, "#4A3C31", "#5C4A3D", "#F2EBE1", "#C2B4A6", "#D9A05B", "#261B12"],
     ["d_olive", "Olive Branch (Gemini)", 1, "#F0F4EC", "#FAFCF8", "#223322", "#5B6B5B", "#446644", "#FFFFFF"],
-    ["d_covenant", "Midnight Covenant (Gemini)", 0, "#1A1A24", "#252533", "#E6E6EB", "#9A9AB3", "#7A6B8C", "#FFFFFF"],
-    ["d_desert", "Desert Clay (Gemini)", 1, "#DABAA3", "#EFE4DA", "#3A2314", "#6D4C38", "#8B4522", "#FFFFFF"]];
+    ["d_covenant", "Midnight Covenant (Gemini)", 0, "#1A1A24", "#252533", "#E6E6EB", "#9A9AB3", "#7A6B8C", "#FFFFFF"]];
   const rgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
   const hx = a => "#" + a.map(v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, "0")).join("");
   const mix = (a, b, t) => hx(rgb(a).map((v, i) => v * (1 - t) + rgb(b)[i] * t));
