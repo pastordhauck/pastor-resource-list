@@ -2186,7 +2186,39 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
   // Serve went live as its own page (Daniel, 10 Nov 2026: "add it to the site as a new page with the serve tab"), so the old
   // "Serve:" lists (mission trips and volunteering) stay on the list as a Resources topic instead of filling the Serve tab
   if (serveSets.length) GROUPS.splice(at0 + (helpSets.length ? 1 : 0), 0, {title: "Mission and volunteering", sets: serveSets});
-  const SERVE_URL = /github\.io$/.test(location.hostname) || location.protocol === "http:" ? "serve/" : "https://pastordhauck.github.io/pastor-resource-list/serve/";
+  const SERVE_HERE = /github\.io$/.test(location.hostname) || location.protocol === "http:";
+  const SERVE_URL = SERVE_HERE ? "serve/" : "https://pastordhauck.github.io/pastor-resource-list/serve/";
+  // Daniel, 10 Nov 2026: Serve must open like Map room, a smooth zoom inside the same app with the same top bar, not a jump to
+  // another page. So Serve is a layer of this app holding the Serve page (serve/?embed=1 hides its own top bar).
+  let serveLayer = null;
+  const serveFrame = () => {
+    if (serveLayer) return serveLayer;
+    serveLayer = document.createElement("section"); serveLayer.className = "layer"; serveLayer.id = "L-serve"; serveLayer.setAttribute("aria-label", "Serve");
+    serveLayer.innerHTML = `<iframe id="serveFrame" title="Serve" src="serve/?embed=1" loading="eager"><\/iframe>`;
+    ($("L-room") || $("L-home")).after(serveLayer);
+    const css = document.createElement("style");
+    css.textContent = "#L-serve{display:flex;flex-direction:column;padding-left:0;padding-right:0;padding-bottom:0;overflow:hidden}#serveFrame{flex:1;width:100%;min-height:0;border:0;display:block;background:transparent}";
+    document.head.append(css); return serveLayer;
+  };
+  function openServe(url, e) {
+    if (!SERVE_HERE) { location.href = url; return; }        // a copy of the list outside the app site opens the Serve page itself
+    serveFrame();
+    const from = stack[stack.length - 1].id; stack = [{id: "L-serve", name: "Serve", tab: "serve"}];
+    if (from !== "L-serve") swap(from, "L-serve", e ? `${e.clientX}px ${e.clientY}px` : "50% 30%", true);
+    document.querySelectorAll(".layer").forEach(l => { if (l.id !== "L-serve") l.classList.remove("past"); });
+    trail();
+  }
+  // load Serve quietly once the page is idle, so the first tap zooms straight in
+  if (SERVE_HERE) setTimeout(serveFrame, 2500);
+  // Daniel, 10 Nov 2026: the top number should count everything on the platform, not only the ministry resources:
+  // resources + local help places (all states, even before they load) + Adventist churches + the 86 Serve recipes
+  { const n = $("nTotal");
+    if (n && typeof TOTAL !== "undefined") {
+      const hp = Object.values(window.LPIDX || {}).reduce((a, s) => a + (s.n || 0), 0), ch = typeof CH !== "undefined" ? CH.filter(x => x.sda !== false).length : 0, RECIPES = 86;
+      n.textContent = fmt(TOTAL + hp + ch + RECIPES);
+      const lab = n.nextSibling; if (lab && lab.nodeType === 3) lab.textContent = "resources in all";
+      n.parentElement.title = `${fmt(TOTAL)} ministry resources, ${fmt(hp)} local help places, ${fmt(ch)} Adventist churches and ${RECIPES} Serve recipes`;
+    } }
   // home: redraw the topic list and the Explore rows with the new topics (same code as the page's own)
   rowsBlock($("lineups"), "h", GROUPS.filter(g => g.title !== "Adventist churches").map(g => { const seen = new Set(), items = g.sets.flatMap(([n]) => SETS[n] || []).filter(x => !seen.has(x) && seen.add(x));
     items.sort((a, b) => (b.pages && b.pages.length ? 1 : 0) - (a.pages && a.pages.length ? 1 : 0)); return {title: `Explore ${g.title.toLowerCase()}.`, count: items.length, items}; }));
@@ -2198,7 +2230,7 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     TABS.forEach(([key, label, grp]) => {
       const b = document.createElement("button"); b.id = key + "Tab"; b.setAttribute("aria-pressed", "false"); b.textContent = label; btns[key] = b;
       seg.insertBefore(b, mapBtn);                                    // Map room stays last
-      b.onclick = e => { if (grp.url) { location.href = grp.url; return; } section("L-home"); openGroup(grp, at(e)); stack[stack.length - 1].tab = key; trail(); };
+      b.onclick = e => { if (grp.url) { openServe(grp.url, e); return; } section("L-home"); openGroup(grp, at(e)); stack[stack.length - 1].tab = key; trail(); };
     });
     const _trail = trail; trail = function () { const r = _trail.apply(this, arguments); const tab = (stack.find(s => s.tab) || {}).tab;
       seg.querySelectorAll("button").forEach(x => { const k = Object.keys(btns).find(k => btns[k] === x);
