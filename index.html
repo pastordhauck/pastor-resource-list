@@ -2428,7 +2428,8 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     // Daniel, 11 Nov 2026: "We just need the speakers tab underneath the resources serve and map room bar", Serve's tab style.
     // The bar shows on Resources (and on Speakers itself); Resources in the top bar or Back brings you out again.
     { const bar = document.createElement("nav"); bar.id = "resTabs"; bar.setAttribute("aria-label", "Resources");
-      bar.innerHTML = `<button type="button" data-rt="spk" aria-selected="false">Speakers<\/button>`; document.body.append(bar);
+      // Daniel, 11 Nov 2026: "add the resources tab but the resources tab would be the default when you open the app"
+      bar.innerHTML = `<button type="button" data-rt="res" aria-selected="true">Resources<\/button><button type="button" data-rt="spk" aria-selected="false">Speakers<\/button>`; document.body.append(bar);
       const st = document.createElement("style");
       st.textContent = "#resTabs{position:fixed;left:0;right:0;top:var(--rtTop,58px);z-index:79;display:none;justify-content:center;gap:28px;height:48px;background:var(--bg);border-bottom:1px solid var(--edge);padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px))}"
         + "html.rt #resTabs{display:flex}#resTabs button{background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);font:500 15px Inter,system-ui,sans-serif;padding:0 2px;cursor:pointer;white-space:nowrap}"
@@ -2437,8 +2438,11 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
       document.head.append(st);
       const place = () => { const t = document.querySelector(".top"); if (t) document.documentElement.style.setProperty("--rtTop", Math.round(t.getBoundingClientRect().bottom) + "px"); };
       const sync = () => { place(); const on = stack[0].id === "L-home"; document.documentElement.classList.toggle("rt", on);
-        bar.firstElementChild.setAttribute("aria-selected", String(stack[stack.length - 1].id === "L-spk")); };
-      bar.onclick = e => { if (e.target.closest("[data-rt=spk]")) openSpeakers(); };
+        const spkOn = stack[stack.length - 1].id === "L-spk";
+        bar.querySelector("[data-rt=spk]").setAttribute("aria-selected", String(spkOn)); bar.querySelector("[data-rt=res]").setAttribute("aria-selected", String(!spkOn)); };
+      // Resources tab: back to the Resources front page with the same zoom as the other tabs (section() uses Map room's)
+      bar.onclick = e => { const b = e.target.closest("[data-rt]"); if (!b) return;
+        if (b.dataset.rt === "spk") openSpeakers(); else if (stack.length > 1 || stack[0].id !== "L-home") section("L-home"); };
       const _tr = trail; trail = function () { const r = _tr.apply(this, arguments); sync(); return r; };
       addEventListener("resize", place); sync(); setTimeout(sync, 800);
       // the taller top moves the page down after it opened; start at the very top like before
