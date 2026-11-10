@@ -281,6 +281,20 @@ html:is([data-style="light"],[data-style="linen"],[data-style="gray"]) :is(.btn.
 .spkbar button{background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);font:500 15px Inter,system-ui,sans-serif;padding:0 2px;cursor:pointer;white-space:nowrap}
 .spkbar button:hover{color:var(--ink)}.spkbar button.on{color:var(--ink);font-weight:600;border-bottom-color:var(--gold)}
 @media(max-width:480px){.spkbar nav{gap:18px;justify-content:flex-start;overflow-x:auto}.spkbar button{font-size:14px}}
+/* Daniel, 11 Nov 2026: the search bar like Find resources (one thin bar in the middle), and Topic / Based in become oval
+   pills under it like "Search by person ⌄", still typeable */
+html body form#f.hubbar{max-width:640px;margin-inline:auto;border-radius:999px;padding:6px 6px 6px 18px}
+.hubpills{position:relative;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:10px auto 0;max-width:1040px}
+html body .hubpills .sfield.pick{position:static;display:inline-flex;align-items:center;height:37px;min-height:0;margin:0;padding:0 10px 0 15px;border-radius:999px;background:var(--glass,var(--panel));border:1px solid var(--edge);flex:none;width:auto}
+html body .hubpills .sfield.pick>span{display:none}
+html body .hubpills .combo{position:static;display:flex;align-items:center}
+html body .hubpills .combo input{width:13ch;min-width:0;background:none;border:0;color:var(--ink);font:14px Inter,system-ui,sans-serif;padding:0;height:35px}
+html body .hubpills .combo input::placeholder{color:var(--ink)}
+html body .hubpills .combo input:focus{outline:none;background:none;box-shadow:none}
+html body .hubpills .sfield.pick:focus-within{border-color:var(--gold)}
+html body .hubpills .cbarrow{background:none;border:0;color:var(--muted);padding:0 0 0 4px;cursor:pointer}
+html body .hubpills .cblist{left:50%!important;right:auto!important;transform:translateX(-50%);top:calc(100% + 6px)!important;width:min(560px,calc(100vw - 32px))}
+html body .hubpills .cblist.wide{width:min(1000px,calc(100vw - 32px))}
 @keyframes spkzin{from{opacity:0;transform:scale(.82);filter:blur(10px)}to{opacity:1;transform:none;filter:none}}
 @media (prefers-reduced-motion:no-preference){.wrap.tzin{animation:spkzin 1.15s cubic-bezier(.22,.7,.18,1) both;transform-origin:50% 30%}}
 </style><style>:root:not([data-style]){--bg:#070b14;--surface:#0f1730;--surface2:#18264c;--gold:#e0b65a;--goldlight:#f3d48e;--ink:#eef1f8;--muted:#9ba6c2;--line:rgba(160,180,240,.16);--edge:rgba(160,180,240,.16);--glass:rgba(18,28,52,.62)}:root:not([data-style]){--panel:#0f1730;--panel2:#18264c;--fade:#9ba6c2}html[data-style="light"]{color-scheme:light;--bg:#f4f1ea;--glass:rgba(255,255,255,.72);--glass2:rgba(255,255,255,.94);--edge:rgba(30,40,70,.16);--ink:#161a24;--muted:#565d70;--dim:#80879a;--gold:#b8892c;--gold2:#8a6516;
@@ -718,6 +732,8 @@ draw();
   addEventListener("storage", e => { if (e.key === "prl-kit-speakers") { info(); draw(); } });
   // My speakers: un-saving someone takes them off this tab right away
   document.addEventListener("click", e => { if (e.target.closest(".heart,.heart2,[data-kitadd]")) setTimeout(() => { info(); if (st.tab === "mine") draw(); }, 0); });
+  { const f = document.getElementById("f"), picks = f ? [...f.querySelectorAll(".sfield.pick")] : [];
+    if (picks.length) { const row = document.createElement("div"); row.className = "hubpills"; picks.forEach(p => row.append(p)); f.after(row); } }
   if (new URLSearchParams(location.search).has("embed")) document.documentElement.classList.add("inapp");
 })();
 </script>
