@@ -2444,6 +2444,7 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
       st.textContent = "#resTabs{position:fixed;left:0;right:0;top:var(--rtTop,58px);z-index:79;display:none;justify-content:center;gap:28px;height:48px;background:var(--bg);border-bottom:1px solid var(--edge);padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px))}"
         + "html.rt #resTabs{display:flex}#resTabs button{background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);font:500 15px Inter,system-ui,sans-serif;padding:0 2px;cursor:pointer;white-space:nowrap}"
         + "#resTabs button:hover{color:var(--ink)}#resTabs button[aria-selected=true]{color:var(--ink);font-weight:600;border-bottom-color:var(--gold)}"
+        + "#L-serve{padding-top:var(--rtTop,58px)!important}"   // Serve's tab bar starts right under the top bar, at the same height as Resources' bar
         + "html.rt #L-home,html.rt #L-topic,html.rt #L-spk{padding-top:calc(var(--rtTop,58px) + 54px)!important}html.rt #qform.sbar.follow{top:calc(var(--rtTop,58px) + 56px)!important}";
       document.head.append(st);
       const place = () => { const t = document.querySelector(".top"); if (t) document.documentElement.style.setProperty("--rtTop", Math.round(t.getBoundingClientRect().bottom) + "px"); };
