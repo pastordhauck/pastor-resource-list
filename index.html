@@ -2465,6 +2465,36 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
   // Light, a little more tan and slightly darker for a soft page (Daniel, 11 Nov 2026); added last so it wins over the older Light
   { const st = document.createElement("style"); st.textContent = 'html[data-style="light"]:root{color-scheme:light;--bg:#e9e1d3;--surface:#f3ede2;--surface2:#e0d5c2;--glass:rgba(247,242,233,.78);--glass2:rgba(247,242,233,.95);--edge:rgba(60,45,25,.16);--line:rgba(60,45,25,.16);--ink:#1f1b16;--muted:#5c5446;--dim:#857a68;--gold:#a87a2a;--gold2:#7d5a18;--goldlight:#7d5a18;--fx-p1:#e3d9c8;--fx-p2:#f3ede2;--fx-p2a:rgba(243,237,226,.94);--fx-p3:#ddd1bd;--fx-topbg:rgba(233,225,211,.94)}'; document.head.append(st); }
 
+  // ---- Map room search bar above the map (Daniel, 11 Nov 2026: "Map room also needs a search bar ... above the map ... follows you down")
+  // A state jumps to that state, a town goes into that town, anything else searches the desk's results below the map.
+  { const L = $("L-room"), room = L && L.querySelector(".room");
+    if (room) {
+      const box = document.createElement("div"); box.className = "roomsearch";
+      box.innerHTML = `<form id="roomForm" class="sbar" role="search"><label class="rgrow"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/><\/svg><input id="roomQ" type="search" placeholder="Search a state, town or church…" aria-label="Search the map" autocomplete="off"><\/label>`
+        + `<button type="button" class="rset" title="Search settings" aria-label="Search settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M20 6h0M4 12h4M14 12h6M4 18h10M20 18h0"/><circle cx="17" cy="6" r="2"/><circle cx="11" cy="12" r="2"/><circle cx="17" cy="18" r="2"/><\/svg><\/button><button type="submit" class="rgo">Search<\/button><\/form>`;
+      room.before(box);
+      const st = document.createElement("style");
+      st.textContent = ".roomsearch{position:sticky;top:0;z-index:25;padding:8px 0 10px;background:var(--bg)}"
+        + "#roomForm{max-width:640px;margin:0 auto;display:flex;align-items:center;gap:4px;border-radius:999px;padding:6px 6px 6px 18px;background:var(--glass);border:1px solid var(--edge);min-height:0}"
+        + "#roomForm .rgrow{flex:1;min-width:0;display:flex;align-items:center;gap:10px;color:var(--muted)}#roomForm input{flex:1;min-width:0;background:none;border:0;outline:none;color:var(--ink);font:15px Inter,system-ui,sans-serif;height:36px}"
+        + "#roomForm .rset{background:none;border:0;color:var(--muted);cursor:pointer;height:36px;padding:0 8px;display:grid;place-items:center}#roomForm .rset:hover{color:var(--ink)}"
+        + "#roomForm .rgo{height:36px;border-radius:999px;border:1px solid var(--gold);background:var(--gold);color:#1b1404;font:600 15px Inter,system-ui,sans-serif;padding:0 18px;cursor:pointer}"
+        + ".roomnote{text-align:center;font-size:13px;color:var(--muted);margin-top:6px;min-height:18px}";
+      document.head.append(st);
+      const note = document.createElement("div"); note.className = "roomnote"; box.append(note);
+      const flat = s => s.toLowerCase().replace(/[^a-z ]/g, " ").replace(/\s+/g, " ").trim();
+      const toDesk = q => { const d = $("deskQ"); if (!d) return false; d.value = q; d.dispatchEvent(new Event("input", {bubbles: true})); const k = L.querySelector(".desk"); if (k) k.scrollIntoView({behavior: calm ? "auto" : "smooth", block: "start"}); return true; };
+      $("roomForm").addEventListener("submit", e => { e.preventDefault(); const raw = $("roomQ").value.trim(); note.textContent = ""; if (!raw) return;
+        const q = flat(raw), parts = raw.split(","), stIn = (parts[1] || "").trim().toUpperCase();
+        const st = Object.keys(NAME).find(k => k.toLowerCase() === q || flat(NAME[k]) === q);
+        if (st) { goLevel({level: "state", st}, NAME[st]); return; }
+        const town = flat(parts[0]), hit = P.find(x => x.p && flat(x.p) === town && (!stIn || x.st === stIn));
+        if (hit) { if (stack[0].id !== "L-room") section("L-room"); goLevel({level: "city", st: hit.st, city: hit.p}, hit.p); return; }
+        toDesk(raw); note.textContent = `Showing places whose name or town matches “${raw}”.`; });
+      // settings: the app's Settings panel (My state, how the map opens)
+      box.querySelector(".rset").onclick = () => { const g = $("gear"); if (g) g.click(); };
+    } }
+
 })();
 /* ---- use note (Daniel, 8 Nov 2026: AI and robot rules) ---- */
 (() => {
