@@ -2339,7 +2339,17 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     setInterval(count, 2000); addEventListener("storage", count); count();
     // open Serve, then run something inside it once it is ready
     const inServe = fn => { openServe(SERVE_URL); let t = 0; const tick = () => { const w = sv(); if (w && w.showSub) { try { fn(w); } catch (e) {} count(); } else if (t++ < 40) setTimeout(tick, 150); }; tick(); };
-    $("appKit").onclick = () => inServe(w => { w.showSub("recipes"); const b = w.document.querySelector("[data-km=mine]"); if (b) b.click(); w.scrollTo(0, 0); });
+    // My kit is its own page (Daniel, 11 Nov 2026): opened only by this button, with tabs like Serve. It is a mode of the Serve
+    // layer (one kit, stored once); the trail reads "My kit" and no top tab is lit. The Serve tab switches the mode off again.
+    const kitMode = (w, on) => { if (w && w.kitPage) { try { w.kitPage(on); } catch (e) {} } };
+    const _os = openServe;
+    openServe = function (url, e) { const was = stack[0].id === "L-serve" && stack[0].tab === "kit"; const r = _os.apply(this, arguments);
+      const w = sv(); kitMode(w, false); if (was && w && w.document.body) { const r2 = w.document.documentElement; r2.classList.remove("zin"); void w.document.body.offsetWidth; r2.classList.add("zin"); } return r; };
+    window.openKit = () => { const was = stack[0].id === "L-serve"; _os(SERVE_URL); stack = [{id: "L-serve", name: "My kit", tab: "kit"}]; trail();
+      let t = 0; const tick = () => { const w = sv(); if (w && w.kitPage) { kitMode(w, true); count();
+          if (was) { const r2 = w.document.documentElement; r2.classList.remove("zin"); void w.document.body.offsetWidth; r2.classList.add("zin"); } }
+        else if (t++ < 40) setTimeout(tick, 150); }; tick(); };
+    $("appKit").onclick = () => openKit();
     $("appPrint").onclick = () => inServe(w => { const b = w.document.getElementById("openPrints"); if (b) b.click(); });
     // carousel boxes: Website + Add to kit (the tile itself still opens the details)
     const inKit = x => qGet("prl-saved").includes(keyOf(x));

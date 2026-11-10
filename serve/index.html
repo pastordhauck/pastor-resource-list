@@ -642,8 +642,8 @@ const VERSES=[["Luke 4:18", "The Spirit of the Lord is upon me, because he hath 
 function showVerse(i){const v=VERSES[i];$('#vText').textContent='“'+v[1]+'”';$('#vRef').textContent=v[0]+' (KJV)';$('#vSel').value=i}
 showVerse(Math.floor((Date.now()/864e5+4)/7)%VERSES.length);
 $('#vSel').onchange=e=>{const v=VERSES[+e.target.value];$('#vText').textContent='“'+v[1]+'”';$('#vRef').textContent=v[0]+' (KJV)'};
-const SRC={'Places and events':'from Find a way to serve','Recipes for service':'from Recipes for service','Resources':'from the Resources tab','Partners':'from Connect your church'};
-const kindOf=id=>id.startsWith('recipe')?'Recipes for service':id.startsWith('res')?'Resources':id.startsWith('ptn')?'Partners':id.startsWith('trip')?'Recipes for service':'Places and events';
+const SRC={'Places and events':'from Find a way to serve','Recipes for service':'from Recipes for service','Resources':'from the Resources tab','Speakers':'from the Speakers tab','Partners':'from Connect your church'};
+const kindOf=id=>id.startsWith('resspk')?'Speakers':id.startsWith('recipe')?'Recipes for service':id.startsWith('res')?'Resources':id.startsWith('ptn')?'Partners':id.startsWith('trip')?'Recipes for service':'Places and events';
 function renderKitInline(){const box=$('#kitInline');if(!box)return;const inp=$('#kitNameInline');if(document.activeElement!==inp)inp.value=kit.name;
  const groups={};kit.ids.forEach(id=>{const d=allItems.find(x=>x.id===id);if(d)(groups[kindOf(id)]=groups[kindOf(id)]||[]).push(d)});
  box.innerHTML=Object.keys(groups).length?Object.entries(groups).map(([g,ds])=>`<div class="kgroup"><h6>${g} <small class="muted" style="text-transform:none;letter-spacing:0;font-weight:400">· ${SRC[g]||''}</small></h6>`+ds.map(d=>`<div class="kititem"><span>${esc(d.title)}</span><button data-remove="${d.id}">Remove</button></div>`).join('')+'</div>').join(''):'<p class="small muted">Your kit is empty. Add ways to serve, idea cards and resources.</p>'}
@@ -832,15 +832,15 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-print]');i
 
 /* ---------- My kit viewer ---------- */
 let kv='grid',ktopic='All';
-const KORDER=['Places and events','Recipes for service','Resources','Partners'];
+const KORDER=['Places and events','Recipes for service','Resources','Speakers','Partners'];const KSERVE=['Places and events','Recipes for service','Partners'];
 function kitItemsBy(){const g={};kit.ids.forEach(id=>{const d=allItems.find(x=>x.id===id);if(d)(g[kindOf(id)]=g[kindOf(id)]||[]).push(d)});return g}
 const ktile=(d,g)=>`<div class="ktile"><span class="kchip">${g}</span><h4>${esc(d.title)}</h4><p>${esc(d.summary||'')}</p><small>${SRC[g]||''}${d.by?' · '+esc(d.by):''}</small><button type="button" data-remove="${d.id}">Remove</button></div>`;
 function renderKitView(){const box=$('#kBody');if(!box)return;const g=kitItemsBy(),topics=KORDER.filter(k=>g[k]);
  $('#kitCountLine').textContent=kit.ids.length?`${kit.ids.length} saved. See them all below.`:'';
- if(ktopic!=='All'&&!g[ktopic])ktopic='All';
+ if(ktopic!=='All'&&!g[ktopic]&&!document.documentElement.classList.contains('kitonly'))ktopic='All';
  $('#kTopics').innerHTML=topics.length?['All',...topics].map(k=>`<button type="button" data-kt="${k}" class="${k===ktopic?'on':''}">${k}${k==='All'?'':' · '+g[k].length}</button>`).join(''):'';
- const show=topics.filter(k=>ktopic==='All'||k===ktopic);
- if(!show.length){box.innerHTML='<p class="kempty">Your kit is empty. Tap “+ Add to kit” on a way to serve, a recipe, a partner, or on the Resources and Map room pages.</p>';return}
+ const show=topics.filter(k=>ktopic==='All'||k===ktopic||(ktopic==='Serve'&&KSERVE.includes(k)));
+ if(!show.length&&kit.ids.length&&ktopic!=='All'){box.innerHTML='<p class="kempty">Nothing saved here yet. Tap “+ Add to kit” on anything in '+(ktopic==='Serve'?'Serve':ktopic)+' and it shows here.</p>';return}if(!show.length){box.innerHTML='<p class="kempty">Your kit is empty. Tap “+ Add to kit” on a way to serve, a recipe, a partner, or on the Resources and Map room pages.</p>';return}
  box.innerHTML=show.map(k=>`<div class="ksec"><h5>${k} <small>· ${SRC[k]||''}</small></h5>`+(kv==='grid'?`<div class="kgrid">${g[k].map(d=>ktile(d,k)).join('')}</div>`:kv==='car'?`<div class="kcar"><button type="button" class="kcb l" aria-label="Back">‹</button><div class="ktrack">${g[k].map(d=>ktile(d,k)).join('')}</div><button type="button" class="kcb r" aria-label="More">›</button></div>`:g[k].map(d=>`<div class="krowl"><div><b>${esc(d.title)}</b><small>${SRC[k]||''}${d.by?' · '+esc(d.by):''}</small></div><button type="button" data-remove="${d.id}">Remove</button></div>`).join(''))+'</div>').join('');
  $$('#kTopics [data-kt]').forEach(b=>b.onclick=()=>{ktopic=b.dataset.kt;renderKitView()});
  $$('#kBody .kcb').forEach(b=>b.onclick=()=>{const tr=b.parentElement.querySelector('.ktrack');tr.scrollBy({left:(b.classList.contains('r')?1:-1)*244,behavior:'smooth'})})}
@@ -1116,10 +1116,10 @@ renderTell();
  const KG={};
  renderKitView=function(){const box=document.getElementById('kBody');if(!box)return;const g=kitItemsBy(),topics=KORDER.filter(k=>g[k]);
   document.getElementById('kitCountLine').textContent=kit.ids.length?`${kit.ids.length} saved. See them all below.`:'';
-  if(ktopic!=='All'&&!g[ktopic])ktopic='All';
+  if(ktopic!=='All'&&!g[ktopic]&&!document.documentElement.classList.contains('kitonly'))ktopic='All';
   document.getElementById('kTopics').innerHTML=topics.length?['All',...topics].map(k=>`<button type="button" data-kt="${k}" class="${k===ktopic?'on':''}">${k}${k==='All'?'':' · '+g[k].length}</button>`).join(''):'';
-  const show=topics.filter(k=>ktopic==='All'||k===ktopic);
-  if(!show.length){box.innerHTML='<p class="kempty">Your kit is empty. Tap “+ Add to kit” on a way to serve, a recipe, a partner, or on the Resources and Map room pages.</p>';return}
+  const show=topics.filter(k=>ktopic==='All'||k===ktopic||(ktopic==='Serve'&&KSERVE.includes(k)));
+  if(!show.length&&kit.ids.length&&ktopic!=='All'){box.innerHTML='<p class="kempty">Nothing saved here yet. Tap “+ Add to kit” on anything in '+(ktopic==='Serve'?'Serve':ktopic)+' and it shows here.</p>';return}if(!show.length){box.innerHTML='<p class="kempty">Your kit is empty. Tap “+ Add to kit” on a way to serve, a recipe, a partner, or on the Resources and Map room pages.</p>';return}
   show.forEach(k=>g[k].forEach(d=>KG[d.id]=[d,k]));
   box.innerHTML=show.map(k=>`<section class="rsec"><div class="rsechw"><h3 class="rsech">${esc(k)} <small>${g[k].length}</small></h3></div>`+
    (kv==='grid'?`<div class="rqcards">${g[k].map(d=>kCard(d,k)).join('')}</div>`:kv==='car'?`<div class="rqwrap rqwrap-s"><div class="rqcar"><button type="button" class="rqbtn l" aria-label="Previous">‹</button><div class="rqtrack">${g[k].map(kTile).join('')}</div><button type="button" class="rqbtn r" aria-label="Next">›</button></div><aside class="rqinfo"></aside></div>`:g[k].map(d=>kRow(d,k)).join(''))+'</section>').join('');
@@ -1813,4 +1813,40 @@ html.rq-lock{overflow:hidden}html.rq-lock body{overflow-x:clip}
 .rsteps summary::after{content:" ▾"}.rsteps[open] summary::after{content:" ▴"}.rcount{color:var(--muted);font-size:13px;margin:0 0 12px}
 .rsteps summary{cursor:pointer;font-weight:600;font-size:14px;margin-top:8px}.rsteps ol{margin:8px 0 0;padding-left:18px;font-size:14px}
 </style>
-</body></html>
+<style>
+.kittabs{display:none;position:sticky;top:0;z-index:30;background:var(--bg);border-bottom:1px solid var(--edge,var(--line));justify-content:center;gap:28px;height:48px;margin:0 0 18px}
+html.kitonly .kittabs{display:flex}.kittabs button{background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);font:500 15px Inter,system-ui,sans-serif;padding:0 2px;cursor:pointer;white-space:nowrap}
+.kittabs button:hover{color:var(--ink)}.kittabs button[aria-selected=true]{color:var(--ink);font-weight:600;border-bottom-color:var(--gold)}
+@media(max-width:480px){.kittabs{gap:18px}.kittabs button{font-size:14px}}
+html.kitonly .kotop{padding-top:0!important;margin-top:0!important}html.kitonly .kohide,html.kitonly #kTopics,html.kitonly .phone-kit,html.kitonly .kitmode{display:none!important}
+.kitlink{display:none;margin:0 auto 16px;max-width:1040px;padding:10px 16px;border:1px solid var(--edge,var(--line));border-radius:14px;background:var(--glass,transparent);align-items:center;gap:10px;flex-wrap:wrap}
+html.embed:not(.kitonly) .kitlink{display:flex}.kitlink button{margin-left:auto;background:none;border:1px solid var(--gold);color:var(--gold);border-radius:999px;padding:6px 14px;font:600 14px Inter,system-ui,sans-serif;cursor:pointer}
+html.embed:not(.kitonly) [data-km=mine]{display:none!important}
+</style>
+<script>
+(()=>{const P=(()=>{try{return window.parent!==window&&parent.openKit?parent:null}catch(e){return null}})();
+ const mine=document.getElementById('km-mine');if(!mine)return;
+ const bar=document.createElement('nav');bar.className='kittabs';bar.setAttribute('aria-label','My kit');
+ bar.innerHTML=['All','Resources','Speakers','Serve'].map(k=>`<button type="button" data-ktab="${k}" aria-selected="${k==='All'}">${k}</button>`).join('');
+ mine.prepend(bar);
+ const sync=()=>bar.querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.ktab===ktopic||(ktopic==='All'&&b.dataset.ktab==='All'))));
+ const zin=el=>{if(!el||matchMedia('(prefers-reduced-motion: reduce)').matches)return;el.classList.remove('tzin');void el.offsetWidth;el.classList.add('tzin')};
+ bar.onclick=e=>{const b=e.target.closest('[data-ktab]');if(!b||b.getAttribute('aria-selected')==='true')return;ktopic=b.dataset.ktab;renderKitView();sync();scrollTo(0,0);zin(document.getElementById('kBody'))};
+ const hidden=[];
+ window.kitPage=on=>{const r=document.documentElement,was=r.classList.contains('kitonly');hidden.splice(0).forEach(el=>el.classList.remove('kohide','kotop'));r.classList.toggle('kitonly',!!on);
+  if(on){showSub('recipes');const m=document.querySelector('[data-km=mine]');if(m)m.click();
+   for(let el=mine;el&&el!==document.body;el=el.parentElement)[...el.parentElement.children].forEach(s=>{if(s!==el&&!s.matches('script,style,dialog,#toast')){s.classList.add('kohide');hidden.push(s)}});
+   for(let el=mine;el&&el!==document.body;el=el.parentElement){el.classList.add('kotop');hidden.push(el)}
+   ktopic='All';renderKitView();sync();scrollTo(0,0)}
+  else{const c=document.querySelector('[data-km=church]');if(c&&document.querySelector('[data-km=mine].on'))c.click();if(was){showSub('find');scrollTo(0,0)}}};
+ // Plan to serve inside the app: a small line that opens My kit instead of a second copy of the kit
+ if(r0())(()=>{const l=document.createElement('div');l.className='kitlink';l.innerHTML='<span>🧺 Your kit: <b class="kit-count">'+kit.ids.length+'</b> saved</span><button type="button">Open My kit →</button>';
+   const km=document.querySelector('.kitmode');if(km)km.before(l);l.querySelector('button').onclick=()=>P&&P.openKit();
+   const c=document.querySelector('[data-km=church]');if(c&&document.querySelector('[data-km=mine].on'))c.click();
+   setInterval(()=>{const n=l.querySelector('.kit-count');if(n)n.textContent=kit.ids.length},2000)})();
+ function r0(){return document.documentElement.classList.contains('embed')&&P}
+ // the bottom "Open kit" bar opens the app's My kit page too
+ document.addEventListener('click',e=>{if(P&&e.target.closest('[data-open-kit]')){e.preventDefault();e.stopImmediatePropagation();P.openKit()}},true);
+ if(/[?&]kit=1/.test(location.search))kitPage(true);
+})();
+</script></body></html>
