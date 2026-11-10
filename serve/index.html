@@ -1869,7 +1869,9 @@ html body .svpills .sfield.miles select option{background:var(--bg);color:var(--
 html body .svpills #nearMe.nearbtn{height:37px;min-height:0;margin:0;padding:0 15px;border-radius:999px;background:var(--glass,var(--surface));border:1px solid var(--edge,var(--line));color:var(--ink);font:14px Inter,system-ui,sans-serif;cursor:pointer}
 html body .svpills #nearMe.nearbtn:hover{border-color:var(--gold)}
 @media(max-width:480px){html body .svpills .sfield.town input{width:11ch}html body .svpills .sfield.miles>span{display:none}html body .svpills{gap:6px}html body .svpills .sfield,html body .svpills #nearMe.nearbtn{padding:0 11px}}
-.svpills.ride{position:fixed;left:0;right:0;z-index:30;margin:0 auto;padding-inline:16px}html body .svpills.ride .sfield,html body .svpills.ride #nearMe.nearbtn{background:var(--glass2,var(--surface))!important;backdrop-filter:blur(14px);box-shadow:0 8px 22px rgba(0,0,0,.25)}
+.svband{position:fixed;left:0;right:0;z-index:29;background:var(--bg);border-bottom:1px solid var(--edge,var(--line));pointer-events:none}.svband[hidden]{display:none}
+html body form#searchForm.sbar.follow{box-shadow:none!important}
+.svpills.ride{position:fixed;left:0;right:0;z-index:30;margin:0 auto;padding-inline:16px}
 .svset{background:none;border:0;color:var(--muted);cursor:pointer;padding:0 8px;display:grid;place-items:center;height:36px;flex:none}.svset:hover{color:var(--ink)}
 html body form#searchForm.sbar{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;border-radius:999px!important}html body form#searchForm.sbar .sfield.grow{flex:1 1 auto!important;min-width:0!important;width:auto!important}html body form#searchForm.sbar .findbtn{width:auto!important;flex:none!important;margin:0!important}
 </style>
@@ -1878,8 +1880,11 @@ html body form#searchForm.sbar{display:flex!important;flex-direction:row!importa
  ['.sfield.town','.sfield.miles','#nearMe'].forEach(q=>{const el=f.querySelector(q);if(el)row.append(el)});f.after(row);
  // Daniel, 11 Nov 2026: the ovals follow you down with the bar (they belong to the search), and a settings button sits next to Search
  const ph=document.createElement('div');row.before(ph);
- const ride=()=>{if(f.classList.contains('follow')){const r=f.getBoundingClientRect();if(!row.classList.contains('ride')){ph.style.height=row.offsetHeight+10+'px';row.classList.add('ride')}row.style.top=Math.round(r.bottom+6)+'px'}
-  else if(row.classList.contains('ride')){row.classList.remove('ride');row.style.top='';ph.style.height=''}};
+ // a solid band behind the following bar and ovals, like Plan to serve's (Daniel, 11 Nov 2026)
+ const band=document.createElement('div');band.className='svband';document.body.append(band);
+ const ride=()=>{if(f.classList.contains('follow')){const r=f.getBoundingClientRect();if(!row.classList.contains('ride')){ph.style.height=row.offsetHeight+10+'px';row.classList.add('ride')}row.style.top=Math.round(r.bottom+6)+'px';
+   const sb=document.querySelector('.stickybar'),top=sb?Math.max(0,sb.getBoundingClientRect().bottom):0,bot=row.getBoundingClientRect().bottom+8;band.style.top=top+'px';band.style.height=Math.max(0,bot-top)+'px';band.hidden=false}
+  else{band.hidden=true;if(row.classList.contains('ride')){row.classList.remove('ride');row.style.top='';ph.style.height=''}}};
  new MutationObserver(ride).observe(f,{attributes:true,attributeFilter:['class','style']});addEventListener('scroll',ride,{passive:true});
  const go=f.querySelector('.findbtn');if(go&&!f.querySelector('.svset')){const sb=document.createElement('button');sb.type='button';sb.className='svset';sb.title='Search settings';sb.setAttribute('aria-label','Search settings');
   sb.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M20 6h0M4 12h4M14 12h6M4 18h10M20 18h0"/><circle cx="17" cy="6" r="2"/><circle cx="11" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg>';
