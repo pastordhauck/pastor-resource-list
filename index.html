@@ -2444,6 +2444,7 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
       st.textContent = "#resTabs{position:fixed;left:0;right:0;top:var(--rtTop,58px);z-index:79;display:none;justify-content:center;gap:28px;height:48px;background:var(--bg);border-bottom:1px solid var(--edge);padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px))}"
         + "html.rt #resTabs{display:flex}#resTabs button{background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);font:500 15px Inter,system-ui,sans-serif;padding:0 2px;cursor:pointer;white-space:nowrap}"
         + "#resTabs button:hover{color:var(--ink)}#resTabs button[aria-selected=true]{color:var(--ink);font-weight:600;border-bottom-color:var(--gold)}"
+        + "html body .top{background:var(--bg)!important}"   // solid top bar above the tab bar, so the page never shows through (11 Nov 2026)
         + "#L-serve{padding-top:var(--rtTop,58px)!important}"   // Serve's tab bar starts right under the top bar, at the same height as Resources' bar
         + "html.rt #L-home,html.rt #L-topic,html.rt #L-spk{padding-top:calc(var(--rtTop,58px) + 54px)!important}html.rt #qform.sbar.follow{top:calc(var(--rtTop,58px) + 56px)!important}";
       document.head.append(st);
@@ -2460,6 +2461,9 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
       const h0 = $("L-home"); [0, 300, 900].forEach(ms => setTimeout(() => { if (h0 && h0.scrollTop < 120 && stack.length === 1) h0.scrollTop = 0; }, ms)); }
     if (SERVE_HERE) setTimeout(spkFrame, 4000);   // load quietly so the first tap zooms straight in
   }
+
+  // Light, a little more tan and slightly darker for a soft page (Daniel, 11 Nov 2026); added last so it wins over the older Light
+  { const st = document.createElement("style"); st.textContent = 'html[data-style="light"]:root{color-scheme:light;--bg:#e9e1d3;--surface:#f3ede2;--surface2:#e0d5c2;--glass:rgba(247,242,233,.78);--glass2:rgba(247,242,233,.95);--edge:rgba(60,45,25,.16);--line:rgba(60,45,25,.16);--ink:#1f1b16;--muted:#5c5446;--dim:#857a68;--gold:#a87a2a;--gold2:#7d5a18;--goldlight:#7d5a18;--fx-p1:#e3d9c8;--fx-p2:#f3ede2;--fx-p2a:rgba(243,237,226,.94);--fx-p3:#ddd1bd;--fx-topbg:rgba(233,225,211,.94)}'; document.head.append(st); }
 
 })();
 /* ---- use note (Daniel, 8 Nov 2026: AI and robot rules) ---- */
