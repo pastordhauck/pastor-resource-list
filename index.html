@@ -2183,18 +2183,22 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
   const at0 = GROUPS.findIndex(g => g.title === "Ministry") + 1 || GROUPS.length;
   // Serve is its own top tab now (Daniel, 8 Nov 2026: "resources, serve, adventist professionals, map room"), so it is not a Resources topic
   if (helpSets.length) GROUPS.splice(at0, 0, {title: "Help for people in need", sets: helpSets});
+  // Serve went live as its own page (Daniel, 10 Nov 2026: "add it to the site as a new page with the serve tab"), so the old
+  // "Serve:" lists (mission trips and volunteering) stay on the list as a Resources topic instead of filling the Serve tab
+  if (serveSets.length) GROUPS.splice(at0 + (helpSets.length ? 1 : 0), 0, {title: "Mission and volunteering", sets: serveSets});
+  const SERVE_URL = /github\.io$/.test(location.hostname) || location.protocol === "http:" ? "serve/" : "https://pastordhauck.github.io/pastor-resource-list/serve/";
   // home: redraw the topic list and the Explore rows with the new topics (same code as the page's own)
   rowsBlock($("lineups"), "h", GROUPS.filter(g => g.title !== "Adventist churches").map(g => { const seen = new Set(), items = g.sets.flatMap(([n]) => SETS[n] || []).filter(x => !seen.has(x) && seen.add(x));
     items.sort((a, b) => (b.pages && b.pages.length ? 1 : 0) - (a.pages && a.pages.length ? 1 : 0)); return {title: `Explore ${g.title.toLowerCase()}.`, count: items.length, items}; }));
   $("groups").innerHTML = GROUPS.map((g, i) => `<button class="grp" data-g="${i}"><b>${esc(g.title)}<\/b><small>${g.sets.map(s => esc(s[0])).join(" · ")}<\/small><em>${fmt(g.sets.reduce((a, s) => a + s[1], 0))} on the list · Go deeper →<\/em><\/button>`).join("");
   // top tabs: Resources · Serve · Adventist professionals · Map room (Daniel, 8 Nov 2026)
-  const TABS = [["serve", "Serve", {title: "Serve", sets: serveSets}], ["pro", "Adventist professionals", {title: "Adventist professionals", sets: proSets}]].filter(t => t[2].sets.length && (t[0] !== "pro" || PRO_TAB));
+  const TABS = [["serve", "Serve", {title: "Serve", sets: serveSets, url: SERVE_URL}], ["pro", "Adventist professionals", {title: "Adventist professionals", sets: proSets}]].filter(t => (t[2].url || t[2].sets.length) && (t[0] !== "pro" || PRO_TAB));
   if (TABS.length && $("seg")) {
     const seg = $("seg"), mapBtn = seg.querySelector('[data-sec="L-room"]'), btns = {};
     TABS.forEach(([key, label, grp]) => {
       const b = document.createElement("button"); b.id = key + "Tab"; b.setAttribute("aria-pressed", "false"); b.textContent = label; btns[key] = b;
       seg.insertBefore(b, mapBtn);                                    // Map room stays last
-      b.onclick = e => { section("L-home"); openGroup(grp, at(e)); stack[stack.length - 1].tab = key; trail(); };
+      b.onclick = e => { if (grp.url) { location.href = grp.url; return; } section("L-home"); openGroup(grp, at(e)); stack[stack.length - 1].tab = key; trail(); };
     });
     const _trail = trail; trail = function () { const r = _trail.apply(this, arguments); const tab = (stack.find(s => s.tab) || {}).tab;
       seg.querySelectorAll("button").forEach(x => { const k = Object.keys(btns).find(k => btns[k] === x);
