@@ -1022,7 +1022,7 @@ renderTell();
  const WHERE={home:'At home',neighborhood:'In your neighborhood',church:'At church',community:'In the community',online:'Online'};
  const row=x=>`<article class="listing rlist" data-rgo="${x.id}"><div class="listing-tile lpic" aria-hidden="true">${pic(x)}</div><div><h3>${esc(x.t)}</h3><div class="meta">${esc(cap(x.time))} · ${esc(WHO[x.who]||x.who)}<br><span class="gold">${esc(WHERE[x.where]||x.where)}</span></div><div class="byline">What you need: ${esc(x.need)}</div><div class="tags"><span>${esc(cap(x.kind))}</span><span>${esc(x.src)}</span></div></div><div class="listing-summary">${steps(x)}<div class="ractions">${acts(x)}</div></div></article>`;
  function draw(){const q=$('#rcQ').value.toLowerCase().trim(),f=[['time','#rcTime'],['who','#rcWho'],['where','#rcWhere'],['kind','#rcKind']].map(([k,s])=>[k,$(s).value]);
-  const L=RECIPES.filter(x=>f.every(([k,v])=>!v||x[k]===v)&&(!q||(x.t+' '+x.need+' '+x.steps.join(' ')+' '+x.kind).toLowerCase().includes(q)));
+  const L=RECIPES.filter(x=>(!window.rcExtra||window.rcExtra(x))&&f.every(([k,v])=>!v||x[k]===v)&&(!q||(x.t+' '+x.need+' '+x.steps.join(' ')+' '+x.kind).toLowerCase().includes(q)));
   $('#rcCount').textContent=L.length?`${L.length} recipe${L.length===1?'':'s'}`:'No recipes match. Try fewer filters.';
   // sections by kind with big headings, the same in every view (like the Resources page)
   const g={};L.forEach(x=>(g[x.kind]=g[x.kind]||[]).push(x));
@@ -1900,6 +1900,12 @@ html body form#planForm.sbar{max-width:640px;margin:0 auto;border-radius:999px;d
 #planForm input{flex:1;min-width:0;background:none;border:0;color:var(--ink);font:15px Inter,system-ui,sans-serif;outline:none}
 html body .plansearch .svpills select{padding-right:4px}
 html body #rcQ{display:none!important}
+.plset{max-width:760px;margin:10px auto 0;background:var(--glass2,var(--bg));border:1px solid var(--edge,var(--line));border-radius:18px;padding:14px 16px;display:grid;gap:10px;box-shadow:0 14px 34px rgba(0,0,0,.28)}.plset[hidden]{display:none}
+.plset .rmrow{display:grid;grid-template-columns:130px 1fr;gap:10px;align-items:center}.plset .rmrow>b{font:800 13px Inter,system-ui,sans-serif;color:#5c6894}
+.plset .rmseg{display:flex;flex-wrap:wrap;gap:6px}.plset .rmseg button,.plset .rmchk{font:500 13.5px Inter,system-ui,sans-serif;color:var(--ink);background:none;border:1px solid var(--edge,var(--line));border-radius:999px;padding:6px 12px;cursor:pointer;display:inline-flex;gap:6px;align-items:center;min-height:0}
+.plset .rmseg button[aria-pressed=true]{border-color:var(--gold);color:var(--gold);font-weight:600}.plset .rmend{grid-template-columns:1fr auto;font-size:12.5px;color:var(--muted)}
+.plset .rmdone{border:1px solid var(--gold);background:var(--gold);color:#1b1404;border-radius:999px;padding:7px 18px;font:600 14px Inter,system-ui,sans-serif;cursor:pointer;min-height:0}
+@media(max-width:600px){.plset .rmrow{grid-template-columns:1fr}}
 html body #planForm input{background:none!important;border:0!important;box-shadow:none!important;height:36px!important;padding:0!important;min-height:0!important;border-radius:0!important}
 html body #planForm .findbtn{background:var(--gold)!important;border:1px solid var(--gold)!important;color:#1b1404!important;border-radius:999px!important;height:36px!important;min-height:0!important;padding:0 18px!important;font:600 15px Inter,system-ui,sans-serif!important;flex:none}
 html body .plansearch .svpills select{width:auto!important;min-width:0!important;max-width:100%;min-height:0!important;height:35px!important;border:0!important;background:none!important;box-shadow:none!important}
@@ -1923,7 +1929,28 @@ html body .plansearch .svpills select{width:8.4em!important;text-overflow:ellips
  const push=()=>{q.value=pq.value;q.dispatchEvent(new Event('input',{bubbles:true}))};
  let t=0;pq.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(()=>{if(pq.value.trim())recipes();push()},250)});
  box.querySelector('#planForm').addEventListener('submit',e=>{e.preventDefault();push();recipes(true)});
- // settings: the time choices (how much time do you have) sit in Recipes for service
- box.querySelector('.svset').onclick=()=>{recipes();const r=document.querySelector('.rtimes');if(r){const y=r.getBoundingClientRect().top+scrollY-box.offsetHeight-80;scrollTo({top:y,behavior:'smooth'})}};
+ // Search settings (Daniel, 11 Nov 2026: "I like those ideas. Build it"): time, season, hide what is in my kit, view
+ const SEASON={holidays:/holiday|christmas|thanksgiving|easter|advent|new year/i,summer:/summer|vbs|vacation bible|camp|picnic|garden|yard|outdoor|park/i,school:/school|backpack|teacher|student|tutor/i,winter:/winter|snow|coat|cold|shovel|warm/i};
+ window.rcExtra=x=>{const s=window.rcSeason,txt=x.t+' '+x.need+' '+x.steps.join(' ');if(s&&SEASON[s]&&!SEASON[s].test(txt))return false;
+  if(window.rcHideKit&&typeof kit!=='undefined'&&kit.ids.includes('recipe-'+x.id))return false;return true};
+ const pan=document.createElement('div');pan.className='plset';pan.hidden=true;box.append(pan);
+ const redraw=()=>document.getElementById('rcWho').dispatchEvent(new Event('input',{bubbles:true}));
+ const seg=(key,label,opts,cur)=>`<div class="rmrow"><b>${label}</b><div class="rmseg">${opts.map(([v,l])=>`<button type="button" data-${key}="${v}" aria-pressed="${v===cur}">${l}</button>`).join('')}</div></div>`;
+ const draw=()=>{const tm=(document.getElementById('rcTime')||{}).value||'',rv=(document.querySelector('[data-rv].on')||{}).dataset;
+  pan.innerHTML=seg('ptime','How much time',[['','Any'],['5 minutes','5 minutes'],['1 hour','An hour'],['afternoon','An afternoon'],['weekend','A weekend'],['ongoing','Ongoing']],tm)
+   +seg('pseason','Season',[['','Any time'],['holidays','Holidays'],['summer','Summer'],['school','Back to school'],['winter','Winter']],window.rcSeason||'')
+   +'<div class="rmrow"><b>Hide</b><div class="rmseg"><label class="rmchk"><input type="checkbox" data-phide'+(window.rcHideKit?' checked':'')+'> Ones already in My kit</label></div></div>'
+   +seg('pview','View',[['list','List'],['car','Carousel'],['grid','Grid']],rv?rv.rv:'list')
+   +'<div class="rmrow rmend"><span>Who, Where and Kind are the ovals under the search bar.</span><button type="button" class="rmdone">Done</button></div>'};
+ pan.addEventListener('click',e=>{const b=e.target.closest('button'),c=e.target.closest('input[type=checkbox]');recipes();
+  if(c){window.rcHideKit=c.checked;redraw();return}if(!b)return;const d=b.dataset;
+  if(b.classList.contains('rmdone')){pan.hidden=true;return}
+  if(d.ptime!==undefined){const chip=document.querySelector('[data-rtime="'+d.ptime+'"]'),cur=document.getElementById('rcTime').value;
+   if(d.ptime===''){const on=document.querySelector('[data-rtime][aria-pressed=true]');if(on)on.click()}else if(chip&&cur!==d.ptime)chip.click()}
+  if(d.pseason!==undefined){window.rcSeason=d.pseason;redraw()}
+  if(d.pview!==undefined){const v=document.querySelector('[data-rv="'+d.pview+'"]');if(v)v.click()}
+  setTimeout(draw,60)});
+ box.querySelector('.svset').onclick=()=>{const open=pan.hidden;recipes();pan.hidden=!open;if(open)draw()};
+ document.addEventListener('click',e=>{if(e.isTrusted&&!pan.hidden&&!e.composedPath().includes(box))pan.hidden=true});
 })();
 </script></body></html>

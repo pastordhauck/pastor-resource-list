@@ -2509,12 +2509,47 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
         if (st) { section("L-room"); goLevel({level: "state", st}, NAME[st]); if (city) goLevel({level: "city", st, city}, city); }
         else if (LV.level === "us" || LV.level === "region") { note.textContent = "Add a state or town to search for places, like “vegan restaurants in Minnesota”."; return; }
         else desk();
+        setTimeout(() => {   // the desk fills in after the zoom starts; count it then
         const n = (deskItems || []).length, where = city ? `${city}, ${st}` : st ? NAME[st] : LV.level === "city" ? `${LV.city}, ${LV.st}` : NAME[LV.st];
         note.textContent = words.length ? (n ? `${loose ? "Closest matches for" : ""} ${words.join(" ")} in ${where}: ${fmt(n)}${n >= 200 ? "+" : ""} ${n === 1 ? "place" : "places"} on the desk below.`.trim() : `Nothing for “${words.join(" ")}” in ${where} yet.`) : `Showing ${where}.`;
-        if (words.length && n) { const k = L.querySelector(".desk"); if (k) setTimeout(() => k.scrollIntoView({behavior: calm ? "auto" : "smooth", block: "start"}), 900); } });
+        if (words.length && n) { const k = L.querySelector(".desk"); if (k) setTimeout(() => k.scrollIntoView({behavior: calm ? "auto" : "smooth", block: "start"}), 200); }
+        }, 700); });
       $("roomQ").addEventListener("input", () => { if (!$("roomQ").value.trim() && words.length) { words = []; note.textContent = ""; desk(); } });
-      // settings: the app's Settings panel (My state, how the map opens)
-      box.querySelector(".rset").onclick = () => { const g = $("gear"); if (g) g.click(); };
+      // Search settings (Daniel, 11 Nov 2026: "I like those ideas. Build it"): a panel under the bar that drives the room's own controls
+      let sortMode = "";
+      const _bf2 = brandFilter;
+      brandFilter = function (items) { const r = _bf2(items); if (!sortMode) return r;
+        const cmp = sortMode === "az" ? (a, b) => a.n.localeCompare(b.n) : (a, b) => (a.p || "").localeCompare(b.p || "") || a.n.localeCompare(b.n);
+        r.sort = function () { return Array.prototype.sort.call(this, cmp); }; return r; };   // desk() sorts what we return; this keeps the chosen order
+      const pan = document.createElement("div"); pan.className = "rmset"; pan.hidden = true; box.append(pan);
+      const seg = (name, opts, cur) => `<div class="rmrow"><b>${name}<\/b><div class="rmseg">${opts.map(([v, l]) => `<button type="button" data-${name.replace(/\W/g, "").toLowerCase()}="${v}" aria-pressed="${v === cur}">${l}<\/button>`).join("")}<\/div><\/div>`;
+      const draw = () => { const kinds = Object.entries(MAP.kinds || {}), on = k => { const b = document.querySelector(`.fbox[data-kind="${k}"]`); return b && b.getAttribute("aria-pressed") === "true"; };
+        const mi = +($("miles") || {}).value || 0, xs = $("xst") && $("xst").checked, lang = (document.querySelector("#langs [aria-pressed=true], #langs .on") || {}).dataset;
+        pan.innerHTML = seg("Search within", [["state", "This state only"], ["cross", "Across state lines"]], xs ? "cross" : "state")
+          + seg("Miles circle", [["0", "Off"], ["5", "5 mi"], ["10", "10 mi"], ["25", "25 mi"], ["50", "50 mi"]], String(mi))
+          + `<div class="rmrow"><b>Show only<\/b><div class="rmseg">${kinds.map(([k, v]) => `<label class="rmchk"><input type="checkbox" data-kind="${k}"${on(k) ? " checked" : ""}> ${esc(v)}<\/label>`).join("")}<\/div><\/div>`
+          + seg("Language", [["English", "English"], ["Spanish", "Español"], ["Hmong", "Hmong"], ["all", "All"]], lang && lang.lang || "all")
+          + seg("Sort", [["", "Churches first"], ["az", "A to Z"], ["town", "By town"]], sortMode)
+          + seg("Open at", [["light", "Light up my state"], ["zoom", "Zoom into my state"]], openMode())
+          + `<div class="rmrow rmend"><span>Miles circle and state lines work once you are in a state or town.<\/span><button type="button" class="rmdone">Done<\/button><\/div>`; };
+      pan.addEventListener("click", e => { const b = e.target.closest("button"), c = e.target.closest("input[type=checkbox]");
+        if (c) { const f = document.querySelector(`.fbox[data-kind="${c.dataset.kind}"]`); if (f) f.click(); setTimeout(draw, 50); return; }
+        if (!b) return; const d = b.dataset;
+        if (b.classList.contains("rmdone")) { pan.hidden = true; return; }
+        if (d.searchwithin !== undefined && $("xst")) { const want = d.searchwithin === "cross"; if ($("xst").checked !== want) { $("xst").checked = want; $("xst").dispatchEvent(new Event("change", {bubbles: true})); } }
+        if (d.milescircle !== undefined && $("miles")) { $("miles").value = d.milescircle; $("miles").dispatchEvent(new Event("input", {bubbles: true})); $("miles").dispatchEvent(new Event("change", {bubbles: true})); }
+        if (d.language !== undefined) { const l = document.querySelector(`#langs [data-lang="${d.language}"]`); if (l) l.click(); }
+        if (d.sort !== undefined) { sortMode = d.sort; if (LV.level !== "us" && LV.level !== "region") desk(); }
+        if (d.openat !== undefined) { const o = document.querySelector(`#setOpen [data-o="${d.openat}"]`); if (o) o.click(); else try { localStorage.setItem("prl-open", d.openat); } catch (x) {} }
+        setTimeout(draw, 60); });
+      box.querySelector(".rset").onclick = () => { pan.hidden = !pan.hidden; if (!pan.hidden) draw(); };
+      document.addEventListener("click", e => { if (e.isTrusted && !pan.hidden && !e.composedPath().includes(box)) pan.hidden = true; });
+      st.textContent += ".rmset{max-width:760px;margin:10px auto 0;background:var(--glass2,var(--bg));border:1px solid var(--edge);border-radius:18px;padding:14px 16px;display:grid;gap:10px;box-shadow:0 14px 34px rgba(0,0,0,.28)}"
+        + ".rmrow{display:grid;grid-template-columns:130px 1fr;gap:10px;align-items:center}.rmrow>b{font:800 13px Inter,system-ui,sans-serif;color:#5c6894}"
+        + ".rmseg{display:flex;flex-wrap:wrap;gap:6px}.rmseg button,.rmchk{font:500 13.5px Inter,system-ui,sans-serif;color:var(--ink);background:none;border:1px solid var(--edge);border-radius:999px;padding:6px 12px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}"
+        + ".rmseg button[aria-pressed=true]{border-color:var(--gold);color:var(--gold);font-weight:600}.rmend{grid-template-columns:1fr auto;font-size:12.5px;color:var(--muted)}"
+        + ".rmdone{border:1px solid var(--gold);background:var(--gold);color:#1b1404;border-radius:999px;padding:7px 18px;font:600 14px Inter,system-ui,sans-serif;cursor:pointer}"
+        + "@media(max-width:600px){.rmrow{grid-template-columns:1fr}}";
     } }
 
   // Daniel, 11 Nov 2026: "get rid of the search by person ... drop-down oval in the find resources ... we have speakers tab"
