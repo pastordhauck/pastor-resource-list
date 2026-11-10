@@ -743,4 +743,72 @@ draw();
   if (new URLSearchParams(location.search).has("embed")) document.documentElement.classList.add("inapp");
 })();
 </script>
+<script>// Color styles added 11 Nov 2026 (Daniel: "add in the study parchment, the private bank slate, the charcoal and gold ... use charcoal
+// and gold to replace our current dark navy ... keep the other colors"). Shared by the main app, Serve and Speakers so all three match.
+// The default Dark becomes Charcoal and gold; Study parchment and Private bank slate are new light styles that get every Light-only rule.
+(() => {
+  const DARK = "--bg:#141414;--room:#181818;--wall:#1c1c1c;--surface:#1f1f1f;--surface2:#2a2826;--panel:#1f1f1f;--panel2:#2a2826;"
+    + "--glass:rgba(36,34,31,.62);--glass2:rgba(42,40,36,.88);--edge:rgba(240,230,210,.14);--line:rgba(240,230,210,.14);"
+    + "--ink:#f2efe9;--muted:#a8a39a;--fade:#a8a39a;--dim:#77726a;--gold:#d4af5a;--gold2:#e6c886;--goldlight:#e6c886;"
+    + "--card1:#2a2824;--card2:#1d1c1a;--topbg:rgba(20,20,20,.92);--homebg:#2b2925;--roombg:#22211e;--side:rgba(36,34,31,.75);"
+    + "--fx-p1:#181818;--fx-p2:#1f1f1f;--fx-p2a:rgba(31,31,31,.93);--fx-p3:#2a2826;--fx-topbg:rgba(20,20,20,.92)";
+  const LIGHT = {
+    parchment: "--bg:#e3d8c4;--room:#ddd0b8;--wall:#e8dfcd;--surface:#ede5d5;--surface2:#d6c8ad;--panel:#ede5d5;--panel2:#d6c8ad;"
+      + "--glass:rgba(237,229,213,.82);--glass2:rgba(240,233,220,.96);--edge:rgba(60,45,25,.16);--line:rgba(60,45,25,.16);"
+      + "--ink:#2a2318;--muted:#685d4a;--fade:#685d4a;--dim:#8a7d68;--gold:#8c5a2b;--gold2:#6d4420;--goldlight:#6d4420;"
+      + "--card1:#ddd0b8;--card2:#ede5d5;--topbg:rgba(227,216,196,.94);--homebg:#d8cab0;--roombg:#ddd0b8;--side:rgba(237,229,213,.8);"
+      + "--fx-p1:#ddd0b8;--fx-p2:#ede5d5;--fx-p2a:rgba(237,229,213,.94);--fx-p3:#d6c8ad;--fx-topbg:rgba(227,216,196,.94)",
+    bank: "--bg:#eceff3;--room:#e2e7ee;--wall:#f2f4f7;--surface:#ffffff;--surface2:#e2e7ee;--panel:#ffffff;--panel2:#e2e7ee;"
+      + "--glass:rgba(255,255,255,.82);--glass2:rgba(255,255,255,.96);--edge:rgba(24,32,44,.14);--line:rgba(24,32,44,.14);"
+      + "--ink:#18202c;--muted:#5a6577;--fade:#5a6577;--dim:#8590a0;--gold:#2c4a7a;--gold2:#1f3760;--goldlight:#1f3760;"
+      + "--card1:#e2e7ee;--card2:#ffffff;--topbg:rgba(236,239,243,.94);--homebg:#dfe5ee;--roombg:#e2e7ee;--side:rgba(255,255,255,.8);"
+      + "--fx-p1:#e2e7ee;--fx-p2:#ffffff;--fx-p2a:rgba(255,255,255,.95);--fx-p3:#dde3eb;--fx-topbg:rgba(236,239,243,.94)"};
+  const css = [`html:not([data-style]):root,html[data-style="dark"]:root{color-scheme:dark;${DARK}}`];
+  for (const k in LIGHT) css.push(`html[data-style="${k}"]:root{color-scheme:light;${LIGHT[k]}}`);
+  // every rule written for Light (button text, borders, pictures ...) also applies to the two new light styles
+  for (const sh of document.styleSheets) { let rs; try { rs = sh.cssRules; } catch (e) { continue; }
+    for (const r of rs) { const s = r.selectorText; if (!s || !s.includes('[data-style="light"]') || /^html\[data-style="light"\](:root)?$/.test(s.trim())) continue;
+      for (const k in LIGHT) css.push(r.cssText.split('[data-style="light"]').join(`[data-style="${k}"]`)); } }
+  // the two new light styles have darker buttons (brown, navy): white button text reads better there
+  const BTN = ".findbtn,.go,.btn.gold,.rgo,.rmdone,.rqinfo .btn.gold,.rhead .rqadd,#appKitN,.seg button[aria-pressed=true],.segn button[aria-pressed=true],.langs button[aria-pressed=true],.ptabs button.on,.ptabs button[aria-current=true],.kittabs+*,.hubbar .findbtn,#planForm .findbtn,form#searchForm .findbtn,.seg button.on,.rqtile.hot .k";
+  for (const k in LIGHT) css.push(`html[data-style="${k}"] :is(${BTN}){color:#fff!important}`);
+  // Serve's opening picture: its small lines were a fixed pale gold that only reads on dark pages (also on Light, Soft linen, Black and white)
+  // (the picture area sets its own pale gold, so each style gets its own darker colors here)
+  const HERO = {light: ["#7d5a18", "#4a4236"], linen: ["#6c5667", "#55515c"], gray: ["#222222", "#444444"], parchment: ["#6d4420", "#544a3a"], bank: ["#1f3760", "#47526a"]};
+  // the picture area sets its own text, muted and gold colors (made for the old navy); give it each style's own instead
+  const HV = {dark: ["#f2efe9", "#cfc9bf", "#d4af5a"], warm: ["#f6ece0", "#c9b49c", "#e8a85a"], forest: ["#e9f3ec", "#a3bfae", "#d9c27a"], coral: ["#fbeee9", "#d6b5ab", "#ff7a59"],
+    dusk: ["#e7e4ea", "#aaa5b0", "#b897a9"], contrast: ["#ffffff", "#f0f0f0", "#ffd60a"], light: ["#1f1b16", "#4a4236", "#7d5a18"], linen: ["#2b2a31", "#55515c", "#6c5667"],
+    gray: ["#161616", "#444444", "#222222"], parchment: ["#2a2318", "#544a3a", "#6d4420"], bank: ["#18202c", "#47526a", "#1f3760"]};
+  for (const k in HV) css.push(`${k === "dark" ? 'html:not([data-style]) .hero,' : ""}html[data-style="${k}"] .hero{--ink:${HV[k][0]}!important;--muted:${HV[k][1]}!important;--gold:${HV[k][2]}!important}`);
+  for (const k in HERO) css.push(`html[data-style="${k}"] body .hero-links #heroPlan{background:rgba(255,255,255,.72)!important;color:${HERO[k][0]}!important}`);
+  for (const k in HERO) css.push(`html[data-style="${k}"] .hero p{color:${HERO[k][1]}!important}html[data-style="${k}"] .hero :is(.eyebrow,.kicker,.text-btn,.text-btn *){color:${HERO[k][0]}!important}`);
+  // Daniel, 11 Nov 2026: "if this is a color that is chosen, everything should match this color" (e.g. Plan to serve's "Tell the
+  // coordinator" box stayed navy). Boxes Serve drew in fixed navy now take the chosen style's own panel color, in every style.
+  css.push(`html :is(.pcard,#tellBox,.kitpanel,.invite){background:var(--glass)!important;border-color:var(--edge)!important}`
+    + `html body .hero-links #heroPlan,html body .hero-links #heroPlan *{background:var(--glass2)!important;border-color:var(--edge)!important;color:var(--ink)!important}html body .hero-links #heroPlan *{background:none!important}`
+    + `html #installBar{background:var(--glass2)!important;color:var(--ink)!important;border-color:var(--edge)!important}`);
+  // Light styles: text Serve wrote in fixed pale colors (made for dark pages) now uses the style's own text colors, and small gold
+  // labels use the deeper gold so they read on a light page
+  const LF = 'html:is([data-style="light"],[data-style="linen"],[data-style="gray"],[data-style="parchment"],[data-style="bank"])';
+  css.push(`${LF} :is(.kitsteps>div,.vcard p.mh,.ppanel li,.why li,.kitintro h2,.kitintro p,.pcard,.pcard :is(p,span,b,h4,label,li),#tellBox :is(h4,label),.irow span){color:var(--ink)!important}`
+    + `${LF} :is(.meta,.tags>span,.tag,.pcard .hint,.pcard .note,.note,.hint,.wtitle,#rTitle,.subhint){color:var(--muted)!important}`
+    + `${LF} :is(.eyebrow,.text-btn,.prbtn,#vRef,.pveye,.preview-label,#wEye,#tEye,.btn.outline,#churchLink,.save-btn,.kitactions .btn.outline,#mbLead .on){color:var(--gold2)!important}`
+    + `${LF} #chCopy h1{color:var(--ink)!important}${LF} #chCopy .chtown{color:var(--muted)!important}`
+    + `${LF} :is(#mbDays,#mbFmt,#mbLead) button{color:var(--ink)!important;border-color:var(--edge)!important}`);
+  css.push(`html:is([data-style="light"],[data-style="linen"],[data-style="gray"]) .acts .btn.gold{color:#1b1404!important}html:is([data-style="parchment"],[data-style="bank"]) .acts .btn.gold{color:#fff!important}`
+    + `html body form.sbar:not(.follow),html body #planForm.sbar{background:var(--glass)!important;border-color:var(--edge)!important}`);
+  // ChatGPT's review (11 Nov 2026): the faded side cards in each row looked disabled. Keep them nearly full strength.
+  css.push(".tile:not(.hot),.rqtile:not(.hot){opacity:.92!important}.rqtile:not(.hot):hover{opacity:1!important}");
+  const st = document.createElement("style"); st.id = "stylePlus"; st.textContent = css.join("\n"); document.head.append(st);
+  // the color pickers: Dark shows charcoal and gold, and the two new styles sit right after Light
+  if (typeof STYLES !== "undefined" && Array.isArray(STYLES) && !STYLES.some(s => s[0] === "parchment")) {
+    STYLES[0][2] = "#141414"; STYLES[0][3] = "#d4af5a";
+    const li = STYLES.findIndex(s => s[0] === "light");
+    STYLES.splice(li + 1, 0, ["parchment", "Study parchment", "#e3d8c4", "#8c5a2b"], ["bank", "Private bank slate", "#eceff3", "#2c4a7a"]);
+    const cur = document.documentElement.dataset.style || "dark";
+    ["setStyle", "pgStyle"].forEach(id => { const box = document.getElementById(id); if (!box) return;
+      box.innerHTML = STYLES.map(([v, l, bg, ac]) => `<button type="button" data-s="${v}" aria-pressed="${v === cur}"><i style="background:radial-gradient(circle,${ac} 0 38%,${bg} 40%)"></i>${l}</button>`).join(""); });
+  }
+  })();
+</script>
 </html>
