@@ -1363,6 +1363,12 @@ renderTell();
     ()=>{st.textContent='Location was not shared. Type your town and state instead.'},{timeout:10000,maximumAge:600000})};
   $('#location').addEventListener('input',()=>{const v=$('#location').value;if(v.length<2||!TOWNS)return;const f=flat(v);$('#locations').innerHTML=Object.keys(TOWNS).filter(k=>flat(k.split('|')[0]).startsWith(f)).slice(0,12).map(k=>`<option value="${esc(k.replace('|',', '))}">`).join('')});
   $('#location').addEventListener('focus',()=>{ready().catch(()=>{})},{once:true});
+  let liveT=0;$('#location').addEventListener('input',()=>{clearTimeout(liveT);const v=$('#location').value.trim();
+   if(!v){if(center){center=null;lastRows=[];try{localStorage.removeItem('serve-town')}catch{}rfDraw()}return}
+   liveT=setTimeout(async()=>{try{await ready()}catch{return}const m=v.split(',').map(x=>x.trim()),t=flat(m[0]),s=(m[1]||'').toUpperCase().replace(/[^A-Z]/g,'');
+    if(s.length===1||!t)return;let best=null;
+    for(const k in TOWNS){const [n,ks]=k.split('|');if(s&&ks!==s.slice(0,2))continue;if(flat(n)===t&&(!best||TOWNS[k][2]>best[1][2]))best=[k,TOWNS[k]]}
+    if(!best)return;const label=best[0].replace('|',', ');if(center&&center.label===label)return;rfGo([best[1][0],best[1][1]],label)},600)});
   const WHAT={food:[0,3],practical:[1,2,5],visiting:[4]};
   const realOk=d=>(!state.q||[d.title,d.summary,d.by,...d.tags].join(' ').toLowerCase().includes(state.q))&&(d.remote||d.distance<=state.radius)&&(!state.what.length||state.what.some(w=>(d.kinds||[]).some(i=>(WHAT[w]||[]).includes(i))));
   const _ma=matchingAll,_m=matching;
