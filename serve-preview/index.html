@@ -1508,10 +1508,6 @@ renderTell();
   const _dv=drawViews;drawViews=function(){_dv();draw();decorate()};draw()})();
  // a recipe opened from Find goes back to Find, not "recipes"
  if(typeof openRecipe==='function'){const _or=openRecipe;openRecipe=function(...a){const r=_or(...a);if(document.body.dataset.sub==='find'){const bk=document.querySelector('#rqDeep .rqdtop [data-rqback]');if(bk)bk.textContent='← Back to Find a way to serve'}return r}}
- // Daniel, 11 Nov ("Do 1, 2 and 4"): on Find, the search comes first and the photo and testimony go below the results
- (()=>{const hero=document.querySelector('main>.hero'),quote=document.querySelector('main>.quote'),sf=document.getElementById('sub-find');if(!hero||!sf)return;
-  const place=()=>{const find=(document.body.dataset.sub||'find')==='find';if(find){sf.after(hero)}else{sf.before(hero)}if(quote)hero.after(quote)};
-  if(typeof showSub==='function'){const _ss=showSub;showSub=function(){const r=_ss.apply(this,arguments);place();return r}}place()})();
  document.querySelectorAll('[data-wkdays]').forEach(b=>b.onclick=()=>{const w=document.getElementById('wkDaysWrap'),open=w.hidden;w.hidden=!open;b.setAttribute('aria-expanded',String(open));b.textContent=open?'Days ◂':'Days ▸'});
  document.querySelectorAll('[data-rtime]').forEach(b=>b.onclick=()=>{const on=b.getAttribute('aria-pressed')!=='true';document.querySelectorAll('[data-rtime]').forEach(x=>x.setAttribute('aria-pressed',String(x===b&&on)));$('#rcTime').value=on?b.dataset.rtime:'';draw()});
  document.querySelectorAll('[data-rv]').forEach(b=>b.onclick=()=>{rv=b.dataset.rv;document.querySelectorAll('[data-rv]').forEach(x=>x.classList.toggle('on',x===b));draw()});
