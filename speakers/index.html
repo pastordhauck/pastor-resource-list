@@ -280,12 +280,10 @@ html:is([data-style="light"],[data-style="linen"],[data-style="gray"]) :is(.btn.
 .spkbar nav{max-width:1040px;margin:0 auto;display:flex;justify-content:center;gap:28px;height:54px;padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px))}
 .spkbar button{background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);font:500 15px Inter,system-ui,sans-serif;padding:0 2px;cursor:pointer;white-space:nowrap}
 .spkbar button:hover{color:var(--ink)}.spkbar button.on{color:var(--ink);font-weight:600;border-bottom-color:var(--gold)}
-html body .sticky{top:54px!important}
 @media(max-width:480px){.spkbar nav{gap:18px;justify-content:flex-start;overflow-x:auto}.spkbar button{font-size:14px}}
 @keyframes spkzin{from{opacity:0;transform:scale(.82);filter:blur(10px)}to{opacity:1;transform:none;filter:none}}
 @media (prefers-reduced-motion:no-preference){.wrap.tzin{animation:spkzin 1.15s cubic-bezier(.22,.7,.18,1) both;transform-origin:50% 30%}}
 </style>
-<div class="spkbar"><nav role="tablist" aria-label="Speakers"><button data-tab="find" class="on" aria-selected="true">Find a speaker</button><button data-tab="invite" aria-selected="false">Invite a speaker</button><button data-tab="mine" aria-selected="false">My speakers</button></nav></div>
 <div class="wrap">
   <h1 id="spkH">Speakers</h1>
   <p class="sub" id="spkSub">Find Adventist preachers, teachers and evangelists by name, ministry or topic, then listen, watch or invite.</p>
@@ -696,7 +694,7 @@ draw();
     invite: ["Invite a speaker", "Speakers with a public way to invite them. Open one, then tap Write an invitation."],
     mine: ["My speakers", "Speakers you saved with + Add to kit."]};
   const bar = document.querySelector(".spkbar"), wrap = document.querySelector(".wrap");
-  bar.onclick = e => { const b = e.target.closest("[data-tab]"); if (!b || b.classList.contains("on")) return;
+  if (bar) bar.onclick = e => { const b = e.target.closest("[data-tab]"); if (!b || b.classList.contains("on")) return;
     bar.querySelectorAll("button").forEach(x => { x.classList.toggle("on", x === b); x.setAttribute("aria-selected", String(x === b)); });
     st.tab = b.dataset.tab; st.shown = 24; $("spkH").textContent = TXT[st.tab][0]; $("spkSub").textContent = TXT[st.tab][1];
     draw(); scrollTo(0, 0); wrap.classList.remove("tzin"); void wrap.offsetWidth; wrap.classList.add("tzin"); };
