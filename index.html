@@ -2495,6 +2495,9 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
       box.querySelector(".rset").onclick = () => { const g = $("gear"); if (g) g.click(); };
     } }
 
+  // Daniel, 11 Nov 2026: "get rid of the search by person ... drop-down oval in the find resources ... we have speakers tab"
+  { const st = document.createElement("style"); st.textContent = "#person{display:none!important}"; document.head.append(st); }
+
 })();
 /* ---- use note (Daniel, 8 Nov 2026: AI and robot rules) ---- */
 (() => {
