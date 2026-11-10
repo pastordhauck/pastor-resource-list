@@ -2329,10 +2329,12 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     const sv = () => { const f = document.getElementById("serveFrame"); try { return f && f.contentWindow && f.contentWindow.document.readyState !== "loading" ? f.contentWindow : null; } catch (e) { return null; } };
     const kitN = () => { const w = sv(); let n = 0; try { if (w && w.kit) n = w.kit.ids.length; } catch (e) {} return Math.max(n, qGet("prl-saved").length); };
     const bar = document.createElement("span"); bar.id = "appKitBar";
-    bar.innerHTML = `<button type="button" id="appKit" class="appbtn" title="My kit">🧺<span> My kit<\/span> <b id="appKitN">0<\/b><\/button><button type="button" id="appPrint" class="appbtn" title="Print" aria-label="Print">🖨<\/button>`;
-    const placeBar = () => { const g = $("gear"); if (g && bar.nextElementSibling !== g) g.before(bar); };
-    placeBar(); setTimeout(placeBar, 0); addEventListener("load", placeBar);   // after the ? button is added, so the order is ? · My kit · Print · Settings
-    const count = () => { const n = $("appKitN"); if (n) n.textContent = kitN(); };
+    bar.innerHTML = `<button type="button" id="appKit" class="appbtn" title="My kit" aria-label="My kit">🧺<b id="appKitN">0<\/b><\/button><button type="button" id="appPrint" class="appbtn" title="Print" aria-label="Print">🖨<\/button>`;
+    // one tight group, evenly spaced: ? · My kit · Print · Settings (Daniel, 11 Nov: "just basically right next to each other")
+    const placeBar = () => { const g = $("gear"), h = $("helpBtn"); if (!g) return; if (!bar.isConnected) g.before(bar);
+      if (g.parentElement !== bar) bar.append(g); if (h && h !== bar.firstElementChild) bar.prepend(h); };
+    placeBar(); setTimeout(placeBar, 0); setTimeout(placeBar, 800); addEventListener("load", placeBar);
+    const count = () => { const n = $("appKitN"); if (n) { const k = kitN(); n.textContent = k; n.toggleAttribute("data-z", !k); } };
     setInterval(count, 2000); addEventListener("storage", count); count();
     // open Serve, then run something inside it once it is ready
     const inServe = fn => { openServe(SERVE_URL); let t = 0; const tick = () => { const w = sv(); if (w && w.showSub) { try { fn(w); } catch (e) {} count(); } else if (t++ < 40) setTimeout(tick, 150); }; tick(); };
@@ -2359,12 +2361,12 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
       const g = $("gear"), og = g.onclick; g.onclick = e => { og && og.call(g, e); if (!sp.hidden) fill(); };
     }
     const css = document.createElement("style");
-    css.textContent = "#appKitBar{display:inline-flex;gap:6px;align-items:center;margin-right:6px}.appbtn{flex:none;border:1px solid var(--edge);background:var(--glass);color:var(--ink);border-radius:999px;height:34px;padding:0 12px;font:600 13px system-ui;cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}"
-      + "#appPrint{width:34px;padding:0;justify-content:center}#appKitN{background:var(--gold);color:#111;border-radius:999px;font-size:11px;min-width:18px;height:18px;display:inline-grid;place-items:center;padding:0 5px}"
-      + "@media(max-width:700px){#appKit span{display:none}.appbtn{padding:0 9px}}"
+    css.textContent = "#appKitBar{display:inline-flex;gap:8px;align-items:center;margin:0;flex:none}"
+      + "#appKitBar>button{flex:none;width:34px;height:34px;padding:0;margin:0!important;border:1px solid var(--edge);background:var(--glass);color:var(--ink);border-radius:999px;font:700 15px system-ui;cursor:pointer;display:grid;place-items:center;position:relative}"
+      + "#gear>span{display:none!important}#appKitN{position:absolute;top:-6px;right:-7px;background:var(--gold);color:#111;border-radius:999px;font:700 10px system-ui;min-width:17px;height:17px;display:grid;place-items:center;padding:0 4px}#appKitN:empty,#appKitN[data-z]{display:none}"
       + "#setServeBody .segn,#setServeBody label{margin-top:6px}#setServeBody .row{display:flex;align-items:center;gap:8px;font-size:13px;margin:4px 0}"
       // the search bar follows you down (Daniel, 11 Nov 2026: "on any page, the search bar follows you all the way down")
-      + "#qform.sbar.follow{position:fixed;top:calc(72px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);width:min(640px,calc(100% - 32px));z-index:40;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 12px 30px rgba(0,0,0,.35)}";
+      + "#qform.sbar.follow{position:fixed;top:calc(72px + env(safe-area-inset-top,0px));left:0;right:0;margin-inline:auto;transform:none!important;animation:none!important;width:min(640px,calc(100% - 32px));z-index:40;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 12px 30px rgba(0,0,0,.35)}";
     document.head.append(css);
     // the search bar follows you down: once it scrolls out of view it rides at the top, and goes back in place when you scroll up
     { const f = $("qform"); if (f) { const ph = document.createElement("div"); f.before(ph);
