@@ -2208,6 +2208,8 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     document.querySelectorAll(".layer").forEach(l => { if (l.id !== "L-serve") l.classList.remove("past"); });
     trail();
   }
+  // one color style everywhere (Daniel, 10 Nov 2026): a style picked inside Serve also changes this page, and the other way round
+  addEventListener("storage", e => { if (e.key === "prl-style" && e.newValue && typeof setStyle === "function" && document.documentElement.dataset.style !== e.newValue) setStyle(e.newValue); });
   // load Serve quietly once the page is idle, so the first tap zooms straight in
   if (SERVE_HERE) setTimeout(serveFrame, 2500);
   // Daniel, 10 Nov 2026: the top number should count everything on the platform, not only the ministry resources:
