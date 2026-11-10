@@ -2319,6 +2319,60 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
   const css = document.createElement("style");
   css.textContent = ".subgroups{margin-top:6px}#tChips .chip[data-subback]{cursor:pointer;border:1px solid var(--edge);background:var(--glass);color:var(--ink);font:inherit}";
   document.head.append(css);
+  // ---- one top bar for the whole app (Daniel, 11 Nov 2026) ----
+  // "the kit should be on my resource on serve and map room, in between settings and the question mark ... my kit moves up and
+  // print also moves up ... we don't need two settings bars". Carousel boxes: "Keep the website button as is, but instead of go
+  // deeper, it's going to be add to kit. And that's going to be the same standing rule across all the site."
+  // One kit: Add to kit here uses the same list as "♡ Save" (prl-saved); Serve's My kit shows those items too.
+  {
+    Object.assign(window, {qGet, qSet, keyOf, byKey});   // Serve's My kit reads and writes the same list
+    const sv = () => { const f = document.getElementById("serveFrame"); try { return f && f.contentWindow && f.contentWindow.document.readyState !== "loading" ? f.contentWindow : null; } catch (e) { return null; } };
+    const kitN = () => { const w = sv(); let n = 0; try { if (w && w.kit) n = w.kit.ids.length; } catch (e) {} return Math.max(n, qGet("prl-saved").length); };
+    const bar = document.createElement("span"); bar.id = "appKitBar";
+    bar.innerHTML = `<button type="button" id="appKit" class="appbtn" title="My kit">🧺<span> My kit<\/span> <b id="appKitN">0<\/b><\/button><button type="button" id="appPrint" class="appbtn" title="Print" aria-label="Print">🖨<\/button>`;
+    const placeBar = () => { const g = $("gear"); if (g && bar.nextElementSibling !== g) g.before(bar); };
+    placeBar(); setTimeout(placeBar, 0); addEventListener("load", placeBar);   // after the ? button is added, so the order is ? · My kit · Print · Settings
+    const count = () => { const n = $("appKitN"); if (n) n.textContent = kitN(); };
+    setInterval(count, 2000); addEventListener("storage", count); count();
+    // open Serve, then run something inside it once it is ready
+    const inServe = fn => { openServe(SERVE_URL); let t = 0; const tick = () => { const w = sv(); if (w && w.showSub) { try { fn(w); } catch (e) {} count(); } else if (t++ < 40) setTimeout(tick, 150); }; tick(); };
+    $("appKit").onclick = () => inServe(w => { w.showSub("recipes"); const b = w.document.querySelector("[data-km=mine]"); if (b) b.click(); w.scrollTo(0, 0); });
+    $("appPrint").onclick = () => inServe(w => { const b = w.document.getElementById("openPrints"); if (b) b.click(); });
+    // carousel boxes: Website + Add to kit (the tile itself still opens the details)
+    const inKit = x => qGet("prl-saved").includes(keyOf(x));
+    const kitBtn = (x, attr) => `<button class="btn gold" ${attr}>${inKit(x) ? "✓ In my kit" : "+ Add to kit"}<\/button>`;
+    const fixBox = box => {   // the gold "Go deeper →" in a carousel box becomes "+ Add to kit"; the Website button stays as it is
+      box.querySelectorAll(".acts > button.btn[data-deep]").forEach(d => { const [key, i, j] = d.dataset.deep.split(":"), r = ROWSETS[key] && ROWSETS[key][+i], x = r && r.items[+j]; if (x) d.outerHTML = kitBtn(x.place || x, `data-kitadd="${d.dataset.deep}"`); });
+      if (box.id === "roomInfo" && typeof P !== "undefined") box.querySelectorAll(".acts > button.btn[data-open]").forEach(o => { const x = P[+o.dataset.open]; if (x) o.outerHTML = kitBtn(x, `data-kitroom="${o.dataset.open}"`); });
+    };
+    new MutationObserver(ms => ms.forEach(m => { if (m.target.querySelectorAll) fixBox(m.target); })).observe(document.body, {childList: true, subtree: true});
+    document.addEventListener("click", e => {
+      const a = e.target.closest("[data-kitadd],[data-kitroom]"); if (!a) return; e.stopPropagation();
+      let x; if (a.dataset.kitadd) { const [key, i, j] = a.dataset.kitadd.split(":"); x = ROWSETS[key][+i].items[+j]; x = x.place || x; } else x = P[+a.dataset.kitroom];
+      const k = keyOf(x); let s = qGet("prl-saved"); const on = !s.includes(k); s = s.filter(v => v !== k); if (on) s.unshift(k); qSet("prl-saved", s);
+      a.textContent = on ? "✓ In my kit" : "+ Add to kit"; if (typeof toast === "function") toast(on ? "Added to My kit." : "Removed from My kit."); if (typeof pillCounts === "function") pillCounts(); count();
+    }, true);
+    // one Settings panel: on Serve it also shows Serve's own options (church picture, print look, parts of the page)
+    const sp = $("setp"); if (sp && !$("setServe")) {
+      sp.insertAdjacentHTML("beforeend", `<div id="setServe" hidden><div class="wtitle" style="margin-top:16px">Serve page<\/div><div id="setServeBody"><\/div><\/div>`);
+      const fill = () => { const w = sv(), on = stack[0] && stack[0].id === "L-serve" && w && w.serveSettingsAPI; $("setServe").hidden = !on; if (on) w.serveSettingsAPI.render($("setServeBody"), document); };
+      const g = $("gear"), og = g.onclick; g.onclick = e => { og && og.call(g, e); if (!sp.hidden) fill(); };
+    }
+    const css = document.createElement("style");
+    css.textContent = "#appKitBar{display:inline-flex;gap:6px;align-items:center;margin-right:6px}.appbtn{flex:none;border:1px solid var(--edge);background:var(--glass);color:var(--ink);border-radius:999px;height:34px;padding:0 12px;font:600 13px system-ui;cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}"
+      + "#appPrint{width:34px;padding:0;justify-content:center}#appKitN{background:var(--gold);color:#111;border-radius:999px;font-size:11px;min-width:18px;height:18px;display:inline-grid;place-items:center;padding:0 5px}"
+      + "@media(max-width:700px){#appKit span{display:none}.appbtn{padding:0 9px}}"
+      + "#setServeBody .segn,#setServeBody label{margin-top:6px}#setServeBody .row{display:flex;align-items:center;gap:8px;font-size:13px;margin:4px 0}"
+      // the search bar follows you down (Daniel, 11 Nov 2026: "on any page, the search bar follows you all the way down")
+      + "#qform.sbar.follow{position:fixed;top:calc(72px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);width:min(640px,calc(100% - 32px));z-index:40;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 12px 30px rgba(0,0,0,.35)}";
+    document.head.append(css);
+    // the search bar follows you down: once it scrolls out of view it rides at the top, and goes back in place when you scroll up
+    { const f = $("qform"); if (f) { const ph = document.createElement("div"); f.before(ph);
+        const home = () => document.getElementById("L-home");
+        new IntersectionObserver(([en]) => { const away = !en.isIntersecting && en.boundingClientRect.top < 80 && home().classList.contains("on");
+          ph.style.height = away ? f.offsetHeight + "px" : ""; f.classList.toggle("follow", away); }, {rootMargin: "-72px 0px 0px 0px"}).observe(ph);
+        new MutationObserver(() => { if (!home().classList.contains("on")) { f.classList.remove("follow"); ph.style.height = ""; } }).observe(home(), {attributes: true, attributeFilter: ["class"]}); } }
+  }
 })();
 /* ---- use note (Daniel, 8 Nov 2026: AI and robot rules) ---- */
 (() => {
