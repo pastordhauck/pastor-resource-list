@@ -2200,11 +2200,20 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     css.textContent = "#L-serve{display:flex;flex-direction:column;padding-left:0;padding-right:0;padding-bottom:0;overflow:hidden}#serveFrame{flex:1;width:100%;min-height:0;border:0;display:block;background:transparent}";
     document.head.append(css); return serveLayer;
   };
+  function serveFresh() {
+    const d = $("serveFrame") && $("serveFrame").contentDocument; if (!d || !d.body) return;
+    if (!d.getElementById("zinCss")) { const st = d.createElement("style"); st.id = "zinCss";
+      st.textContent = "@keyframes zinrise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}@media (prefers-reduced-motion:no-preference){html.zin main>*{animation:zinrise .8s cubic-bezier(.22,.7,.18,1) both}}";
+      d.head.append(st); }
+    const r = d.documentElement; r.classList.remove("zin"); void d.body.offsetWidth; r.classList.add("zin");
+  }
   function openServe(url, e) {
     if (!SERVE_HERE) { location.href = url; return; }        // a copy of the list outside the app site opens the Serve page itself
     serveFrame();
     const from = stack[stack.length - 1].id; stack = [{id: "L-serve", name: "Serve", tab: "serve"}];
-    if (from !== "L-serve") swap(from, "L-serve", e ? `${e.clientX}px ${e.clientY}px` : "50% 30%", true);
+    // Daniel, 11 Nov 2026: "the serve tab needs to zoom in the same way maps tab does. same exact way": same origin as Map room
+    // (section(): "50% 30%"), and Serve's parts rise in after the zoom like Map room's walls and desk (fresh())
+    if (from !== "L-serve") { swap(from, "L-serve", "50% 30%", true); serveFresh(); }
     document.querySelectorAll(".layer").forEach(l => { if (l.id !== "L-serve") l.classList.remove("past"); });
     trail();
   }
