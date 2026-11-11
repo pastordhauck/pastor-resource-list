@@ -2562,7 +2562,10 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
 // and gold to replace our current dark navy ... keep the other colors"). Shared by the main app, Serve and Speakers so all three match.
 // The default Dark becomes Charcoal and gold; Study parchment and Private bank slate are new light styles that get every Light-only rule.
 (() => {
-  const DARK = "--bg:#141414;--room:#181818;--wall:#1c1c1c;--surface:#1f1f1f;--surface2:#2a2826;--panel:#1f1f1f;--panel2:#2a2826;"
+  // Light was retired 11 Nov 2026: anyone who had it gets Study parchment (the nearest match); the parent's write reaches Serve and Speakers too
+  try { if (localStorage.getItem("prl-style") === "light") localStorage.setItem("prl-style", "parchment"); } catch (e) {}
+  if (document.documentElement.dataset.style === "light") document.documentElement.dataset.style = "parchment";
+  const DARK ="--bg:#141414;--room:#181818;--wall:#1c1c1c;--surface:#1f1f1f;--surface2:#2a2826;--panel:#1f1f1f;--panel2:#2a2826;"
     + "--glass:rgba(36,34,31,.62);--glass2:rgba(42,40,36,.88);--edge:rgba(240,230,210,.14);--line:rgba(240,230,210,.14);"
     + "--ink:#f2efe9;--muted:#a8a39a;--fade:#a8a39a;--dim:#77726a;--gold:#d4af5a;--gold2:#e6c886;--goldlight:#e6c886;"
     + "--card1:#2a2824;--card2:#1d1c1a;--topbg:rgba(20,20,20,.92);--homebg:#2b2925;--roombg:#22211e;--side:rgba(36,34,31,.75);"
@@ -2582,7 +2585,6 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
   // look at and decide"). They are built from their 7 colors and show in Settings only after opening the site with ?colors=draft.
   // [id, name, light?, page, panel, text, muted, buttons, button text]
   const DRAFTS = [
-    ["d_oat", "Oat & Walnut (ChatGPT)", 1, "#eadfcc", "#f8f2e7", "#282219", "#5f5344", "#754824", "#ffffff"],
     ["d_evergreen", "Deep Evergreen (ChatGPT)", 0, "#121d1b", "#20302d", "#f3f0e8", "#b6c1b9", "#cf9675", "#17221f"],
     ["d_sanctuary", "Sanctuary Stone (Gemini)", 1, "#f4f4f2", "#ffffff", "#2c2c2c", "#5f5f5f", "#4a6572", "#ffffff"],
     ["d_vespers", "Vespers (Gemini)", 0, "#0f141e", "#1a2130", "#eaecef", "#8b99a8", "#c29b62", "#12161f"],
@@ -2654,7 +2656,8 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
   if (typeof STYLES !== "undefined" && Array.isArray(STYLES) && !STYLES.some(s => s[0] === "parchment")) {
     STYLES[0][2] = "#141414"; STYLES[0][3] = "#d4af5a";
     const li = STYLES.findIndex(s => s[0] === "light");
-    STYLES.splice(li + 1, 0, ["parchment", "Study parchment", "#e3d8c4", "#8c5a2b"], ["bank", "Private bank slate", "#eceff3", "#2c4a7a"]);
+    // Daniel, 11 Nov 2026: of Light, Study parchment and Oat & Walnut keep only Study parchment (name stays); Light leaves the list
+    STYLES.splice(li, 1, ["parchment", "Study parchment", "#e3d8c4", "#8c5a2b"], ["bank", "Private bank slate", "#eceff3", "#2c4a7a"]);
     let draft = false; try { const q = new URLSearchParams(location.search).get("colors"); if (q === "draft") localStorage.setItem("prl-colors-draft", "1"); if (q === "off") localStorage.removeItem("prl-colors-draft"); draft = localStorage.getItem("prl-colors-draft") === "1"; } catch (e) {}
     if (draft) STYLES.push(...DRAFTS.map(([id, name, light, bg, , , , ac]) => [id, "Draft: " + name, bg, ac]));
     const cur = document.documentElement.dataset.style || "dark";
