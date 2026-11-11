@@ -1488,8 +1488,8 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
   // the states with any help place within `miles` of a map spot (a box check, so places across a state line are included)
   const boxXY = s => PLIDX[s].xy || (PLIDX[s].xy = (([a, b, c, d]) => { const q = [geoXY(a, b), geoXY(a, d), geoXY(c, b), geoXY(c, d)]; return [Math.min(...q.map(v => v[0])), Math.min(...q.map(v => v[1])), Math.max(...q.map(v => v[0])), Math.max(...q.map(v => v[1]))]; })(PLIDX[s].b));
   const statesNear = (xy, miles) => Object.keys(PLIDX).filter(s => { const [x0, y0, x1, y1] = boxXY(s); return Math.hypot(Math.max(x0 - xy[0], 0, xy[0] - x1), Math.max(y0 - xy[1], 0, xy[1] - y1)) * MI <= miles; });
-  const ready = c => !c || statesNear(c.xy, 110).every(s => done[s]);
-  const ensure = c => c ? LPLoad(statesNear(c.xy, 110)) : Promise.resolve(0);   // 110: searches reach out to 100 miles
+  const ready = c => !c || (c.stateOnly ? !!done[c.st] : statesNear(c.xy, 110).every(s => done[s]));
+  const ensure = c => c ? LPLoad(c.stateOnly ? [c.st] : statesNear(c.xy, 110)) : Promise.resolve(0);   // 110: searches reach out to 100 miles
   window.LPEnsure = ensure;
   const FIND = [
     ["211.org", "https://www.211.org/", "Call or text 211 to reach local help with food, shelter and bills."],
@@ -1647,7 +1647,8 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     if (c && !ready(c)) ensure(c).then(n => { if (n && !ssp.hidden) refreshLite(); });   // the count updates once that state's help places arrive
     let pool = R ? R.filter(flt) : c ? [...ITEMS.filter(x => x.local), ...P.filter(y => y.xy && y.sda !== false && !y.local).map(asItem)].filter(flt) : ITEMS.filter(flt);
     if (c) {
-      const lim = SS.miles || (R ? 0 : 50);   // only cuts when a distance is picked (an empty search shows what is within 50 miles)
+      const lim = c.stateOnly ? 0 : SS.miles || (R ? 0 : 50);
+      if (c.stateOnly) pool = pool.filter(x => { const s = x.local ? x.s : x.place ? x.place.st : null; return s ? s === c.st : !!R; });   // a whole state: only that state's places (plus national resources for a search)   // only cuts when a distance is picked (an empty search shows what is within 50 miles)
       pool = pool.map(x => { const p = xyOf(x); return {x, d: p ? mi(c.xy, p) : null}; }).filter(r => r.d === null ? !!R : (!lim || r.d <= lim));
       pool.sort((a, b) => (a.d === null) - (b.d === null) || (a.d !== null && a.d - b.d) || 0);
       pool = pool.map(({x, d}) => d === null ? x : Object.assign({}, x, {c: (x.local ? x.c : KIND(x.place || x)) + " · " + milesTxt(d), line: `${milesTxt(d)} · ${x.local ? x.p + ", " + x.s : x.line || ""}${x.local ? ". " + (x.v === "yes" ? "Volunteers wanted." : "Call to ask about volunteering.") + (x.ph ? " Phone " + x.ph + "." : "") : ""}`, dmi: d}));
@@ -1719,6 +1720,13 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     else if ((m = q.match(/\s*\b(?:near|close to|around)\s+(?:me|here|my home|my house|where i live)\b\s*/i))) { SS.near = "me"; SS.other = null; SS.otherQ = ""; q = q.replace(m[0], " "); }
     else if ((m = q.match(/\s+\b(?:near|around|close to|in)\s+(\d{5}|[a-z .'-]+,\s*[a-z]{2}|[a-z .'-]+)\s*$/i)) && (/^(near|around|close)/i.test(m[0].trim()) || /\d{5}|,/.test(m[1]))) {
       const pl = findPlace(m[1]); if (pl) { SS.near = "other"; SS.other = pl; SS.otherQ = m[1].trim(); q = q.slice(0, m.index); } }
+    // a state name alone ("food pantry in Minnesota", "... in MN"): search that whole state
+    if (q === qi.value && typeof NAME !== "undefined") { const fl = s => s.toLowerCase().replace(/[^a-z ]/g, " ").replace(/\s+/g, " ").trim();
+      const mm = q.match(/\s+\b(?:in|near|around|across|throughout)\s+(?:the\s+state\s+of\s+)?([a-z .]+?)\s*$/i);
+      const sc = mm && Object.keys(NAME).find(k => fl(NAME[k]) === fl(mm[1]) || (mm[1].trim().length === 2 && k === mm[1].trim().toUpperCase()));
+      if (sc) { const pts = P.filter(y => y.st === sc && y.xy), xy = pts.length ? [pts.reduce((a, y) => a + y.xy[0], 0) / pts.length, pts.reduce((a, y) => a + y.xy[1], 0) / pts.length] : null;
+        if (xy) { SS.near = "other"; SS.other = {xy, st: sc, label: NAME[sc], spec: "s:" + sc, stateOnly: true}; SS.otherQ = NAME[sc]; q = q.slice(0, mm.index); } } }
+    if (q === qi.value && SS.near === "other" && SS.other && SS.other.stateOnly) { SS.near = "auto"; SS.other = null; SS.otherQ = ""; }   // a typed state counts for that one search only
     q = q.replace(/^\s*(?:please\s+)?(?:find|show|search for|look for|where is|where are|i need|we need)\s+(?:me\s+)?(?:a|an|the|some)?\s*/i, "").trim();
     if (q !== qi.value) qi.value = q;
   }
@@ -1744,10 +1752,14 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     const xy = HCITY[best]; return {xy, st: best.split("|")[1], label: townName(best), fuzzy: q};
   }
   if (typeof findHome === "function") { const _fh = findHome; findHome = function (q) { return _fh(q) || fuzzyHome(q); }; }
+  function statePlace(sc) {   // a whole state as a search place: its middle point, and stateOnly so lists keep to that state
+    if (typeof NAME === "undefined" || !NAME[sc]) return null; const pts = P.filter(y => y.st === sc && y.xy); if (!pts.length) return null;
+    return {xy: [pts.reduce((a, y) => a + y.xy[0], 0) / pts.length, pts.reduce((a, y) => a + y.xy[1], 0) / pts.length], st: sc, label: NAME[sc], spec: "s:" + sc, stateOnly: true}; }
   function placeIn(q) {   // "in Arlington, Texas" / "near Arlington TX" / "from 76010" -> a place, or null
     let m = q.match(/\b(\d{5})\b/); if (m) { const pl = findPlace(m[1]); if (pl) return {pl, label: pl.label, text: m[0]}; }
     const re = new RegExp(`\\b(?:in|near|around|from|at|by)\\s+([a-z .'-]+?)(?:,\\s*|\\s+)(${STRE}|[a-z]{2})\\b`, "i");
     m = q.match(re); if (m) { const st = STN[m[2].toLowerCase()] || m[2].toUpperCase(); const pl = findPlace(`${m[1].trim()}, ${st}`); if (pl) return {pl, text: m[0]}; }
+    m = q.match(new RegExp(`\\b(?:in|near|around|across|throughout)\\s+(?:the\\s+state\\s+of\\s+)?(${STRE}|[a-z]{2})\\s*$`, "i")); if (m) { const sc = STN[m[1].toLowerCase()] || m[1].toUpperCase(), pl = statePlace(sc); if (pl) return {pl, text: m[0]}; }
     m = q.match(/\b(?:in|near|around)\s+([a-z .'-]+?)\s*$/i); if (m) { const pl = findPlace(m[1].trim()); if (pl) return {pl, text: m[0]}; }
     return null;
   }
@@ -1771,7 +1783,7 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     const stOk = x => { const m = (x.n || "").toLowerCase().match(new RegExp(`^(${STRE})\\b`)); return !m || (c && STN[m[1]] === c.st); };
     const add = (title, items, fresh) => { const one = new Set(); items = items.filter(x => x && stOk(x) && !one.has(x.n) && one.add(x.n) && (!fresh || !seen.has(x.n))); items.forEach(x => seen.add(x.n)); if (items.length) rows.push({title, count: items.length, items}); };
     // the big free finders, filled in with this town's ZIP: every local program, any town in the country
-    if (c && typeof HZIP !== "undefined") { let zb = null, zd = 1e9; for (const z in HZIP) { const r = HZIP[z], d = (r[0] - c.xy[0]) ** 2 + (r[1] - c.xy[1]) ** 2; if (d < zd) { zd = d; zb = z; } }
+    if (c && !c.stateOnly && typeof HZIP !== "undefined") { let zb = null, zd = 1e9; for (const z in HZIP) { const r = HZIP[z], d = (r[0] - c.xy[0]) ** 2 + (r[1] - c.xy[1]) ** 2; if (d < zd) { zd = d; zb = z; } }
       if (zb) rows.push({title: `Local help in ${c.label}: search every program`, count: 2, items: [
         {n: `Findhelp: local programs near ${c.label}`, c: `Local help finder · ZIP ${zb}`, u: `https://www.findhelp.org/search_results/${zb}`, sets: [], line: `Shelters, food, rent and bill help, health care and more, listed for ZIP ${zb}. Free; pick a category on the page.`, about: `Opens Findhelp's free search filled in with ZIP ${zb}. Call ahead: hours and help change.`},
         {n: "211: call or text 211", c: "Local help line · any town", u: "https://www.211.org/", sets: [], line: "Call or text 211 from any phone to reach a local helper for shelter, food, rent and bills. Free and confidential.", about: "211 connects the caller to local help where they are."}]}); }
@@ -1780,11 +1792,11 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
       if (n.sets) items = ITEMS.filter(x => (x.sets || []).some(s => n.sets.test(s)));
       if (n.pick) items = ITEMS.filter(x => HELPSET(x) && n.pick.test(`${x.n} ${x.u}`));
       if (n.words && typeof rankedList === "function") items = (rankedList(n.words) || []).filter(x => !x.place).slice(0, 15);
-      if (n.hk !== undefined && c) items = [...PL.filter(p => (p.k || []).includes(n.hk)).map(p => ({p, d: mi(c.xy, p.xy)})).filter(r => r.d <= 60).sort((a, b) => a.d - b.d).map(({p, d}) => ({n: p.n, c: p.h + " · " + milesTxt(d), u: p.u || "", ph: p.ph || "", sets: [], p: p.t, s: p.s, xy: p.xy, local: true, v: p.v, line: `${milesTxt(d)} · ${p.t}, ${p.s}.${p.ph ? " Phone " + p.ph + "." : ""}`, about: `${p.n} in ${p.t}, ${p.s}. Call before you go.`})), ...items];
+      if (n.hk !== undefined && c) items = [...PL.filter(p => (p.k || []).includes(n.hk)).map(p => ({p, d: mi(c.xy, p.xy)})).filter(r => c.stateOnly ? r.p.s === c.st : r.d <= 60).sort((a, b) => a.d - b.d).map(({p, d}) => ({n: p.n, c: p.h + " · " + milesTxt(d), u: p.u || "", ph: p.ph || "", sets: [], p: p.t, s: p.s, xy: p.xy, local: true, v: p.v, line: `${milesTxt(d)} · ${p.t}, ${p.s}.${p.ph ? " Phone " + p.ph + "." : ""}`, about: `${p.n} in ${p.t}, ${p.s}. Call before you go.`})), ...items];
       add(n.title, items);
     }
     if (c) {   // churches can pray, visit and often help through Community Services or a food pantry
-      const ch = churches().filter(y => y.xy).map(y => [mi(c.xy, y.xy), y]).filter(([d]) => d <= 40).sort((a, b) => a[0] - b[0]).slice(0, 15);
+      const ch = churches().filter(y => y.xy).map(y => [mi(c.xy, y.xy), y]).filter(([d, y]) => c.stateOnly ? y.st === c.st : d <= 40).sort((a, b) => a[0] - b[0]).slice(0, c.stateOnly ? 40 : 15);
       const CHL = "Adventist churches"; add(`${CHL} near ${c.label}: call and ask about help`, ch.map(([d, y]) => ({n: y.n, c: KIND(y) + " · " + milesTxt(d), u: y.u || "", sets: [], place: y, line: `${milesTxt(d)} · ${[y.p, y.st].filter(Boolean).join(", ")}`})));
     }
     add("More places that help anywhere", ITEMS.filter(HELPSET), 1);
