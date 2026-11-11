@@ -58,8 +58,9 @@ html.fxl :is(.card,.grp,.info,.rqinfo,.wkday,.tool,.lsteps>li,.pcard,.needrow,.p
 /* a box inside a box: only the inner one reacts */
 html.fxl :is(.pcard,.tool,.psec .gap,.fxb,.card,.grp,.info,.rqinfo,details.why):has(:is(.pcard,.needrow,.lsteps>li,details.why,.ptn,.gitem,.wkday,.fxb):hover){translate:none!important;border-color:var(--edge)!important;box-shadow:none!important}
 /* Map room states: the state under the pointer lifts a little, right away */
+/* only under the mouse, and without a shadow filter: lifting the carousel's lit state (with a shadow) repainted the whole map and made the Map room carousel lag */
 html.fxl #wStates path{transform-box:fill-box;transition:transform .15s ease-out,fill .6s}
-html.fxl #wStates path:hover,html.fxl #wStates path.lit{transform:translateY(-3px);filter:drop-shadow(0 5px 3px rgba(0,0,0,.45))}
+html.fxl #wStates path:hover{transform:translateY(-3px)}
 }
 /* one resource: the picture sits raised off the page and level (not tilted); no hover effect */
 html.fxl #L-detail .frame{box-shadow:0 30px 70px rgba(0,0,0,.45),0 6px 16px rgba(0,0,0,.22)}   /* no upward shift: it cut off the picture's top */

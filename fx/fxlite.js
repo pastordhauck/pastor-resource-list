@@ -36,16 +36,25 @@
   }
   const pend = new Set(); let fr = 0;
   const later = t => { pend.add(t); if (!fr) fr = requestAnimationFrame(() => { fr = 0; pend.forEach(flow); pend.clear(); }); };
-  document.addEventListener("scroll", e => { const t = e.target; if (t.matches && t.matches(TRACKS)) later(t); }, true);
+  document.addEventListener("scroll", e => { const t = e.target; if (!(t.matches && t.matches(TRACKS))) return; later(t);
+    if (t._fxHold) e.stopPropagation();   // while gliding, the page's own picker waits (it already ran once at the click)
+  }, true);
 
   // carousel arrows (Find resources, Map room): glide that starts moving the moment you click and settles softly.
   // The browser's own smooth scroll starts slowly, which read as lag (Daniel, 11 Nov).
   function glide(tr, x) {
-    cancelAnimationFrame(tr._fxr); const from = tr.scrollLeft, dx = x - from, t0 = performance.now(), dur = 650;
+    cancelAnimationFrame(tr._fxr); const from = tr.scrollLeft, dx = x - from, dur = 650; let t0 = 0;
     tr.style.scrollSnapType = "none";
-    const step = now => { const p = Math.min(1, (now - t0) / dur); tr.scrollLeft = from + dx * (1 - Math.pow(1 - p, 3));
-      if (p < 1) tr._fxr = requestAnimationFrame(step); else { tr._fxi = null; tr.style.scrollSnapType = ""; } };
-    tr._fxr = requestAnimationFrame(step);
+    const step = now => { if (!t0) t0 = now; const p = Math.min(1, (now - t0) / dur); tr.scrollLeft = from + dx * (1 - Math.pow(1 - p, 3));
+      if (p < 1) tr._fxr = requestAnimationFrame(step); else { tr._fxi = null; tr.style.scrollSnapType = "";
+        if (tr._fxHold) { tr._fxHold = false; tr.dispatchEvent(new Event("scroll")); } } };   // picker catches up (no change unless clicks came fast)
+    if (tr.matches(".track") && !tr._fxHold) {
+      // Find resources and Map room: let the page do its heavy update (info box, map) ONCE, now, for the target card,
+      // then glide with that work paused, so the motion never stutters halfway (Daniel: Map room felt laggy).
+      tr.scrollLeft = x; tr.dispatchEvent(new Event("scroll"));   // the page's picker runs in the next frame at the target
+      tr._fxHold = true;
+      tr._fxr = requestAnimationFrame(() => { tr.scrollLeft = from; tr._fxr = requestAnimationFrame(step); });   // same frame, before paint: no jump
+    } else tr._fxr = requestAnimationFrame(step);
   }
   // every carousel's arrows use it: Find resources and Map room (.carbtn), Serve and Speakers rows (.rqbtn), Speakers small rows (.arr)
   document.addEventListener("click", e => {
@@ -71,6 +80,11 @@
       if (el.getBoundingClientRect().top > innerHeight * .92) { el.classList.add("fx-rev"); io.observe(el); } });
   }
   // a refilled carousel (Map room) gets its bend at once, so it never jumps into shape
-  let st = 0; new MutationObserver(() => { document.querySelectorAll(TRACKS).forEach(later); clearTimeout(st); st = setTimeout(scan, 120); }).observe(document.body, {childList: true, subtree: true});
+  // Only reacts to real page changes: the Map room redraws its pin (SVG) every frame while the map moves, and re-measuring every carousel then made it lag.
+  let st = 0; new MutationObserver(recs => {
+    let page = false;
+    for (const r of recs) { const t = r.target; if (t.closest && t.closest("svg")) continue; page = true; if (t.matches && t.matches(TRACKS)) later(t); }
+    if (page) { clearTimeout(st); st = setTimeout(scan, 120); }
+  }).observe(document.body, {childList: true, subtree: true});
   addEventListener("resize", () => document.querySelectorAll(TRACKS).forEach(later)); scan(); setTimeout(scan, 1500);
 })();
