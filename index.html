@@ -2655,6 +2655,10 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     { const ln = STYLES.findIndex(s => s[0] === "linen"); if (ln >= 0) STYLES.splice(ln, 1); }
     // the kept ChatGPT/Gemini styles are regular choices now (no ?colors=draft needed)
     STYLES.push(...DRAFTS.map(([id, name, light, bg, , , , ac]) => [id, name, bg, ac]));
+    // Daniel, 11 Nov 2026: the default first, then the most professional and best looking; High contrast (an accessibility choice) last
+    const ORDER = ["dark", "parchment", "d_vespers", "d_merlot", "d_petrol", "d_mist", "d_evergreen", "d_alabaster", "d_harvest", "d_crimson", "forest", "warm", "dusk", "coral", "gray", "contrast"];
+    const rank = v => { const i = ORDER.indexOf(v); return i < 0 ? 99 : i; };
+    STYLES.sort((x, y) => rank(x[0]) - rank(y[0]));
     const cur = document.documentElement.dataset.style || "dark";
     ["setStyle", "pgStyle"].forEach(id => { const box = document.getElementById(id); if (!box) return;
       box.innerHTML = STYLES.map(([v, l, bg, ac]) => `<button type="button" data-s="${v}" aria-pressed="${v === cur}"><i style="background:radial-gradient(circle,${ac} 0 38%,${bg} 40%)"><\/i>${l}<\/button>`).join(""); });
