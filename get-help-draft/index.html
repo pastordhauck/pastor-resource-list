@@ -19,6 +19,7 @@ form{display:flex;gap:6px;align-items:center;background:var(--glass);border:1px 
 form:focus-within{border-color:var(--gold)}
 #where{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--ink);font:17px Inter,system-ui,sans-serif;height:44px}
 #where::placeholder{color:var(--muted)}
+.mic{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--edge);background:none;color:var(--ink);font-size:19px;cursor:pointer;margin-left:-10px}.mic.on{background:var(--warn);border-color:var(--warn);color:#fff}
 .go{height:44px;border:0;border-radius:999px;background:var(--gold);color:var(--btntext);font:700 16px Inter,system-ui,sans-serif;padding:0 20px;cursor:pointer}
 .sub{display:flex;gap:8px;align-items:center;margin:10px 2px 0;flex-wrap:wrap;font-size:13px;color:var(--muted)}
 .pill{border:1px solid var(--edge);background:var(--glass);color:var(--ink);border-radius:999px;padding:8px 13px;font:500 14px Inter,system-ui,sans-serif;cursor:pointer;min-height:40px}
@@ -192,7 +193,7 @@ textarea.copybox{width:100%;min-height:180px;margin-top:8px;background:var(--sur
   <div class="top"><div class="row"><a class="back" href="../" id="backLink">← My Pastor Resource List</a><span class="draft">Draft</span></div></div>
   <h1>Get help</h1>
   <p class="lead">Someone called needing help? Type their town or ZIP, pick what they need, then copy the list into a text or email.</p>
-  <form id="f" role="search"><input id="where" type="search" inputmode="search" autocomplete="off" placeholder="Town, state or ZIP (like Charlotte, NC)" aria-label="Town, state or ZIP"><button class="go" type="submit">Search</button></form>
+  <form id="f" role="search"><button type="button" class="mic" id="mic" aria-label="Say the town and the need" title="Say it" hidden>🎤</button><input id="where" type="search" inputmode="search" autocomplete="off" placeholder="Town, state or ZIP (like Charlotte, NC)" aria-label="Town, state or ZIP"><button class="go" type="submit">Search</button></form>
   <div class="sub"><button type="button" class="pill" id="nearMe">◎ Near me</button><span id="last"></span></div>
   <div class="needs" id="needs" role="group" aria-label="What do they need?"></div>
   <div class="sos"><b>In danger right now?</b> Call <a class="num" href="tel:911">911</a>. Thinking about suicide or in crisis? Call or text <a class="num" href="tel:988">988</a>.</div>
@@ -311,6 +312,29 @@ textarea.copybox{width:100%;min-height:180px;margin-top:8px;background:var(--sur
   $("cpText").onclick = () => doCopy(false); $("cpMail").onclick = () => doCopy(true);
   // remember the last town: one tap brings it back
   const last = ls("gh-last"); if (last && last !== "your location") { $("where").value = last; $("last").textContent = "Last town: " + last; }
+  // ---- voice (Daniel, 11 Nov 2026): tap the mic and say "Charlotte, North Carolina, help with rent". The phone's own speech
+  // recognition turns it into words (Android Chrome and iPhone Safari; the words go to Google or Apple, like the keyboard mic).
+  // The need is picked from the words, the rest is the town.
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const SAY = [["money", /\b(rent|bills?|electric|utilit\w*|money|financ\w*|gas bill|heat\w*|pay)\b/i], ["food", /\b(food|hungry|groceries|meals?|pantry)\b/i],
+    ["housing", /\b(housing|shelter|homeless|place to stay|evict\w*)\b/i], ["mental", /\b(mental|depress\w*|anxi\w*|suicid\w*|counsel\w*)\b/i],
+    ["addiction", /\b(addict\w*|drugs?|alcohol\w*|drinking|recovery|sober)\b/i], ["family", /\b(abuse|violence|unsafe|safety|domestic)\b/i],
+    ["health", /\b(doctor|clinic|medical|health|medicine|dentist)\b/i], ["legal", /\b(legal|lawyer|court|attorney)\b/i], ["clothing", /\b(cloth\w*|coat|furniture|household)\b/i]];
+  if (SR) { const mic = $("mic"); mic.hidden = false; let rec = null;
+    mic.onclick = () => { if (rec) { rec.stop(); return; }
+      rec = new SR(); rec.lang = navigator.language || "en-US"; rec.interimResults = true; rec.maxAlternatives = 1;
+      mic.classList.add("on"); $("where").placeholder = "Listening… say the town and what they need";
+      rec.onresult = e => { const said = [...e.results].map(r => r[0].transcript).join(" "); $("where").value = said;
+        if (e.results[e.results.length - 1].isFinal) {
+          const hit = SAY.find(([, rx]) => rx.test(said));
+          if (hit) { need = hit[0]; ls("gh-need", need); $("needs").querySelectorAll("[data-n]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.n === need))); }
+          // the town is what is left once the need words are taken out
+          let town = said; SAY.forEach(([, rx]) => { town = town.replace(new RegExp(rx.source, "gi"), " "); });
+          town = town.replace(/\b(help( with)?|needs?|for|with|in|near|someone|a man|a woman|they|he|she|is|are|looking|i'?m|from|calling|the|and|an?|of)\b/gi, " ").replace(/[.?!]/g, " ").replace(/\s+/g, " ").trim();
+          $("where").value = town || said; search($("where").value); } };
+      const done = () => { mic.classList.remove("on"); $("where").placeholder = "Town, state or ZIP (like Charlotte, NC)"; rec = null; };
+      rec.onend = done; rec.onerror = e => { done(); if (e.error === "not-allowed") toast("The microphone is blocked. Allow it in the phone settings, or use the keyboard mic."); };
+      rec.start(); }; }
   draw();
   (window.requestIdleCallback || setTimeout)(() => geo().catch(() => {}));
 })();
