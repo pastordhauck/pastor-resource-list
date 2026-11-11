@@ -1,28 +1,26 @@
 /* Light motion for the live site (Daniel, 11 Nov 2026, picked from the 3D walkthrough video):
-   carousel rows with depth (0:11-0:16), parts that rise as you scroll (1:11-1:22), cards that lean toward the pointer (2:22, Serve partners),
+   carousel rows with depth (0:11-0:16), parts that rise as you scroll (1:11-1:22), boxes that lean toward the pointer (2:22, Serve partners),
    map states that lift under the pointer (3:11-3:16), and the resource picture raised flat, not crooked (0:23).
-   Taken from work/design/3d_video/fx3d/fx3d.css, minus the 3D rooms and tab flights. Off for people who ask for reduced motion. */
+   RULE (Daniel, 11 Nov): each thing gets ONE effect, either a hover effect or a motion effect, never both; hover effects stay small
+   ("I don't like it anymore when I hover over something and it raises too much"). Off for people who ask for reduced motion. */
 @media (prefers-reduced-motion: no-preference) {
-/* carousel rows: the row bends away gently on both sides, the lit card steps forward */
-html.fxl :is(.track,.rqtrack) > *{transform:perspective(1100px) translateY(calc(var(--lift,0) * -10px)) rotateY(calc(var(--d,0) * -9deg)) translateZ(calc(var(--lift,0) * 36px - var(--a,0) * 24px)) scale(calc(1 + var(--lift,0) * .08))!important;
+/* carousel rows (motion effect only, no hover raise): the row bends away gently, the lit card steps forward a little */
+html.fxl :is(.track,.rqtrack) > *{transform:perspective(1100px) translateY(calc(var(--lift,0) * -6px)) rotateY(calc(var(--d,0) * -9deg)) translateZ(calc(var(--lift,0) * 22px - var(--a,0) * 24px)) scale(calc(1 + var(--lift,0) * .04))!important;
   transform-origin:50% 60%;transition:transform .45s cubic-bezier(.22,.7,.18,1),opacity .4s,border-color .4s,box-shadow .4s!important}
-html.fxl :is(.track,.rqtrack) > .hot{--lift:1;box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 35%,transparent),0 22px 40px rgba(0,0,0,.45)!important}
+html.fxl :is(.track,.rqtrack) > .hot{--lift:1;box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 35%,transparent),0 16px 32px rgba(0,0,0,.4)!important}
 
-/* parts of a page rise softly as you scroll to them */
+/* rows and sections (motion effect only): they rise softly as you scroll to them */
 html.fxl .fx-rev:not(.fx-in){opacity:0!important}
 html.fxl .fx-rev.fx-in{animation:fxlRev 1s cubic-bezier(.22,.7,.18,1) backwards!important}   /* not 'both': a lasting transform would trap fixed things inside */
 @keyframes fxlRev{from{opacity:0;transform:perspective(1400px) translate3d(0,56px,-120px) rotateX(8deg)}to{opacity:1;transform:none}}
 }
 @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
-/* cards lean a little toward the pointer (mouse only, not phones) */
-html.fxl :is(.card,.grp,.info,.rqinfo,.wkday,.tool){transition:transform .6s cubic-bezier(.22,.7,.18,1),box-shadow .5s,border-color .4s}
-html.fxl .fxt{transform:perspective(1000px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateZ(12px)!important;
-  transition:transform .2s ease-out,box-shadow .4s,border-color .4s!important;box-shadow:0 24px 50px rgba(0,0,0,.38)}
-/* Map room: the state under the pointer lifts */
+/* boxes (hover effect only, mouse only): a slight lean toward the pointer, no lifting off the page */
+html.fxl :is(.card,.grp,.info,.rqinfo,.wkday,.tool){transition:transform .6s cubic-bezier(.22,.7,.18,1)}
+html.fxl .fxt{transform:perspective(1200px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))!important;transition:transform .25s ease-out!important}
+/* Map room states (hover effect only): the state under the pointer lifts a little */
 html.fxl #wStates path{transform-box:fill-box;transition:transform .35s ease-out,filter .35s}
-html.fxl #wStates path:hover,html.fxl #wStates path.lit{transform:translateY(-5px);filter:drop-shadow(0 9px 5px rgba(0,0,0,.55))}
+html.fxl #wStates path:hover,html.fxl #wStates path.lit{transform:translateY(-3px);filter:drop-shadow(0 6px 4px rgba(0,0,0,.5))}
 }
-/* one resource: the picture sits raised off the page, level (not tilted); a small extra lift under the mouse */
-html.fxl #L-detail .frame{box-shadow:0 34px 80px rgba(0,0,0,.5),0 6px 16px rgba(0,0,0,.25);transform:translateY(-3px)}
-@media (prefers-reduced-motion: no-preference) and (hover: hover){html.fxl #L-detail .frame{transition:transform .5s cubic-bezier(.22,.7,.18,1),box-shadow .5s}
-  html.fxl #L-detail .frame:hover{transform:translateY(-8px);box-shadow:0 44px 96px rgba(0,0,0,.55),0 8px 20px rgba(0,0,0,.25)}}
+/* one resource: the picture sits raised off the page and level (not tilted); no hover effect */
+html.fxl #L-detail .frame{box-shadow:0 30px 70px rgba(0,0,0,.45),0 6px 16px rgba(0,0,0,.22);transform:translateY(-3px)}

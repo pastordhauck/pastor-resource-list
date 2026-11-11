@@ -8,12 +8,13 @@
   const TILT = ".card,.grp,.info,.rqinfo,.wkday,.tool"; let cur = null;
   if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
     addEventListener("pointermove", e => {
-      const el = e.target.closest ? e.target.closest(TILT) : null;
+      let el = e.target.closest ? e.target.closest(TILT) : null;
+      if (el && el.closest(".track,.rqtrack,.fx-rev")) el = null;   // one effect per thing: carousel cards and rising parts don't also lean
       if (el !== cur) { if (cur) cur.classList.remove("fxt"); cur = el; if (el) el.classList.add("fxt"); }
       if (!el) return;
       const r = el.getBoundingClientRect(), k = Math.min(1, 320 / r.width);   // wide cards lean less
-      el.style.setProperty("--ry", (((e.clientX - r.left) / r.width - .5) * 8 * k).toFixed(2) + "deg");
-      el.style.setProperty("--rx", ((.5 - (e.clientY - r.top) / r.height) * 6 * k).toFixed(2) + "deg");
+      el.style.setProperty("--ry", (((e.clientX - r.left) / r.width - .5) * 4 * k).toFixed(2) + "deg");   // small lean (Daniel: hover effects stay small)
+      el.style.setProperty("--rx", ((.5 - (e.clientY - r.top) / r.height) * 3 * k).toFixed(2) + "deg");
     }, {passive: true});
     addEventListener("pointerleave", () => { if (cur) cur.classList.remove("fxt"); cur = null; });
   }
@@ -31,7 +32,7 @@
   document.addEventListener("scroll", e => { const t = e.target; if (t.matches && t.matches(TRACKS)) later(t); }, true);
 
   // parts below the screen wait, then rise when you reach them (never hides what is already on screen)
-  const REV = ".lineup,.ghead,#groups .grp,.rpager,main section.wrap,main .section,.rqwrap";
+  const REV = ".lineup,.ghead,.rpager,main section.wrap,main .section,.rqwrap";   // not .grp: those lean on hover instead (one effect each)
   const io = "IntersectionObserver" in window ? new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { en.target.classList.add("fx-in"); io.unobserve(en.target); } }), {rootMargin: "0px 0px -6% 0px"}) : null;
   function scan() {
     document.querySelectorAll(TRACKS).forEach(later);
