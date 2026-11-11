@@ -5,15 +5,17 @@
   const R = document.documentElement; R.classList.add("fxl");
 
   // cards lean toward the mouse (CSS turns --rx/--ry into a small angle)
-  const TILT = ".card,.grp,.info,.rqinfo,.wkday,.tool,.lsteps>li,.pcard,.listing,.rtile,.ptn,.gitem,.ecard,.ktile,.rlist,.area,.fbox,details.why,.sfield,.vgroup,.irow,.pentry"; let cur = null;
+  const TILT = ".card,.grp,.info,.rqinfo,.wkday,.tool,.lsteps>li,.pcard,.listing,.rtile,.ptn,.gitem,.ecard,.ktile,.rlist,.area,.fbox,details.why,.sfield,.vgroup,.irow,.pentry,.agenda-day,.tw-row"; let cur = null;
   if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
     addEventListener("pointermove", e => {
       let el = e.target.closest ? e.target.closest(TILT) : null;
       if (el && el.closest(".track,.rqtrack,.track2")) el = null;   // one effect per thing: carousel cards only move with the carousel
       if (el !== cur) { if (cur) cur.classList.remove("fxt"); cur = el; if (el) el.classList.add("fxt"); }
       if (!el) return;
-      const r = el.getBoundingClientRect(), k = Math.min(1, 320 / r.width);   // wide cards lean less
-      el.style.setProperty("--ry", (((e.clientX - r.left) / r.width - .5) * 3 * k).toFixed(2) + "deg");   // very soft lean (Daniel: hover effects stay small and slow)
+      // every box leans like the prayer-week day cards: same angle, perspective scaled to its size; the day rows of groups in need a bit more
+      const r = el.getBoundingClientRect(), k = el.matches(".agenda-day,.tw-row") ? 1.4 : 1;
+      el.style.setProperty("--p", Math.max(1400, Math.max(r.width, r.height) * 7).toFixed(0) + "px");
+      el.style.setProperty("--ry", (((e.clientX - r.left) / r.width - .5) * 3 * k).toFixed(2) + "deg");
       el.style.setProperty("--rx", ((.5 - (e.clientY - r.top) / r.height) * 2 * k).toFixed(2) + "deg");
     }, {passive: true});
     addEventListener("pointerleave", () => { if (cur) cur.classList.remove("fxt"); cur = null; });
@@ -30,6 +32,24 @@
   const pend = new Set(); let fr = 0;
   const later = t => { pend.add(t); if (!fr) fr = requestAnimationFrame(() => { fr = 0; pend.forEach(flow); pend.clear(); }); };
   document.addEventListener("scroll", e => { const t = e.target; if (t.matches && t.matches(TRACKS)) later(t); }, true);
+
+  // carousel arrows (Find resources, Map room): glide that starts moving the moment you click and settles softly.
+  // The browser's own smooth scroll starts slowly, which read as lag (Daniel, 11 Nov).
+  function glide(tr, x) {
+    cancelAnimationFrame(tr._fxr); const from = tr.scrollLeft, dx = x - from, t0 = performance.now(), dur = 650;
+    tr.style.scrollSnapType = "none";
+    const step = now => { const p = Math.min(1, (now - t0) / dur); tr.scrollLeft = from + dx * (1 - Math.pow(1 - p, 3));
+      if (p < 1) tr._fxr = requestAnimationFrame(step); else { tr._fxi = null; tr.style.scrollSnapType = ""; } };
+    tr._fxr = requestAnimationFrame(step);
+  }
+  document.addEventListener("click", e => {
+    const b = e.target.closest ? e.target.closest(".carbtn[data-car]") : null, tr = b && b.parentElement.querySelector(".track");
+    if (!tr) return;
+    const tiles = [...tr.children], h = tr._fxi ?? tiles.findIndex(t => t.classList.contains("hot")), i = Math.max(0, Math.min(tiles.length - 1, (h < 0 ? 0 : h) + +b.dataset.d)), t = tiles[i];
+    if (!t) return;
+    e.stopPropagation(); tr._fxi = i;   // replaces the page's own arrow handler (same target card)
+    glide(tr, t.offsetLeft - (tr.clientWidth - t.offsetWidth) / 2);
+  }, true);
 
   // parts below the screen wait, then rise when you reach them (never hides what is already on screen)
   const REV = ".lineup,.ghead,.rpager,main section.wrap:not(#recipes),main .section,.rqwrap";   // not .grp (leans on hover); not Serve's kit/church plan section (Daniel)

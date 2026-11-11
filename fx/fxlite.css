@@ -12,9 +12,10 @@
 
 @media (prefers-reduced-motion: no-preference) {
 /* carousels: the row bends away gently; the middle card zooms and rises slowly into place */
-html.fxl :is(.track,.rqtrack,.track2) > *{transform:perspective(1100px) translateY(calc(var(--lift,0) * -6px)) rotateY(calc(var(--d,0) * -8deg)) translateZ(calc(var(--lift,0) * 22px - var(--a,0) * 22px)) scale(calc(1 + var(--lift,0) * .04))!important;
-  translate:none!important;transform-origin:50% 60%;
-  transition:transform .9s cubic-bezier(.25,.8,.25,1),opacity .8s ease,border-color .8s ease,box-shadow .9s ease!important}
+/* the bend follows the scroll at once (no lag after a click); the zoom and raise of the middle card are separate and slow */
+html.fxl :is(.track,.rqtrack,.track2) > *{transform:perspective(1100px) rotateY(calc(var(--d,0) * -8deg)) translateZ(calc(var(--a,0) * -22px))!important;
+  translate:0 calc(var(--lift,0) * -8px)!important;scale:calc(1 + var(--lift,0) * .07)!important;transform-origin:50% 60%;
+  transition:transform .15s ease-out,translate .8s cubic-bezier(.25,.8,.25,1),scale .8s cubic-bezier(.25,.8,.25,1),opacity .8s ease,border-color .8s ease,box-shadow .8s ease!important}
 html.fxl :is(.track,.rqtrack,.track2) > .hot{--lift:1;opacity:1;box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 35%,transparent),0 16px 32px rgba(0,0,0,.4)!important}
 /* no zoom on the pictures inside cards */
 html.fxl :is(.tile,.tile2,.rqtile,.card,.rqcard,.rlist,.listing):hover :is(.th,.th2,.shot img,.lpic .th,img){transform:none!important}
@@ -47,8 +48,9 @@ html.fxl #qshare:hover{translate:0 -2px;box-shadow:0 8px 20px rgba(0,0,0,.25)}
 @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
 /* boxes: one very soft hover style everywhere: a slow, slight lean toward the pointer, no lifting */
 html.fxl :is(.card,.grp,.info,.rqinfo,.wkday,.tool,.lsteps>li,.pcard,.listing,.rtile,.ptn,.gitem,.ecard,.ktile,.rlist,.area,.fbox,details.why,.sfield,.vgroup,.irow,.pentry,.agenda-day,.tw-row):hover{translate:none!important;transform:none}
-html.fxl :is(.card,.grp,.info,.rqinfo,.wkday,.tool,.lsteps>li,.pcard,.listing,.rtile,.ptn,.gitem,.ecard,.ktile,.rlist,.area,.fbox,details.why,.sfield,.vgroup,.irow,.pentry){transition:transform .8s cubic-bezier(.22,.7,.18,1),box-shadow .8s ease,border-color .6s ease}
-html.fxl .fxt{transform:perspective(1400px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))!important;box-shadow:0 12px 28px rgba(0,0,0,.28)!important;
+html.fxl :is(.card,.grp,.info,.rqinfo,.wkday,.tool,.lsteps>li,.pcard,.listing,.rtile,.ptn,.gitem,.ecard,.ktile,.rlist,.area,.fbox,details.why,.sfield,.vgroup,.irow,.pentry,.agenda-day,.tw-row){transition:transform .8s cubic-bezier(.22,.7,.18,1),box-shadow .8s ease,border-color .6s ease}
+/* --p grows with the box, so a wide box leans with the same feel as the small prayer-week day cards (Daniel's model, 11 Nov) */
+html.fxl .fxt{transform:perspective(var(--p,1400px)) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))!important;box-shadow:0 12px 28px rgba(0,0,0,.28)!important;
   transition:transform .7s cubic-bezier(.22,.7,.18,1),box-shadow .8s ease,border-color .6s ease!important}
 /* Map room states: the state under the pointer lifts a little, right away */
 html.fxl #wStates path{transform-box:fill-box;transition:transform .15s ease-out,fill .6s}
