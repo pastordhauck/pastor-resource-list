@@ -1,26 +1,58 @@
-/* Light motion for the live site (Daniel, 11 Nov 2026, picked from the 3D walkthrough video):
-   carousel rows with depth (0:11-0:16), parts that rise as you scroll (1:11-1:22), boxes that lean toward the pointer (2:22, Serve partners),
-   map states that lift under the pointer (3:11-3:16), and the resource picture raised flat, not crooked (0:23).
-   RULE (Daniel, 11 Nov): each thing gets ONE effect, either a hover effect or a motion effect, never both; hover effects stay small
-   ("I don't like it anymore when I hover over something and it raises too much"). Off for people who ask for reduced motion. */
-@media (prefers-reduced-motion: no-preference) {
-/* carousel rows (motion effect only, no hover raise): the row bends away gently, the lit card steps forward a little */
-html.fxl :is(.track,.rqtrack) > *{transform:perspective(1100px) translateY(calc(var(--lift,0) * -6px)) rotateY(calc(var(--d,0) * -9deg)) translateZ(calc(var(--lift,0) * 22px - var(--a,0) * 24px)) scale(calc(1 + var(--lift,0) * .04))!important;
-  transform-origin:50% 60%;transition:transform .45s cubic-bezier(.22,.7,.18,1),opacity .4s,border-color .4s,box-shadow .4s!important}
-html.fxl :is(.track,.rqtrack) > .hot{--lift:1;box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 35%,transparent),0 16px 32px rgba(0,0,0,.4)!important}
+/* Light motion for the live site (Daniel, 11 Nov 2026, picked from the 3D walkthrough video).
+   RULES (Daniel, 11 Nov):
+   - each thing gets ONE effect, a hover effect or a motion effect, never both; nothing raises much;
+   - carousels everywhere (Resources, Speakers, Map room) move the same fluid way: soft zoom and soft raise, never a snap;
+   - boxes all hover the same very soft way (the box to the right of the carousel is the model);
+   - no hover effect on text, headings, verses, pictures inside cards, the buttons inside the right box, or the search bar;
+   - scrolling rise is there but barely noticeable.
+   This file loads last on every page, so it also calms the pages' own older hover rules. Off for people who ask for reduced motion. */
 
-/* rows and sections (motion effect only): they rise softly as you scroll to them */
+/* Serve > Plan to serve > Our church plan: the verse box is gone (the same verse is already at the top; the top band still reads it) */
+#km-church .vcard{display:none!important}
+
+@media (prefers-reduced-motion: no-preference) {
+/* carousels: the row bends away gently; the middle card zooms and rises slowly into place */
+html.fxl :is(.track,.rqtrack,.track2) > *{transform:perspective(1100px) translateY(calc(var(--lift,0) * -6px)) rotateY(calc(var(--d,0) * -8deg)) translateZ(calc(var(--lift,0) * 22px - var(--a,0) * 22px)) scale(calc(1 + var(--lift,0) * .04))!important;
+  translate:none!important;transform-origin:50% 60%;
+  transition:transform .9s cubic-bezier(.25,.8,.25,1),opacity .8s ease,border-color .8s ease,box-shadow .9s ease!important}
+html.fxl :is(.track,.rqtrack,.track2) > .hot{--lift:1;opacity:1;box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 35%,transparent),0 16px 32px rgba(0,0,0,.4)!important}
+/* no zoom on the pictures inside cards */
+html.fxl :is(.tile,.tile2,.rqtile,.card,.rqcard,.rlist,.listing):hover :is(.th,.th2,.shot img,.lpic .th,img){transform:none!important}
+
+/* rows and sections rise softly as you reach them */
 html.fxl .fx-rev:not(.fx-in){opacity:0!important}
 html.fxl .fx-rev.fx-in{animation:fxlRev 1s cubic-bezier(.22,.7,.18,1) backwards!important}   /* not 'both': a lasting transform would trap fixed things inside */
-@keyframes fxlRev{from{opacity:0;transform:perspective(1400px) translate3d(0,56px,-120px) rotateX(8deg)}to{opacity:1;transform:none}}
+@keyframes fxlRev{from{opacity:0;transform:perspective(1400px) translate3d(0,30px,-60px) rotateX(4deg)}to{opacity:1;transform:none}}
+
+/* the search bar never animates (it used to replay its entrance when it settled back at the top); its Search button still can */
+html.fxl .sbar{animation:none!important}
+
+/* no hover motion on text, headings and verses */
+html.fxl :is(main,dialog,.rqlayer) :is(label,summary,h2,h3,h4,h5,blockquote,p),html.fxl .pvband .pvverse,html.fxl .psec>h4{translate:none!important}
+
+/* buttons: slow, smooth hover (not snappy) */
+html.fxl :is(main,dialog) :is(button,a,.btn,.pill,.chip){transition:translate .5s cubic-bezier(.22,.7,.18,1),transform .5s cubic-bezier(.22,.7,.18,1),background-color .4s,border-color .4s,color .4s,box-shadow .5s,opacity .4s}
+/* Serve's verse band buttons keep their text color on hover */
+html.fxl .pvstep:hover{color:#1b1404!important}
+html.fxl:is([data-style="light"],[data-style="linen"],[data-style="gray"]) .pvstep:hover{color:#fff!important}
+html.fxl .pvplan:hover{color:var(--gold2,var(--gold))!important}
+html.fxl :is(.pvstep,.pvplan):hover{translate:0 -2px!important}
+/* buttons inside the box to the right of a carousel (Add to kit, Website): no motion */
+html.fxl :is(.info,.rqinfo) :is(.btn,button,a):hover{transform:none!important;translate:none!important}
+/* "Copy link to share this with others": a small soft lift */
+html.fxl #qshare{transition:translate .6s cubic-bezier(.22,.7,.18,1),box-shadow .6s,border-color .4s}
+html.fxl #qshare:hover{translate:0 -2px;box-shadow:0 8px 20px rgba(0,0,0,.25)}
 }
+
 @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
-/* boxes (hover effect only, mouse only): a slight lean toward the pointer, no lifting off the page */
-html.fxl :is(.card,.grp,.info,.rqinfo,.wkday,.tool){transition:transform .6s cubic-bezier(.22,.7,.18,1)}
-html.fxl .fxt{transform:perspective(1200px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))!important;transition:transform .25s ease-out!important}
-/* Map room states (hover effect only): the state under the pointer lifts a little */
-html.fxl #wStates path{transform-box:fill-box;transition:transform .35s ease-out,filter .35s}
-html.fxl #wStates path:hover,html.fxl #wStates path.lit{transform:translateY(-3px);filter:drop-shadow(0 6px 4px rgba(0,0,0,.5))}
+/* boxes: one very soft hover style everywhere: a slow, slight lean toward the pointer, no lifting */
+html.fxl :is(.card,.grp,.info,.rqinfo,.wkday,.tool,.lsteps>li,.pcard,.listing,.rtile,.ptn,.gitem,.ecard,.ktile,.rlist,.area,.fbox,details.why,.sfield,.vgroup,.irow,.pentry,.agenda-day,.tw-row):hover{translate:none!important;transform:none}
+html.fxl :is(.card,.grp,.info,.rqinfo,.wkday,.tool,.lsteps>li,.pcard,.listing,.rtile,.ptn,.gitem,.ecard,.ktile,.rlist,.area,.fbox,details.why,.sfield,.vgroup,.irow,.pentry){transition:transform .8s cubic-bezier(.22,.7,.18,1),box-shadow .8s ease,border-color .6s ease}
+html.fxl .fxt{transform:perspective(1400px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))!important;box-shadow:0 12px 28px rgba(0,0,0,.28)!important;
+  transition:transform .7s cubic-bezier(.22,.7,.18,1),box-shadow .8s ease,border-color .6s ease!important}
+/* Map room states: the state under the pointer lifts a little, right away */
+html.fxl #wStates path{transform-box:fill-box;transition:transform .15s ease-out,fill .6s}
+html.fxl #wStates path:hover,html.fxl #wStates path.lit{transform:translateY(-3px);filter:drop-shadow(0 5px 3px rgba(0,0,0,.45))}
 }
 /* one resource: the picture sits raised off the page and level (not tilted); no hover effect */
 html.fxl #L-detail .frame{box-shadow:0 30px 70px rgba(0,0,0,.45),0 6px 16px rgba(0,0,0,.22);transform:translateY(-3px)}
