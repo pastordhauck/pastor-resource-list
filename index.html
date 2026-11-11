@@ -2563,8 +2563,10 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
 // The default Dark becomes Charcoal and gold; Study parchment and Private bank slate are new light styles that get every Light-only rule.
 (() => {
   // Light was retired 11 Nov 2026: anyone who had it gets Study parchment (the nearest match); the parent's write reaches Serve and Speakers too
-  try { if (localStorage.getItem("prl-style") === "light") localStorage.setItem("prl-style", "parchment"); } catch (e) {}
-  if (document.documentElement.dataset.style === "light") document.documentElement.dataset.style = "parchment";
+  // Soft linen retired too (11 Nov 2026) and goes to parchment; a dropped draft style goes back to Dark
+  const GONE = {light: "parchment", linen: "parchment", d_sanctuary: "dark", d_riverstone: "dark", d_cedar: "dark", d_olive: "dark", d_aubergine: "dark", d_covenant: "dark", d_ivory: "dark", d_sage: "dark", d_oat: "parchment", d_midnight: "dark", d_walnut: "dark", d_desert: "dark"};
+  try { const s = localStorage.getItem("prl-style"); if (GONE[s]) localStorage.setItem("prl-style", GONE[s]); } catch (e) {}
+  { const s = document.documentElement.dataset.style; if (GONE[s]) { if (GONE[s] === "dark") delete document.documentElement.dataset.style; else document.documentElement.dataset.style = GONE[s]; } }
   const DARK ="--bg:#141414;--room:#181818;--wall:#1c1c1c;--surface:#1f1f1f;--surface2:#2a2826;--panel:#1f1f1f;--panel2:#2a2826;"
     + "--glass:rgba(36,34,31,.62);--glass2:rgba(42,40,36,.88);--edge:rgba(240,230,210,.14);--line:rgba(240,230,210,.14);"
     + "--ink:#f2efe9;--muted:#a8a39a;--fade:#a8a39a;--dim:#77726a;--gold:#d4af5a;--gold2:#e6c886;--goldlight:#e6c886;"
@@ -2581,25 +2583,17 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
       + "--ink:#18202c;--muted:#5a6577;--fade:#5a6577;--dim:#8590a0;--gold:#2c4a7a;--gold2:#1f3760;--goldlight:#1f3760;"
       + "--card1:#e2e7ee;--card2:#ffffff;--topbg:rgba(236,239,243,.94);--homebg:#dfe5ee;--roombg:#e2e7ee;--side:rgba(255,255,255,.8);"
       + "--fx-p1:#e2e7ee;--fx-p2:#ffffff;--fx-p2a:rgba(255,255,255,.95);--fx-p3:#dde3eb;--fx-topbg:rgba(236,239,243,.94)"};
-  // DRAFT styles from ChatGPT and Gemini (Daniel, 11 Nov 2026: "give me a draft with the 10 colors from ChatGPT and 10 from Gemini ... to
-  // look at and decide"). They are built from their 7 colors and show in Settings only after opening the site with ?colors=draft.
+  // Styles first drafted by ChatGPT and Gemini, kept by Daniel on 11 Nov 2026 (the others were dropped). Built from their 7 colors.
   // [id, name, light?, page, panel, text, muted, buttons, button text]
   const DRAFTS = [
-    ["d_evergreen", "Deep Evergreen (ChatGPT)", 0, "#121d1b", "#20302d", "#f3f0e8", "#b6c1b9", "#cf9675", "#17221f"],
-    ["d_sanctuary", "Sanctuary Stone (Gemini)", 1, "#f4f4f2", "#ffffff", "#2c2c2c", "#5f5f5f", "#4a6572", "#ffffff"],
-    ["d_vespers", "Vespers (Gemini)", 0, "#0f141e", "#1a2130", "#eaecef", "#8b99a8", "#c29b62", "#12161f"],
-    ["d_alabaster", "Alabaster and Sage (Gemini)", 1, "#f9f8f6", "#ffffff", "#2f332e", "#626760", "#587054", "#ffffff"],
-    ["d_crimson", "Midnight Crimson (Gemini)", 0, "#16161a", "#232329", "#f0f0f2", "#94949c", "#8c4a4a", "#ffffff"],
-    ["d_harvest", "Autumn Harvest (Gemini)", 1, "#fdfbf7", "#f4efe6", "#382e28", "#6b5f57", "#9e5b43", "#ffffff"],
-    // second round, 11 Nov 2026 (5 more each; Daniel asked for medium-strength, not near-white)
-    ["d_riverstone", "Riverstone Blue (ChatGPT)", 1, "#B8C9CF", "#E3ECEE", "#192B33", "#40535B", "#24556B", "#FFFFFF"],
-    ["d_cedar", "Cedar & Clay (ChatGPT)", 1, "#CBB6A5", "#EFE1D2", "#2B241F", "#534136", "#643D2B", "#FFFFFF"],
-    ["d_merlot", "Frost & Merlot (ChatGPT)", 1, "#F1F0EC", "#FFFFFF", "#242731", "#555963", "#6B3347", "#FFFFFF"],
-    ["d_petrol", "Petrol & Sand (ChatGPT)", 0, "#0F2930", "#20444B", "#F2F1EA", "#BBCFD0", "#E1B17C", "#1D2A30"],
-    ["d_aubergine", "Aubergine & Nickel (ChatGPT)", 0, "#1C1925", "#2D2A37", "#F3F0F6", "#C1B9CB", "#C9B5E0", "#251B30"],
-    ["d_mist", "Morning Mist (Gemini)", 1, "#D1D9E0", "#E8ECEF", "#1C2B36", "#4A5D6B", "#2E5A7A", "#FFFFFF"],
-    ["d_olive", "Olive Branch (Gemini)", 1, "#F0F4EC", "#FAFCF8", "#223322", "#5B6B5B", "#446644", "#FFFFFF"],
-    ["d_covenant", "Midnight Covenant (Gemini)", 0, "#1A1A24", "#252533", "#E6E6EB", "#9A9AB3", "#7A6B8C", "#FFFFFF"]];
+    ["d_merlot", "Frost and merlot", 1, "#F1F0EC", "#FFFFFF", "#242731", "#555963", "#6B3347", "#FFFFFF"],
+    ["d_mist", "Morning mist", 1, "#D1D9E0", "#E8ECEF", "#1C2B36", "#4A5D6B", "#2E5A7A", "#FFFFFF"],
+    ["d_harvest", "Autumn harvest", 1, "#fdfbf7", "#f4efe6", "#382e28", "#6b5f57", "#9e5b43", "#ffffff"],
+    ["d_alabaster", "Alabaster and sage", 1, "#f9f8f6", "#ffffff", "#2f332e", "#626760", "#587054", "#ffffff"],
+    ["d_evergreen", "Deep evergreen", 0, "#121d1b", "#20302d", "#f3f0e8", "#b6c1b9", "#cf9675", "#17221f"],
+    ["d_vespers", "Vespers", 0, "#0f141e", "#1a2130", "#eaecef", "#8b99a8", "#c29b62", "#12161f"],
+    ["d_crimson", "Midnight crimson", 0, "#16161a", "#232329", "#f0f0f2", "#94949c", "#8c4a4a", "#ffffff"],
+    ["d_petrol", "Petrol and sand", 0, "#0F2930", "#20444B", "#F2F1EA", "#BBCFD0", "#E1B17C", "#1D2A30"]];
   const rgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
   const hx = a => "#" + a.map(v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, "0")).join("");
   const mix = (a, b, t) => hx(rgb(a).map((v, i) => v * (1 - t) + rgb(b)[i] * t));
@@ -2658,8 +2652,9 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     const li = STYLES.findIndex(s => s[0] === "light");
     // Daniel, 11 Nov 2026: of Light, Study parchment and Oat & Walnut keep only Study parchment (name stays); Light leaves the list
     STYLES.splice(li, 1, ["parchment", "Study parchment", "#e3d8c4", "#8c5a2b"], ["bank", "Private bank slate", "#eceff3", "#2c4a7a"]);
-    let draft = false; try { const q = new URLSearchParams(location.search).get("colors"); if (q === "draft") localStorage.setItem("prl-colors-draft", "1"); if (q === "off") localStorage.removeItem("prl-colors-draft"); draft = localStorage.getItem("prl-colors-draft") === "1"; } catch (e) {}
-    if (draft) STYLES.push(...DRAFTS.map(([id, name, light, bg, , , , ac]) => [id, "Draft: " + name, bg, ac]));
+    { const ln = STYLES.findIndex(s => s[0] === "linen"); if (ln >= 0) STYLES.splice(ln, 1); }
+    // the kept ChatGPT/Gemini styles are regular choices now (no ?colors=draft needed)
+    STYLES.push(...DRAFTS.map(([id, name, light, bg, , , , ac]) => [id, name, bg, ac]));
     const cur = document.documentElement.dataset.style || "dark";
     ["setStyle", "pgStyle"].forEach(id => { const box = document.getElementById(id); if (!box) return;
       box.innerHTML = STYLES.map(([v, l, bg, ac]) => `<button type="button" data-s="${v}" aria-pressed="${v === cur}"><i style="background:radial-gradient(circle,${ac} 0 38%,${bg} 40%)"><\/i>${l}<\/button>`).join(""); });
