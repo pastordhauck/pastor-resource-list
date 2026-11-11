@@ -1,0 +1,319 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>Get help</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* DRAFT (Daniel, 11 Nov 2026): Get help, built for his phone-call test. Phone first. Colors follow the app's chosen style. */
+:root{--bg:#141414;--surface:#1f1f1f;--surface2:#2a2826;--glass:rgba(36,34,31,.62);--glass2:rgba(42,40,36,.94);--edge:rgba(240,230,210,.14);--ink:#f2efe9;--muted:#a8a39a;--gold:#d4af5a;--gold2:#e6c886;--btntext:#1b1404;--warn:#e07a5f;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 Inter,system-ui,sans-serif;-webkit-text-size-adjust:100%}
+a{color:inherit}
+.wrap{max-width:720px;margin:0 auto;padding:0 max(16px,env(safe-area-inset-right,0px)) 120px max(16px,env(safe-area-inset-left,0px))}
+.top{position:sticky;top:0;z-index:20;background:var(--bg);padding:calc(10px + env(safe-area-inset-top,0px)) 0 10px;border-bottom:1px solid var(--edge)}
+.top .row{display:flex;align-items:center;gap:10px}
+.back{font-size:13px;color:var(--muted);text-decoration:none;white-space:nowrap}
+.draft{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold);border-radius:999px;padding:3px 9px}
+h1{font:700 clamp(28px,7vw,40px)/1.08 Fraunces,Georgia,serif;margin:18px 0 6px;text-wrap:balance}
+.lead{color:var(--muted);margin:0 0 14px;font-size:15px}
+form{display:flex;gap:6px;align-items:center;background:var(--glass);border:1px solid var(--edge);border-radius:999px;padding:5px 5px 5px 16px}
+form:focus-within{border-color:var(--gold)}
+#where{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--ink);font:17px Inter,system-ui,sans-serif;height:44px}
+#where::placeholder{color:var(--muted)}
+.go{height:44px;border:0;border-radius:999px;background:var(--gold);color:var(--btntext);font:700 16px Inter,system-ui,sans-serif;padding:0 20px;cursor:pointer}
+.sub{display:flex;gap:8px;align-items:center;margin:10px 2px 0;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.pill{border:1px solid var(--edge);background:var(--glass);color:var(--ink);border-radius:999px;padding:8px 13px;font:500 14px Inter,system-ui,sans-serif;cursor:pointer;min-height:40px}
+.pill[aria-pressed=true]{background:var(--gold);border-color:var(--gold);color:var(--btntext);font-weight:700}
+.needs{display:flex;gap:8px;overflow-x:auto;margin:14px -16px 0;padding:2px 16px 6px;scrollbar-width:none}
+.needs::-webkit-scrollbar{display:none}
+.needs .pill{flex:none}
+.sos{margin:16px 0 0;padding:12px 14px;border-radius:14px;border:1px solid rgba(224,122,95,.55);background:rgba(224,122,95,.1);font-size:14.5px}
+.sos b{color:var(--warn)}
+.msg{margin:14px 2px;color:var(--muted);font-size:14.5px}
+.choices{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+h2{font:600 13px Inter,system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--gold2);margin:22px 0 8px}
+.card{background:var(--glass);border:1px solid var(--edge);border-radius:16px;padding:14px;margin:0 0 10px}
+.card .t{font-weight:700;font-size:16.5px;line-height:1.25}
+.card .m{color:var(--muted);font-size:14px;margin-top:3px}
+.card .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.act{display:inline-flex;align-items:center;gap:6px;min-height:42px;padding:0 14px;border-radius:999px;border:1px solid var(--edge);background:none;color:var(--ink);font:600 14.5px Inter,system-ui,sans-serif;text-decoration:none;cursor:pointer}
+.act.call{background:var(--gold);border-color:var(--gold);color:var(--btntext)}
+.hot{border-color:var(--gold)}
+.hot .t{font-size:17.5px}
+.hot.slim{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px}.hot.slim .t{font-size:15px}.hot.slim .acts{margin:0;flex:none}
+.num{font-variant-numeric:tabular-nums;font-weight:700}
+.more{width:100%;justify-content:center}
+.note{font-size:13px;color:var(--muted);margin:6px 2px 0}
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--glass2);border-top:1px solid var(--edge);backdrop-filter:blur(10px);padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.dock .row{max-width:720px;margin:0 auto;display:flex;gap:8px}
+.dock button{flex:1;min-height:48px;border-radius:14px;border:1px solid var(--edge);background:none;color:var(--ink);font:700 15px Inter,system-ui,sans-serif;cursor:pointer}
+.dock button.main{background:var(--gold);border-color:var(--gold);color:var(--btntext)}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px;z-index:40}
+textarea.copybox{width:100%;min-height:180px;margin-top:8px;background:var(--surface);color:var(--ink);border:1px solid var(--edge);border-radius:12px;padding:10px;font:14px/1.4 Inter,system-ui,sans-serif}
+@media (prefers-reduced-motion:no-preference){.card{animation:in .25s ease both}@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}}
+</style>
+<style>html[data-style="light"]{color-scheme:light;--bg:#f4f1ea;--glass:rgba(255,255,255,.72);--glass2:rgba(255,255,255,.94);--edge:rgba(30,40,70,.16);--ink:#161a24;--muted:#565d70;--dim:#80879a;--gold:#b8892c;--gold2:#8a6516;
+  --card1:#efe7d6;--card2:#e4dccb;--topbg:rgba(244,241,234,.94);--homebg:#e6dcc4;--roombg:#ddd5c4;--side:rgba(255,255,255,.55)}html[data-style="warm"]{--bg:#140e09;--glass:rgba(52,36,22,.6);--glass2:rgba(62,44,28,.85);--edge:rgba(240,200,150,.16);--ink:#f6ece0;--muted:#c9b49c;--dim:#8f7b66;--gold:#e8a85a;--gold2:#f3c98f;
+  --card1:#3a2816;--card2:#22170d;--topbg:rgba(20,14,9,.92);--homebg:#4a2e17;--roombg:#3a2512;--side:rgba(52,36,22,.7)}html[data-style="forest"]{--bg:#09120e;--glass:rgba(22,44,33,.6);--glass2:rgba(26,52,39,.85);--edge:rgba(170,220,190,.16);--ink:#e9f3ec;--muted:#a3bfae;--dim:#6d8a79;--gold:#d9c27a;--gold2:#ecdca4;
+  --card1:#1d3a2c;--card2:#10221a;--topbg:rgba(9,18,14,.92);--homebg:#1f4433;--roombg:#173426;--side:rgba(22,44,33,.7)}html[data-style="coral"]{--bg:#0e0a0a;--glass:rgba(44,24,21,.6);--glass2:rgba(54,30,26,.86);--edge:rgba(255,170,150,.17);--ink:#fbeee9;--muted:#d6b5ab;--dim:#937a72;--gold:#ff7a59;--gold2:#ffab90;
+  --card1:#3d1c17;--card2:#1d0f0d;--topbg:rgba(14,10,10,.92);--homebg:#5a2117;--roombg:#3f1a13;--side:rgba(44,24,21,.7)}html[data-style="contrast"]{--bg:#000;--glass:#000;--glass2:#000;--edge:#fff;--ink:#fff;--muted:#f0f0f0;--dim:#d0d0d0;--gold:#ffd60a;--gold2:#ffd60a;
+  --card1:#111;--card2:#000;--topbg:#000;--homebg:#000;--roombg:#000;--side:#000}html[data-style="linen"]{color-scheme:light;--bg:#f4f1eb;--glass:rgba(255,255,255,.9);--glass2:#fbfaf7;--edge:rgba(40,38,48,.14);--ink:#2b2a31;--muted:#66626d;--dim:#95919b;
+  --gold:#8a7083;--gold2:#6c5667;--card1:#ebe6de;--card2:#e3ddd3;--topbg:rgba(244,241,235,.94);--homebg:#ece6dc;--roombg:#e7e2d9;--side:rgba(255,255,255,.7)}html[data-style="dusk"]{--bg:#18171c;--glass:rgba(40,38,46,.7);--glass2:rgba(46,44,53,.92);--edge:rgba(220,215,230,.12);--ink:#e7e4ea;--muted:#aaa5b0;--dim:#7d7884;
+  --gold:#b897a9;--gold2:#d6c0cc;--card1:#2a2730;--card2:#1e1c22;--topbg:rgba(24,23,28,.92);--homebg:#2a2530;--roombg:#201e25;--side:rgba(40,38,46,.75)}html[data-style="gray"]{color-scheme:light;--bg:#f6f6f6;--glass:rgba(255,255,255,.94);--glass2:#fff;--edge:rgba(0,0,0,.14);--ink:#161616;--muted:#555;--dim:#888;
+  --gold:#3d3d3d;--gold2:#222;--card1:#ececec;--card2:#e2e2e2;--topbg:rgba(246,246,246,.94);--homebg:#ececec;--roombg:#e6e6e6;--side:rgba(255,255,255,.7)}html[data-style="light"]{color-scheme:light;--bg:#e9e1d3;--surface:#f3ede2;--surface2:#e0d5c2;--glass:rgba(247,242,233,.78);--glass2:rgba(247,242,233,.95);--edge:rgba(60,45,25,.16);--line:rgba(60,45,25,.16);--ink:#1f1b16;--muted:#5c5446;--dim:#857a68;--gold:#a87a2a;--gold2:#7d5a18;--goldlight:#7d5a18;--fx-p1:#e3d9c8;--fx-p2:#f3ede2;--fx-p2a:rgba(243,237,226,.94);--fx-p3:#ddd1bd;--fx-topbg:rgba(233,225,211,.94)}html[data-style="dark"]{color-scheme:dark;${DARK}</style><script>// Color styles added 11 Nov 2026 (Daniel: "add in the study parchment, the private bank slate, the charcoal and gold ... use charcoal
+// and gold to replace our current dark navy ... keep the other colors"). Shared by the main app, Serve and Speakers so all three match.
+// The default Dark becomes Charcoal and gold; Study parchment and Private bank slate are new light styles that get every Light-only rule.
+(() => {
+  // Light was retired 11 Nov 2026: anyone who had it gets Study parchment (the nearest match); the parent's write reaches Serve and Speakers too
+  // Soft linen retired too (11 Nov 2026) and goes to parchment; a dropped draft style goes back to Dark
+  const GONE = {light: "parchment", linen: "parchment", bank: "parchment", d_sanctuary: "dark", d_riverstone: "dark", d_cedar: "dark", d_olive: "dark", d_aubergine: "dark", d_covenant: "dark", d_ivory: "dark", d_sage: "dark", d_oat: "parchment", d_midnight: "dark", d_walnut: "dark", d_desert: "dark"};
+  try { const s = localStorage.getItem("prl-style"); if (GONE[s]) localStorage.setItem("prl-style", GONE[s]); } catch (e) {}
+  { const s = document.documentElement.dataset.style; if (GONE[s]) { if (GONE[s] === "dark") delete document.documentElement.dataset.style; else document.documentElement.dataset.style = GONE[s]; } }
+  const DARK ="--bg:#141414;--room:#181818;--wall:#1c1c1c;--surface:#1f1f1f;--surface2:#2a2826;--panel:#1f1f1f;--panel2:#2a2826;"
+    + "--glass:rgba(36,34,31,.62);--glass2:rgba(42,40,36,.88);--edge:rgba(240,230,210,.14);--line:rgba(240,230,210,.14);"
+    + "--ink:#f2efe9;--muted:#a8a39a;--fade:#a8a39a;--dim:#77726a;--gold:#d4af5a;--gold2:#e6c886;--goldlight:#e6c886;"
+    + "--card1:#2a2824;--card2:#1d1c1a;--topbg:rgba(20,20,20,.92);--homebg:#2b2925;--roombg:#22211e;--side:rgba(36,34,31,.75);"
+    + "--fx-p1:#181818;--fx-p2:#1f1f1f;--fx-p2a:rgba(31,31,31,.93);--fx-p3:#2a2826;--fx-topbg:rgba(20,20,20,.92)";
+  const LIGHT = {
+    parchment: "--bg:#e3d8c4;--room:#ddd0b8;--wall:#e8dfcd;--surface:#ede5d5;--surface2:#d6c8ad;--panel:#ede5d5;--panel2:#d6c8ad;"
+      + "--glass:rgba(237,229,213,.82);--glass2:rgba(240,233,220,.96);--edge:rgba(60,45,25,.16);--line:rgba(60,45,25,.16);"
+      + "--ink:#2a2318;--muted:#685d4a;--fade:#685d4a;--dim:#8a7d68;--gold:#8c5a2b;--gold2:#6d4420;--goldlight:#6d4420;"
+      + "--card1:#ddd0b8;--card2:#ede5d5;--topbg:rgba(227,216,196,.94);--homebg:#d8cab0;--roombg:#ddd0b8;--side:rgba(237,229,213,.8);"
+      + "--fx-p1:#ddd0b8;--fx-p2:#ede5d5;--fx-p2a:rgba(237,229,213,.94);--fx-p3:#d6c8ad;--fx-topbg:rgba(227,216,196,.94)",
+    bank: "--bg:#eceff3;--room:#e2e7ee;--wall:#f2f4f7;--surface:#ffffff;--surface2:#e2e7ee;--panel:#ffffff;--panel2:#e2e7ee;"
+      + "--glass:rgba(255,255,255,.82);--glass2:rgba(255,255,255,.96);--edge:rgba(24,32,44,.14);--line:rgba(24,32,44,.14);"
+      + "--ink:#18202c;--muted:#5a6577;--fade:#5a6577;--dim:#8590a0;--gold:#2c4a7a;--gold2:#1f3760;--goldlight:#1f3760;"
+      + "--card1:#e2e7ee;--card2:#ffffff;--topbg:rgba(236,239,243,.94);--homebg:#dfe5ee;--roombg:#e2e7ee;--side:rgba(255,255,255,.8);"
+      + "--fx-p1:#e2e7ee;--fx-p2:#ffffff;--fx-p2a:rgba(255,255,255,.95);--fx-p3:#dde3eb;--fx-topbg:rgba(236,239,243,.94)"};
+  // Styles first drafted by ChatGPT and Gemini, kept by Daniel on 11 Nov 2026 (the others were dropped). Built from their 7 colors.
+  // [id, name, light?, page, panel, text, muted, buttons, button text]
+  const DRAFTS = [
+    ["d_merlot", "Frost and merlot", 1, "#F1F0EC", "#FFFFFF", "#242731", "#555963", "#6B3347", "#FFFFFF"],
+    ["d_mist", "Morning mist", 1, "#D1D9E0", "#E8ECEF", "#1C2B36", "#4A5D6B", "#2E5A7A", "#FFFFFF"],
+    ["d_harvest", "Autumn harvest", 1, "#fdfbf7", "#f4efe6", "#382e28", "#6b5f57", "#9e5b43", "#ffffff"],
+    ["d_alabaster", "Alabaster and sage", 1, "#f9f8f6", "#ffffff", "#2f332e", "#626760", "#587054", "#ffffff"],
+    ["d_evergreen", "Deep evergreen", 0, "#121d1b", "#20302d", "#f3f0e8", "#b6c1b9", "#cf9675", "#17221f"],
+    ["d_vespers", "Vespers", 0, "#0f141e", "#1a2130", "#eaecef", "#8b99a8", "#c29b62", "#12161f"],
+    ["d_crimson", "Midnight crimson", 0, "#16161a", "#232329", "#f0f0f2", "#94949c", "#8c4a4a", "#ffffff"],
+    ["d_petrol", "Petrol and sand", 0, "#0F2930", "#20444B", "#F2F1EA", "#BBCFD0", "#E1B17C", "#1D2A30"]];
+  const rgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const hx = a => "#" + a.map(v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, "0")).join("");
+  const mix = (a, b, t) => hx(rgb(a).map((v, i) => v * (1 - t) + rgb(b)[i] * t));
+  const rgba = (h, a) => `rgba(${rgb(h).join(",")},${a})`;
+  const mk = (bg, pn, ink, mu, ac, light) => { const p2 = light ? mix(bg, ink, .07) : mix(pn, "#ffffff", .06), g2 = light ? mix(ac, "#000000", .22) : mix(ac, "#ffffff", .25);
+    return `--bg:${bg};--room:${p2};--wall:${mix(bg, pn, .5)};--surface:${pn};--surface2:${p2};--panel:${pn};--panel2:${p2};--glass:${rgba(pn, light ? .82 : .7)};--glass2:${rgba(pn, light ? .96 : .9)};`
+      + `--edge:${rgba(ink, .14)};--line:${rgba(ink, .14)};--ink:${ink};--muted:${mu};--fade:${mu};--dim:${mix(mu, bg, .35)};--gold:${ac};--gold2:${g2};--goldlight:${g2};`
+      + `--card1:${p2};--card2:${pn};--topbg:${rgba(bg, .94)};--homebg:${p2};--roombg:${p2};--side:${rgba(pn, .8)};--fx-p1:${p2};--fx-p2:${pn};--fx-p2a:${rgba(pn, .94)};--fx-p3:${p2};--fx-topbg:${rgba(bg, .94)}`; };
+  const BTNTXT = {parchment: "#fff", bank: "#fff"}, DARKS = {};
+  const HERO0 = {}, HV0 = {};
+  for (const [id, , light, bg, pn, ink, mu, ac, bt] of DRAFTS) {
+    (light ? LIGHT : DARKS)[id] = mk(bg, pn, ink, mu, ac, light); BTNTXT[id] = bt;
+    HV0[id] = [ink, mu, light ? mix(ac, "#000000", .22) : ac]; if (light) HERO0[id] = [mix(ac, "#000000", .22), mu]; }
+  const css = [`html:not([data-style]):root,html[data-style="dark"]:root{color-scheme:dark;${DARK}}`];
+  for (const k in LIGHT) css.push(`html[data-style="${k}"]:root{color-scheme:light;${LIGHT[k]}}`);
+  for (const k in DARKS) css.push(`html[data-style="${k}"]:root{color-scheme:dark;${DARKS[k]}}`);
+  // every rule written for Light (button text, borders, pictures ...) also applies to the two new light styles
+  for (const sh of document.styleSheets) { let rs; try { rs = sh.cssRules; } catch (e) { continue; }
+    for (const r of rs) { const s = r.selectorText; if (!s || !s.includes('[data-style="light"]') || /^html\[data-style="light"\](:root)?$/.test(s.trim())) continue;
+      for (const k in LIGHT) css.push(r.cssText.split('[data-style="light"]').join(`[data-style="${k}"]`)); } }
+  // the two new light styles have darker buttons (brown, navy): white button text reads better there
+  const BTN = ".findbtn,.go,.btn.gold,.rgo,.rmdone,.rqinfo .btn.gold,.rhead .rqadd,#appKitN,.seg button[aria-pressed=true],.segn button[aria-pressed=true],.langs button[aria-pressed=true],.ptabs button.on,.ptabs button[aria-current=true],.kittabs+*,.hubbar .findbtn,#planForm .findbtn,form#searchForm .findbtn,.seg button.on,.rqtile.hot .k";
+  for (const k in BTNTXT) css.push(`html[data-style="${k}"] :is(${BTN}){color:${BTNTXT[k]}!important}`);
+  // Serve's opening picture: its small lines were a fixed pale gold that only reads on dark pages (also on Light, Soft linen, Black and white)
+  // (the picture area sets its own pale gold, so each style gets its own darker colors here)
+  const HERO = {light: ["#7d5a18", "#4a4236"], linen: ["#6c5667", "#55515c"], gray: ["#222222", "#444444"], parchment: ["#6d4420", "#544a3a"], bank: ["#1f3760", "#47526a"], ...HERO0};
+  // the picture area sets its own text, muted and gold colors (made for the old navy); give it each style's own instead
+  const HV = {dark: ["#f2efe9", "#cfc9bf", "#d4af5a"], warm: ["#f6ece0", "#c9b49c", "#e8a85a"], forest: ["#e9f3ec", "#a3bfae", "#d9c27a"], coral: ["#fbeee9", "#d6b5ab", "#ff7a59"],
+    dusk: ["#e7e4ea", "#aaa5b0", "#b897a9"], contrast: ["#ffffff", "#f0f0f0", "#ffd60a"], light: ["#1f1b16", "#4a4236", "#7d5a18"], linen: ["#2b2a31", "#55515c", "#6c5667"],
+    gray: ["#161616", "#444444", "#222222"], parchment: ["#2a2318", "#544a3a", "#6d4420"], bank: ["#18202c", "#47526a", "#1f3760"], ...HV0};
+  for (const k in HV) css.push(`${k === "dark" ? 'html:not([data-style]) .hero,' : ""}html[data-style="${k}"] .hero{--ink:${HV[k][0]}!important;--muted:${HV[k][1]}!important;--gold:${HV[k][2]}!important}`);
+  for (const k in HERO) css.push(`html[data-style="${k}"] body .hero-links #heroPlan{background:rgba(255,255,255,.72)!important;color:${HERO[k][0]}!important}`);
+  for (const k in HERO) css.push(`html[data-style="${k}"] .hero p{color:${HERO[k][1]}!important}html[data-style="${k}"] .hero :is(.eyebrow,.kicker,.text-btn,.text-btn *){color:${HERO[k][0]}!important}`);
+  // Daniel, 11 Nov 2026: "if this is a color that is chosen, everything should match this color" (e.g. Plan to serve's "Tell the
+  // coordinator" box stayed navy). Boxes Serve drew in fixed navy now take the chosen style's own panel color, in every style.
+  css.push(`html :is(.pcard,#tellBox,.kitpanel,.invite){background:var(--glass)!important;border-color:var(--edge)!important}`
+    + `html body .hero-links #heroPlan,html body .hero-links #heroPlan *{background:var(--glass2)!important;border-color:var(--edge)!important;color:var(--ink)!important}html body .hero-links #heroPlan *{background:none!important}`
+    + `html #installBar{background:var(--glass2)!important;color:var(--ink)!important;border-color:var(--edge)!important}`);
+  // Light styles: text Serve wrote in fixed pale colors (made for dark pages) now uses the style's own text colors, and small gold
+  // labels use the deeper gold so they read on a light page
+  const LF = 'html:is(' + ["light", "linen", "gray", ...Object.keys(LIGHT)].map(k => `[data-style="${k}"]`).join(",") + ')';
+  css.push(`${LF} :is(.kitsteps>div,.vcard p.mh,.ppanel li,.why li,.kitintro h2,.kitintro p,.pcard,.pcard :is(p,span,b,h4,label,li),#tellBox :is(h4,label),.irow span){color:var(--ink)!important}`
+    + `${LF} :is(.meta,.tags>span,.tag,.pcard .hint,.pcard .note,.note,.hint,.wtitle,#rTitle,.subhint){color:var(--muted)!important}`
+    + `${LF} :is(.eyebrow,.text-btn,.prbtn,#vRef,.pveye,.preview-label,#wEye,#tEye,.btn.outline,#churchLink,.save-btn,.kitactions .btn.outline,#mbLead .on){color:var(--gold2)!important}`
+    + `${LF} #chCopy h1{color:var(--ink)!important}${LF} #chCopy .chtown{color:var(--muted)!important}`
+    + `${LF} :is(#mbDays,#mbFmt,#mbLead) button{color:var(--ink)!important;border-color:var(--edge)!important}`);
+  // readability pass, 11 Nov 2026 (Daniel: "keep the color but fix what needs to be fixed for each one")
+  const DF = 'html:is(' + Object.keys(DARKS).map(k => `[data-style="${k}"]`).join(",") + ')';
+  css.push(`html[data-style="gray"] :is(${BTN}){color:#fff!important}html[data-style="gray"] #chForm .btn.gold{background:#3d3d3d!important}`   // Black and white: buttons are dark gray, so white text
+    + `${DF} :is(.kitintro h2,.kitintro p){color:var(--ink)!important}${DF} #out .ghead,${DF} .ghead{color:var(--gold2)!important}`   // the kit headline and Speakers group headings were dark on dark
+    + `html .scale span em{color:var(--muted)!important;font-weight:600}`   // Map room "Fewer / More" key
+    // Midnight crimson: its red reads as a button color but is too dark for small text on the dark page, so small red text uses a lighter red
+    + `html[data-style="d_crimson"] :is(.eyebrow,.k,#wEye,#tEye,.pveye,#vRef,.preview-label,.why summary,.chip.need,.igroup h4,.pcard h4,.pcard header b,b>a,span>b,.text-btn,.prbtn,#churchLink,.btn.outline,.save-btn,.kitlink button,.invite p,#mbLead .on,header>b,.meta .gold){color:#c98282!important}`
+    + `html[data-style="d_crimson"] #pvStep{color:#fff!important}`
+    // ChatGPT's readability review (11 Nov 2026): slightly stronger helper text and outlines per style, same colors, just a shade
+    // further from the background ([muted text, outline border]; null = leave as is)
+    + Object.entries({dark: ["#ada79d", "#92877a"], parchment: ["#625548", "#82705c"], d_vespers: ["#b8c0ce", "#8e98aa"], d_merlot: [null, "#827b83"],
+        d_petrol: ["#c5d4d0", "#80a7a8"], d_mist: ["#465663", "#667b8b"], d_evergreen: ["#c0d0c8", "#91ab9c"], d_alabaster: ["#586a58", "#758974"],
+        d_harvest: ["#5c4d43", null], d_crimson: ["#b6adb2", "#bc7e86"], forest: ["#b6c3b1", "#91a689"], warm: ["#c6b6a5", "#987c64"], dusk: ["#b6b0c0", "#988a9c"], coral: [null, "#b0776b"], gray: ["#525252", "#888888"]})
+      .map(([k, [mu, bd]]) => { const s = k === "dark" ? 'html:not([data-style]),html[data-style="dark"]' : `html[data-style="${k}"]`;
+        return (mu ? s.split(",").map(x => `${x}:root`).join(",") + `{--muted:${mu}!important;--fade:${mu}!important}` : "")
+          + (bd ? s.split(",").map(x => `${x} :is(.btn.outline,.kitactions .btn,.acts .btn:not(.gold),.save-btn,.chip:not(.need))`).join(",") + `{border-color:${bd}!important}` : ""); }).join("")
+    // Connect your church with its photo: the light styles had turned the headline dark on the dark photo (Daniel's phone, 11 Nov 2026)
+    + `html body #chBand:has(#chPhoto[src]:not([src=""])) #chCopy :is(h1,h2,p,.eyebrow,.chtown,span){color:#fff!important;text-shadow:0 1px 10px rgba(0,0,0,.55)}`
+    // Serve's bottom kit bar on phones was fixed navy with faint text; it now takes the chosen style's own colors
+    + `html body .phone-kit{background:var(--glass2,var(--surface))!important;color:var(--ink)!important;border-top:1px solid var(--edge)!important}html body .phone-kit button{color:var(--gold2,var(--gold))!important;font-weight:700}`
+    // Connect your church: the Save button had no fill in the ChatGPT/Gemini styles, so its text vanished
+    + `html:is([data-style^="d_"],[data-style="parchment"]) #chForm .btn.gold{background:var(--gold)!important;border-color:var(--gold)!important}`);
+  css.push(`html:is([data-style="light"],[data-style="linen"]) .acts .btn.gold{color:#1b1404!important}html:is([data-style="parchment"],[data-style="bank"]) .acts .btn.gold{color:#fff!important}`
+    + Object.keys(BTNTXT).filter(k => k.startsWith("d_")).map(k => `html[data-style="${k}"] .acts .btn.gold{color:${BTNTXT[k]}!important}`).join("")
+    + `html body form.sbar:not(.follow),html body #planForm.sbar{background:var(--glass)!important;border-color:var(--edge)!important}`);
+  // ChatGPT's review (11 Nov 2026): the faded side cards in each row looked disabled. Keep them nearly full strength.
+  css.push(".tile:not(.hot),.rqtile:not(.hot){opacity:.92!important}.rqtile:not(.hot):hover{opacity:1!important}");
+  const st = document.createElement("style"); st.id = "stylePlus"; st.textContent = css.join("\n"); document.head.append(st);
+  // the color pickers: Dark shows charcoal and gold, and the two new styles sit right after Light
+  if (typeof STYLES !== "undefined" && Array.isArray(STYLES) && !STYLES.some(s => s[0] === "parchment")) {
+    STYLES[0][2] = "#141414"; STYLES[0][3] = "#d4af5a";
+    const li = STYLES.findIndex(s => s[0] === "light");
+    // Daniel, 11 Nov 2026: of Light, Study parchment and Oat & Walnut keep only Study parchment (name stays); Light leaves the list
+    STYLES.splice(li, 1, ["parchment", "Study parchment", "#e3d8c4", "#8c5a2b"]);   // Private bank slate removed by Daniel, 11 Nov 2026
+    { const ln = STYLES.findIndex(s => s[0] === "linen"); if (ln >= 0) STYLES.splice(ln, 1); }
+    // the kept ChatGPT/Gemini styles are regular choices now (no ?colors=draft needed)
+    STYLES.push(...DRAFTS.map(([id, name, light, bg, , , , ac]) => [id, name, bg, ac]));
+    // Daniel, 11 Nov 2026: the default first, then the most professional and best looking; High contrast (an accessibility choice) last
+    const ORDER = ["dark", "parchment", "d_vespers", "d_merlot", "d_petrol", "d_mist", "d_evergreen", "d_alabaster", "d_harvest", "d_crimson", "forest", "warm", "dusk", "coral", "gray", "contrast"];
+    const rank = v => { const i = ORDER.indexOf(v); return i < 0 ? 99 : i; };
+    STYLES.sort((x, y) => rank(x[0]) - rank(y[0]));
+    const cur = document.documentElement.dataset.style || "dark";
+    ["setStyle", "pgStyle"].forEach(id => { const box = document.getElementById(id); if (!box) return;
+      box.innerHTML = STYLES.map(([v, l, bg, ac]) => `<button type="button" data-s="${v}" aria-pressed="${v === cur}"><i style="background:radial-gradient(circle,${ac} 0 38%,${bg} 40%)"></i>${l}</button>`).join(""); });
+  }
+  })();
+</script>
+<div class="wrap">
+  <div class="top"><div class="row"><a class="back" href="../" id="backLink">← My Pastor Resource List</a><span class="draft">Draft</span></div></div>
+  <h1>Get help</h1>
+  <p class="lead">Someone called needing help? Type their town or ZIP, pick what they need, then copy the list into a text or email.</p>
+  <form id="f" role="search"><input id="where" type="search" inputmode="search" autocomplete="off" placeholder="Town, state or ZIP (like Charlotte, NC)" aria-label="Town, state or ZIP"><button class="go" type="submit">Search</button></form>
+  <div class="sub"><button type="button" class="pill" id="nearMe">◎ Near me</button><span id="last"></span></div>
+  <div class="needs" id="needs" role="group" aria-label="What do they need?"></div>
+  <div class="sos"><b>In danger right now?</b> Call <a class="num" href="tel:911">911</a>. Thinking about suicide or in crisis? Call or text <a class="num" href="tel:988">988</a>.</div>
+  <div id="out"></div>
+</div>
+<div class="dock" id="dock" hidden><div class="row"><button type="button" class="main" id="cpText">Copy for text</button><button type="button" id="cpMail">Copy for email</button></div></div>
+<script>
+(() => {
+  const $ = id => document.getElementById(id), esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+  const ls = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } };
+  // the app's color style
+  try { const st = localStorage.getItem("prl-style"); if (st && st !== "dark") document.documentElement.dataset.style = st; } catch (e) {}
+  if (new URLSearchParams(location.search).has("embed")) $("backLink").hidden = true;
+  // ---- needs: each has a hotline first, which kinds of help places match, and a few trusted websites ----
+  // help place kinds (k): 0 food, 1 shelter and housing, 2 rent, bills and energy, 3 clothing and household, 4 health and clinics
+  const L211 = {t: "211 (United Way)", d: "Free, confidential, 24/7. A local helper finds food, rent, bill and shelter help near them.", call: "211", text: "211", show: "211"};
+  const NEEDS = [
+    {id: "all", label: "Any help", k: null, hot: [L211], web: [["Findhelp.org: every free program near a ZIP", "https://www.findhelp.org/"]]},
+    {id: "money", label: "Money and bills", k: [2], words: /financ|rent|bill|utilit|energy|heat/i, hot: [L211], web: [["LIHEAP: help with heating and cooling bills", "https://www.acf.hhs.gov/ocs/low-income-home-energy-assistance-program-liheap"], ["Findhelp.org: rent and bill programs", "https://www.findhelp.org/"]]},
+    {id: "food", label: "Food", k: [0], hot: [{t: "USDA National Hunger Hotline", d: "Weekdays. Finds food pantries, meals and SNAP help.", call: "18663486479", show: "1-866-348-6479"}, L211], web: [["Feeding America: find the local food bank", "https://www.feedingamerica.org/find-your-local-foodbank"]]},
+    {id: "housing", label: "Housing and shelter", k: [1], hot: [L211], web: [["HUD: find shelter and housing help", "https://www.hud.gov/topics/rental_assistance"]]},
+    {id: "mental", label: "Mental health", k: null, words: /mental|counsel|behavior/i, hot: [{t: "988 Suicide and Crisis Lifeline", d: "Call or text 988, 24/7. Veterans press 1.", call: "988", text: "988", show: "988"}, {t: "NAMI HelpLine", d: "Weekdays. Mental health information and support.", call: "18009506264", show: "1-800-950-6264"}], web: [["988lifeline.org (chat online too)", "https://988lifeline.org/"]]},
+    {id: "addiction", label: "Addiction", k: null, words: /recover|addict|substance|alcohol|drug|detox|sober/i, hot: [{t: "SAMHSA National Helpline", d: "Free, confidential, 24/7, English and Spanish. Treatment and support groups.", call: "18006624357", show: "1-800-662-4357"}], web: [["FindTreatment.gov", "https://findtreatment.gov/"]]},
+    {id: "family", label: "Family and safety", k: null, words: /domestic|violence|abuse|women|safe ?house|crisis/i, hot: [{t: "National Domestic Violence Hotline", d: "24/7. Call, or text START to 88788.", call: "18007997233", show: "1-800-799-7233"}, {t: "Childhelp Child Abuse Hotline", d: "24/7, for children, parents and anyone worried about a child.", call: "18004224453", show: "1-800-422-4453"}], web: [["thehotline.org (chat online too)", "https://www.thehotline.org/"]]},
+    {id: "health", label: "Health and clinics", k: [4], hot: [L211], web: [["Find a free or low-cost health center", "https://findahealthcenter.hrsa.gov/"]]},
+    {id: "legal", label: "Legal help", k: null, words: /legal|law|attorney/i, hot: [L211], web: [["LawHelp.org: free legal aid by state", "https://www.lawhelp.org/"], ["Legal Services Corporation: find legal aid", "https://www.lsc.gov/about-lsc/what-legal-aid/get-legal-help"]]},
+    {id: "clothing", label: "Clothing and household", k: [3], hot: [L211], web: [["Findhelp.org: clothing and household goods", "https://www.findhelp.org/"]]}];
+  const ADV = ["Adventist Community Services: local church help centers", "https://www.communityservices.org/"];
+  let need = ls("gh-need") || "all"; if (!NEEDS.find(n => n.id === need)) need = "all";
+  $("needs").innerHTML = NEEDS.map(n => `<button type="button" class="pill" data-n="${n.id}" aria-pressed="${n.id === need}">${esc(n.label)}</button>`).join("");
+  // ---- places: town or ZIP -> lat/lon (Census gazetteer), then that area's help places, one state file at a time ----
+  let GEO = null, BOX = null; const HELP = {};
+  const geo = () => GEO ? Promise.resolve() : Promise.all([fetch("geo.json").then(r => r.json()), fetch("../serve/states.json").then(r => r.json())]).then(([g, b]) => { GEO = g; BOX = b; });
+  const ST = {alabama:"AL",alaska:"AK",arizona:"AZ",arkansas:"AR",california:"CA",colorado:"CO",connecticut:"CT",delaware:"DE",florida:"FL",georgia:"GA",hawaii:"HI",idaho:"ID",illinois:"IL",indiana:"IN",iowa:"IA",kansas:"KS",kentucky:"KY",louisiana:"LA",maine:"ME",maryland:"MD",massachusetts:"MA",michigan:"MI",minnesota:"MN",mississippi:"MS",missouri:"MO",montana:"MT",nebraska:"NE",nevada:"NV","new hampshire":"NH","new jersey":"NJ","new mexico":"NM","new york":"NY","north carolina":"NC","north dakota":"ND",ohio:"OH",oklahoma:"OK",oregon:"OR",pennsylvania:"PA","rhode island":"RI","south carolina":"SC","south dakota":"SD",tennessee:"TN",texas:"TX",utah:"UT",vermont:"VT",virginia:"VA",washington:"WA","west virginia":"WV",wisconsin:"WI",wyoming:"WY","district of columbia":"DC"};
+  const fl = s => s.toLowerCase().replace(/^st\.?\s/, "saint ").replace(/[^a-z ]/g, " ").replace(/\s+/g, " ").trim();
+  function findPlace(q) {   // -> {lat, lon, label} or {choices: [...]} or null
+    const z = (q.match(/\b\d{5}\b/) || [])[0];
+    if (z && GEO.z[z]) return {lat: GEO.z[z][0], lon: GEO.z[z][1], label: "ZIP " + z};
+    let s = q.replace(/\b\d{5}(-\d{4})?\b/, "").trim(), st = "";
+    const parts = s.split(",").map(x => x.trim()).filter(Boolean);
+    if (parts.length >= 2) { const last = parts[parts.length - 1]; st = ST[fl(last)] || (/^[a-z]{2}$/i.test(last) ? last.toUpperCase() : ""); if (st) s = parts.slice(-2, -1)[0]; }
+    if (!st) { const m = s.match(/\s([A-Za-z]{2})$/); if (m && Object.values(ST).includes(m[1].toUpperCase())) { st = m[1].toUpperCase(); s = s.slice(0, m.index); } }
+    if (!st) { const full = Object.keys(ST).sort((a, b) => b.length - a.length).find(n => fl(s).endsWith(" " + n)); if (full) { st = ST[full]; s = fl(s).slice(0, -full.length); } }
+    const name = fl(s); if (!name) return null;
+    const hits = Object.keys(GEO.p).filter(k => { const [n, ks] = k.split("|"); return fl(n) === name && (!st || ks === st); });
+    if (!hits.length) return null;
+    if (hits.length > 1 && !st) return {choices: hits.slice(0, 8)};
+    const k = hits[0], [n, ks] = k.split("|"); return {lat: GEO.p[k][0], lon: GEO.p[k][1], label: `${n}, ${ks}`};
+  }
+  const mi = (a, b, c, d) => { const r = Math.PI / 180, x = Math.sin((c - a) * r / 2) ** 2 + Math.cos(a * r) * Math.cos(c * r) * Math.sin((d - b) * r / 2) ** 2; return 3958.8 * 2 * Math.asin(Math.sqrt(x)); };
+  const statesNear = (lat, lon, r) => Object.keys(BOX).filter(k => { const [x0, y0, x1, y1] = BOX[k], dy = r / 69, dx = r / (69 * Math.max(.2, Math.cos(lat * Math.PI / 180))); return lon >= x0 - dx && lon <= x1 + dx && lat >= y0 - dy && lat <= y1 + dy; });
+  const load = sts => Promise.all(sts.filter(s => !HELP[s]).map(s => fetch(`../help/${s}.json`).then(r => r.ok ? r.json() : []).catch(() => []).then(a => { HELP[s] = a; })));
+  // ---- search and draw ----
+  let at = null, rows = [], shown = 5;
+  const N = () => NEEDS.find(n => n.id === need);
+  function pick() {
+    const n = N(), all = Object.values(HELP).flat();
+    return all.filter(p => p.lat && (n.id === "all" || (n.k && (p.k || []).some(k => n.k.includes(k))) || (n.words && n.words.test(`${p.n} ${p.h} ${p.note || ""}`))))
+      .map(p => ({p, d: mi(at.lat, at.lon, p.lat, p.lon)})).filter(r => r.d <= 75).sort((a, b) => a.d - b.d)
+      .filter((r, i, a) => { const key = tel(r.p.ph) || r.p.n; return a.findIndex(x => (tel(x.p.ph) || x.p.n) === key && x.p.t === r.p.t) === i; });
+  }
+  const svc = p => (p.h || "").split(";")[0].trim(), addr = p => ((p.h || "").split(";")[1] || "").trim();
+  const tel = s => (s || "").replace(/[^\d+]/g, "");
+  const dirs = p => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent([p.n, addr(p), p.t, p.s].filter(Boolean).join(", "));
+  function draw() {
+    const n = N(); let h = "";
+    h += `<h2>Call first</h2>` + n.hot.map(x => at ? `<div class="card hot slim"><div class="t">${esc(x.t)}</div><div class="acts"><a class="act call" href="tel:${x.call}">✆ <span class="num">${esc(x.show)}</span></a>${x.text ? `<a class="act" href="sms:${x.text}">✉ Text</a>` : ""}</div></div>` : `<div class="card hot"><div class="t">${esc(x.t)}</div><div class="m">${esc(x.d)}</div><div class="acts"><a class="act call" href="tel:${x.call}">✆ Call <span class="num">${esc(x.show)}</span></a>${x.text ? `<a class="act" href="sms:${x.text}">✉ Text</a>` : ""}</div></div>`).join("");
+    if (at) {
+      h += `<h2>Nearest to ${esc(at.label)}</h2>`;
+      if (!rows.length) h += `<p class="msg">No ${n.id === "all" ? "" : esc(n.label.toLowerCase()) + " "}places on our list within 75 miles yet. 211 above can find more.</p>`;
+      h += rows.slice(0, shown).map(({p, d}) => `<div class="card"><div class="t">${esc(p.n)}</div><div class="m">${esc(svc(p))}</div><div class="m">${esc(p.t)}, ${esc(p.s)} · ${d < 1 ? "under 1" : Math.round(d)} mi${addr(p) ? " · " + esc(addr(p)) : ""}</div>
+        <div class="acts">${tel(p.ph).length >= 7 ? `<a class="act call" href="tel:${tel(p.ph)}">✆ <span class="num">${esc(p.ph)}</span></a>` : ""}<a class="act" href="${dirs(p)}" target="_blank" rel="noopener">➤ Directions</a>${p.u ? `<a class="act" href="${esc(p.u)}" target="_blank" rel="noopener">Website ↗</a>` : ""}</div></div>`).join("");
+      if (rows.length > shown) h += `<button type="button" class="act more" id="more">Show 5 more (${rows.length - shown} left)</button>`;
+      h += `<p class="note">Call ahead: hours and help change.</p>`;
+    } else h += `<p class="msg">Type a town or ZIP above to see the nearest places.</p>`;
+    h += `<h2>Helpful websites</h2>` + [...n.web, ADV].map(([t, u]) => `<div class="card"><div class="t">${esc(t)}</div><div class="acts"><a class="act" href="${esc(u)}" target="_blank" rel="noopener">Open ↗</a></div></div>`).join("");
+    $("out").innerHTML = h; $("dock").hidden = false;
+  }
+  async function search(q) {
+    q = (q || "").trim(); if (!q) { $("where").focus(); return; }
+    $("out").innerHTML = `<p class="msg">Looking…</p>`;
+    try { await geo(); } catch (e) { $("out").innerHTML = `<p class="msg">Could not load the town list. Check the internet connection and try again.</p>`; return; }
+    const f = findPlace(q);
+    if (!f) { $("out").innerHTML = `<p class="msg">We could not find “${esc(q)}”. Try a ZIP, or a town and state like Charlotte, NC.</p>`; return; }
+    if (f.choices) { $("out").innerHTML = `<p class="msg">Which one?</p><div class="choices">${f.choices.map(k => `<button type="button" class="pill" data-ch="${esc(k)}">${esc(k.replace("|", ", "))}</button>`).join("")}</div>`; return; }
+    useSpot(f);
+  }
+  async function useSpot(f) {
+    at = f; ls("gh-last", f.label); $("last").textContent = "";
+    await load(statesNear(f.lat, f.lon, 75)); rows = pick(); shown = 5; draw();
+  }
+  $("f").onsubmit = e => { e.preventDefault(); $("where").blur(); search($("where").value); };
+  $("needs").onclick = e => { const b = e.target.closest("[data-n]"); if (!b) return; need = b.dataset.n; ls("gh-need", need);
+    $("needs").querySelectorAll("[data-n]").forEach(x => x.setAttribute("aria-pressed", String(x === b))); if (at) rows = pick(); shown = 5; draw(); };
+  $("out").onclick = e => { const c = e.target.closest("[data-ch]"); if (c) { $("where").value = c.dataset.ch.replace("|", ", "); search($("where").value); return; }
+    if (e.target.closest("#more")) { shown += 5; draw(); } };
+  $("nearMe").onclick = () => { if (!navigator.geolocation) return toast("This phone did not share its location.");
+    navigator.geolocation.getCurrentPosition(p => { $("where").value = ""; useSpot({lat: p.coords.latitude, lon: p.coords.longitude, label: "your location"}); }, () => toast("Location was not shared. Type the town instead."), {timeout: 10000}); };
+  // ---- copy for a text (short) or an email (fuller) ----
+  function copyText(full) {
+    const n = N(), list = rows.slice(0, shown), L = [];
+    L.push(`${n.id === "all" ? "Help" : n.label} near ${at ? at.label : "you"}:`);
+    n.hot.forEach(x => L.push(`${x.t}: ${x.text ? "call or text" : "call"} ${x.show}${full ? " (" + x.d + ")" : ""}`));
+    if (full) L.push("");
+    list.forEach(({p, d}, i) => { L.push(`${i + 1}. ${p.n}${p.ph ? " " + p.ph : ""}, ${p.t} (${Math.max(1, Math.round(d))} mi)`);
+      if (full) { if (svc(p)) L.push(`   ${svc(p)}`); if (addr(p)) L.push(`   ${addr(p)}, ${p.t}, ${p.s}`); if (p.u) L.push(`   ${p.u}`); } });
+    if (full) { L.push(""); [...n.web, ADV].forEach(([t, u]) => L.push(`${t}: ${u}`)); }
+    L.push("Call ahead: hours change."); if (full) L.push("From My Pastor Resource List");
+    return L.join("\n");
+  }
+  function toast(m) { const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.append(t); setTimeout(() => t.remove(), 2200); }
+  function doCopy(full) { const s = copyText(full);
+    const ok = () => toast(full ? "Copied for email" : "Copied. Paste it into a text.");
+    const fallback = () => { $("out").insertAdjacentHTML("afterbegin", `<textarea class="copybox" readonly>${esc(s)}</textarea>`); const tb = $("out").querySelector(".copybox"); tb.focus(); tb.select(); toast("Select all and copy"); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(s).then(ok, fallback); else fallback(); }
+  $("cpText").onclick = () => doCopy(false); $("cpMail").onclick = () => doCopy(true);
+  // remember the last town: one tap brings it back
+  const last = ls("gh-last"); if (last && last !== "your location") { $("where").value = last; $("last").textContent = "Last town: " + last; }
+  draw();
+  (window.requestIdleCallback || setTimeout)(() => geo().catch(() => {}));
+})();
+</script>
+
+</html>
