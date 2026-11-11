@@ -2640,7 +2640,25 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     + `${LF} :is(.eyebrow,.text-btn,.prbtn,#vRef,.pveye,.preview-label,#wEye,#tEye,.btn.outline,#churchLink,.save-btn,.kitactions .btn.outline,#mbLead .on){color:var(--gold2)!important}`
     + `${LF} #chCopy h1{color:var(--ink)!important}${LF} #chCopy .chtown{color:var(--muted)!important}`
     + `${LF} :is(#mbDays,#mbFmt,#mbLead) button{color:var(--ink)!important;border-color:var(--edge)!important}`);
-  css.push(`html:is([data-style="light"],[data-style="linen"],[data-style="gray"]) .acts .btn.gold{color:#1b1404!important}html:is([data-style="parchment"],[data-style="bank"]) .acts .btn.gold{color:#fff!important}`
+  // readability pass, 11 Nov 2026 (Daniel: "keep the color but fix what needs to be fixed for each one")
+  const DF = 'html:is(' + Object.keys(DARKS).map(k => `[data-style="${k}"]`).join(",") + ')';
+  css.push(`html[data-style="gray"] :is(${BTN}){color:#fff!important}html[data-style="gray"] #chForm .btn.gold{background:#3d3d3d!important}`   // Black and white: buttons are dark gray, so white text
+    + `${DF} :is(.kitintro h2,.kitintro p){color:var(--ink)!important}${DF} #out .ghead,${DF} .ghead{color:var(--gold2)!important}`   // the kit headline and Speakers group headings were dark on dark
+    + `html .scale span em{color:var(--muted)!important;font-weight:600}`   // Map room "Fewer / More" key
+    // Midnight crimson: its red reads as a button color but is too dark for small text on the dark page, so small red text uses a lighter red
+    + `html[data-style="d_crimson"] :is(.eyebrow,.k,#wEye,#tEye,.pveye,#vRef,.preview-label,.why summary,.chip.need,.igroup h4,.pcard h4,.pcard header b,b>a,span>b,.text-btn,.prbtn,#churchLink,.btn.outline,.save-btn,.kitlink button,.invite p,#mbLead .on,header>b,.meta .gold){color:#c98282!important}`
+    + `html[data-style="d_crimson"] #pvStep{color:#fff!important}`
+    // ChatGPT's readability review (11 Nov 2026): slightly stronger helper text and outlines per style, same colors, just a shade
+    // further from the background ([muted text, outline border]; null = leave as is)
+    + Object.entries({dark: ["#ada79d", "#92877a"], parchment: ["#625548", "#82705c"], d_vespers: ["#b8c0ce", "#8e98aa"], d_merlot: [null, "#827b83"],
+        d_petrol: ["#c5d4d0", "#80a7a8"], d_mist: ["#465663", "#667b8b"], d_evergreen: ["#c0d0c8", "#91ab9c"], d_alabaster: ["#586a58", "#758974"],
+        d_harvest: ["#5c4d43", null], d_crimson: ["#b6adb2", "#bc7e86"], forest: ["#b6c3b1", "#91a689"], warm: ["#c6b6a5", "#987c64"], dusk: ["#b6b0c0", "#988a9c"], coral: [null, "#b0776b"], gray: ["#525252", "#888888"]})
+      .map(([k, [mu, bd]]) => { const s = k === "dark" ? 'html:not([data-style]),html[data-style="dark"]' : `html[data-style="${k}"]`;
+        return (mu ? s.split(",").map(x => `${x}:root`).join(",") + `{--muted:${mu}!important;--fade:${mu}!important}` : "")
+          + (bd ? s.split(",").map(x => `${x} :is(.btn.outline,.kitactions .btn,.acts .btn:not(.gold),.save-btn,.chip:not(.need))`).join(",") + `{border-color:${bd}!important}` : ""); }).join("")
+    // Connect your church: the Save button had no fill in the ChatGPT/Gemini styles, so its text vanished
+    + `html:is([data-style^="d_"],[data-style="parchment"]) #chForm .btn.gold{background:var(--gold)!important;border-color:var(--gold)!important}`);
+  css.push(`html:is([data-style="light"],[data-style="linen"]) .acts .btn.gold{color:#1b1404!important}html:is([data-style="parchment"],[data-style="bank"]) .acts .btn.gold{color:#fff!important}`
     + Object.keys(BTNTXT).filter(k => k.startsWith("d_")).map(k => `html[data-style="${k}"] .acts .btn.gold{color:${BTNTXT[k]}!important}`).join("")
     + `html body form.sbar:not(.follow),html body #planForm.sbar{background:var(--glass)!important;border-color:var(--edge)!important}`);
   // ChatGPT's review (11 Nov 2026): the faded side cards in each row looked disabled. Keep them nearly full strength.
