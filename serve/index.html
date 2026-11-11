@@ -1959,7 +1959,7 @@ html body .plansearch .svpills select{width:8.4em!important;text-overflow:ellips
 (() => {
   // Light was retired 11 Nov 2026: anyone who had it gets Study parchment (the nearest match); the parent's write reaches Serve and Speakers too
   // Soft linen retired too (11 Nov 2026) and goes to parchment; a dropped draft style goes back to Dark
-  const GONE = {light: "parchment", linen: "parchment", d_sanctuary: "dark", d_riverstone: "dark", d_cedar: "dark", d_olive: "dark", d_aubergine: "dark", d_covenant: "dark", d_ivory: "dark", d_sage: "dark", d_oat: "parchment", d_midnight: "dark", d_walnut: "dark", d_desert: "dark"};
+  const GONE = {light: "parchment", linen: "parchment", bank: "parchment", d_sanctuary: "dark", d_riverstone: "dark", d_cedar: "dark", d_olive: "dark", d_aubergine: "dark", d_covenant: "dark", d_ivory: "dark", d_sage: "dark", d_oat: "parchment", d_midnight: "dark", d_walnut: "dark", d_desert: "dark"};
   try { const s = localStorage.getItem("prl-style"); if (GONE[s]) localStorage.setItem("prl-style", GONE[s]); } catch (e) {}
   { const s = document.documentElement.dataset.style; if (GONE[s]) { if (GONE[s] === "dark") delete document.documentElement.dataset.style; else document.documentElement.dataset.style = GONE[s]; } }
   const DARK ="--bg:#141414;--room:#181818;--wall:#1c1c1c;--surface:#1f1f1f;--surface2:#2a2826;--panel:#1f1f1f;--panel2:#2a2826;"
@@ -2046,7 +2046,7 @@ html body .plansearch .svpills select{width:8.4em!important;text-overflow:ellips
     STYLES[0][2] = "#141414"; STYLES[0][3] = "#d4af5a";
     const li = STYLES.findIndex(s => s[0] === "light");
     // Daniel, 11 Nov 2026: of Light, Study parchment and Oat & Walnut keep only Study parchment (name stays); Light leaves the list
-    STYLES.splice(li, 1, ["parchment", "Study parchment", "#e3d8c4", "#8c5a2b"], ["bank", "Private bank slate", "#eceff3", "#2c4a7a"]);
+    STYLES.splice(li, 1, ["parchment", "Study parchment", "#e3d8c4", "#8c5a2b"]);   // Private bank slate removed by Daniel, 11 Nov 2026
     { const ln = STYLES.findIndex(s => s[0] === "linen"); if (ln >= 0) STYLES.splice(ln, 1); }
     // the kept ChatGPT/Gemini styles are regular choices now (no ?colors=draft needed)
     STYLES.push(...DRAFTS.map(([id, name, light, bg, , , , ac]) => [id, name, bg, ac]));
