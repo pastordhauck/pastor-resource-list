@@ -2497,6 +2497,18 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
       brandFilter = function (items) { loose = false; if (words.length) { const all = items.filter(x => { const h = hay(x); return words.every(w => h.includes(w)); });
           if (all.length || words.length < 2) items = all; else { loose = true; items = items.map(x => { const h = hay(x); return [words.filter(w => h.includes(w)).length, x]; }).filter(a => a[0]).sort((a, b) => b[0] - a[0]).map(a => a[1]); } }
         return _bf(items); };
+      // the place saved in Settings: address/ZIP/city first, then the home church, then the map's start state.
+      // A ZIP has no town name, so the nearest town with places stands in (and is kept as prl-home-town for Serve's search too).
+      const savedPlace = () => { const g = k => { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } };
+        const h = g("prl-home"), c = g("prl-homechurch");
+        if (h && h.st && NAME[h.st]) { let best = "", bd = 1e18;
+          if (h.xy) for (const x of P) if (x.st === h.st && x.p && x.xy) { const d = (x.xy[0] - h.xy[0]) ** 2 + (x.xy[1] - h.xy[1]) ** 2; if (d < bd) { bd = d; best = x.p; } }
+          try { if (best) localStorage.setItem("prl-home-town", `${best}, ${h.st}`); } catch (e) {}
+          return {st: h.st, city: best, label: h.label}; }
+        if (c && c.st && NAME[c.st]) return {st: c.st, city: P.some(x => x.st === c.st && x.p === c.p) ? c.p : "", label: `${c.n} (${c.p}, ${c.st})`};
+        let m = ""; try { m = localStorage.getItem("prl-mapstart") || ""; } catch (e) {}
+        return NAME[m] ? {st: m, city: "", label: NAME[m]} : null; };
+      setTimeout(() => { try { savedPlace(); } catch (e) {} }, 1500);   // so Serve finds prl-home-town on its first open
       const STOP = new Set("in near around the a an of for at to me my and or show find places place".split(" "));
       $("roomForm").addEventListener("submit", e => { e.preventDefault(); const raw = $("roomQ").value.trim(); note.textContent = ""; words = []; if (!raw) { desk(); return; }
         let rest = " " + flat(raw) + " ", st = "", city = "";
@@ -2508,11 +2520,14 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
         const t = towns.find(p => rest.includes(" " + flat(p) + " ")); if (t) { city = t; rest = rest.replace(" " + flat(t) + " ", " "); if (!st) st = (P.find(x => x.p === t) || {}).st; }
         words = rest.split(" ").filter(w => w && !STOP.has(w)).map(stem);
         if (stack[0].id !== "L-room") section("L-room");
+        // no place typed and not inside a state yet: start from the place saved in Settings (Daniel, 11 Nov 2026); a typed place always wins
+        let fromSaved = false;
+        if (!st && (LV.level === "us" || LV.level === "region")) { const sp = savedPlace(); if (sp) { st = sp.st; city = sp.city; fromSaved = true; } }
         if (st) { section("L-room"); goLevel({level: "state", st}, NAME[st]); if (city) goLevel({level: "city", st, city}, city); }
-        else if (LV.level === "us" || LV.level === "region") { note.textContent = "Add a state or town to search for places, like “vegan restaurants in Minnesota”."; return; }
+        else if (LV.level === "us" || LV.level === "region") { note.textContent = "Add a state or town to search for places, like “vegan restaurants in Minnesota”, or save your town in Settings."; return; }
         else desk();
         setTimeout(() => {   // the desk fills in after the zoom starts; count it then
-        const n = (deskItems || []).length, where = city ? `${city}, ${st}` : st ? NAME[st] : LV.level === "city" ? `${LV.city}, ${LV.st}` : NAME[LV.st];
+        const n = (deskItems || []).length, where = (city ? `${city}, ${st}` : st ? NAME[st] : LV.level === "city" ? `${LV.city}, ${LV.st}` : NAME[LV.st]) + (fromSaved ? " (your saved place; type another town or state to search there)" : "");
         note.textContent = words.length ? (n ? `${loose ? "Closest matches for" : ""} ${words.join(" ")} in ${where}: ${fmt(n)}${n >= 200 ? "+" : ""} ${n === 1 ? "place" : "places"} on the desk below.`.trim() : `Nothing for “${words.join(" ")}” in ${where} yet.`) : `Showing ${where}.`;
         if (words.length && n) { const k = L.querySelector(".desk"); if (k) setTimeout(() => k.scrollIntoView({behavior: calm ? "auto" : "smooth", block: "start"}), 200); }
         }, 700); });

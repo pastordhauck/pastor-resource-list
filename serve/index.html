@@ -1381,7 +1381,7 @@ renderTell();
    document.querySelectorAll('#agenda .date-stamp').forEach(e=>{e.innerHTML=`${dy!==null?days[dy]:'Any day'}<strong>↻</strong>`})};
   const _rn=render;render=function(){_rn();if(center)rfTexts(matchingAll().length,state.radius)};
   data.length=0;rfDraw();
-  let last='';try{last=localStorage.getItem('serve-town')||''}catch{}if(last&&!last.startsWith('near ')){$('#location').value=last;rfSearch()}
+  let last='';try{const H=JSON.parse(localStorage.getItem('prl-home')||'null'),C=JSON.parse(localStorage.getItem('prl-homechurch')||'null');const hq=H&&H.q&&/[a-z]/i.test(H.q)&&!/\d{5}/.test(H.q)?H.q.split(',').map(x=>x.trim()).filter(Boolean).slice(-2).join(', '):'';last=hq||(H&&localStorage.getItem('prl-home-town'))||(C&&C.p?C.p+', '+C.st:'')||localStorage.getItem('serve-town')||''}catch{}if(last&&!last.startsWith('near ')){$('#location').value=last;rfSearch()}
   // the sample partners and their datalist entries go away
   const PTN=[['food','Nearest food shelf',[0]],['health','Nearest clinic or health office',[4]]];
   window.rfPartners=()=>{PTN.forEach(([k,lab,kinds])=>{document.querySelectorAll(`.ptn [data-save="ptn-${k}"]`).forEach(btn=>{const row=btn.closest('.ptn'),b=row.querySelector('b'),sm=row.querySelector('small');if(!b)return;
