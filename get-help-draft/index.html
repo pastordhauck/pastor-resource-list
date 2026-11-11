@@ -49,6 +49,9 @@ h2{font:600 13px Inter,system-ui,sans-serif;letter-spacing:.12em;text-transform:
 .dock button{flex:1;min-height:48px;border-radius:14px;border:1px solid var(--edge);background:none;color:var(--ink);font:700 15px Inter,system-ui,sans-serif;cursor:pointer}
 .dock button.main{background:var(--gold);border-color:var(--gold);color:var(--btntext)}
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px;z-index:40}
+.mine .inc{display:flex;align-items:center;gap:6px;margin-top:4px;cursor:pointer}.mine .inc input{width:18px;height:18px;accent-color:var(--gold)}
+.act.x{min-width:42px;justify-content:center;padding:0}
+.addf{display:grid;gap:8px}.addf input{min-height:44px;border-radius:10px;border:1px solid var(--edge);background:var(--surface);color:var(--ink);font:16px Inter,system-ui,sans-serif;padding:0 12px}
 textarea.copybox{width:100%;min-height:180px;margin-top:8px;background:var(--surface);color:var(--ink);border:1px solid var(--edge);border-radius:12px;padding:10px;font:14px/1.4 Inter,system-ui,sans-serif}
 @media (prefers-reduced-motion:no-preference){.card{animation:in .25s ease both}@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}}
 </style>
@@ -212,8 +215,11 @@ textarea.copybox{width:100%;min-height:180px;margin-top:8px;background:var(--sur
   const L211 = {t: "211 (United Way)", d: "Free, confidential, 24/7. A local helper finds food, rent, bill and shelter help near them.", call: "211", text: "211", show: "211"};
   const NEEDS = [
     {id: "all", label: "Any help", k: null, hot: [L211], web: [["Findhelp.org: every free program near a ZIP", "https://www.findhelp.org/"]]},
-    {id: "money", label: "Money and bills", k: [2], words: /financ|rent|bill|utilit|energy|heat/i, hot: [L211], web: [["LIHEAP: help with heating and cooling bills", "https://www.acf.hhs.gov/ocs/low-income-home-energy-assistance-program-liheap"], ["Findhelp.org: rent and bill programs", "https://www.findhelp.org/"]]},
-    {id: "food", label: "Food", k: [0], hot: [{t: "USDA National Hunger Hotline", d: "Weekdays. Finds food pantries, meals and SNAP help.", call: "18663486479", show: "1-866-348-6479"}, L211], web: [["Feeding America: find the local food bank", "https://www.feedingamerica.org/find-your-local-foodbank"]]},
+    {id: "money", label: "Money and bills", k: [2], words: /financ|rent|bill|utilit|energy|heat/i, hot: [L211],
+      // approved 11 Nov 2026 (#12): longer-term budget help, kept apart from emergency help; numbers checked on nfcc.org 11 Nov 2026
+      budget: [{t: "NFCC nonprofit credit counseling", d: "Free or low-cost help making a budget and handling debt, from nonprofit counselors.", call: "18773606322", show: "1-877-360-6322", u: "https://www.nfcc.org/"},
+               {t: "Consumer Financial Protection Bureau: budgeting and money tools", d: "Free, plain-English worksheets for budgets, bills and debt.", u: "https://www.consumerfinance.gov/consumer-tools/"}], web: [["LIHEAP: help with heating and cooling bills", "https://www.acf.hhs.gov/ocs/low-income-home-energy-assistance-program-liheap"], ["Findhelp.org: rent and bill programs", "https://www.findhelp.org/"]]},
+    {id: "food", label: "Food", k: [0], hot: [{t: "USDA National Hunger Hotline", d: "Weekdays. Finds food pantries, meals and SNAP help. Spanish: 1-877-842-6273.", call: "18663486479", show: "1-866-348-6479"}, L211], web: [["Feeding America: find the local food bank", "https://www.feedingamerica.org/find-your-local-foodbank"]]},
     {id: "housing", label: "Housing and shelter", k: [1], hot: [L211], web: [["HUD: find shelter and housing help", "https://www.hud.gov/topics/rental_assistance"]]},
     {id: "mental", label: "Mental health", k: null, words: /mental|counsel|behavior/i, hot: [{t: "988 Suicide and Crisis Lifeline", d: "Call or text 988, 24/7. Veterans press 1.", call: "988", text: "988", show: "988"}, {t: "NAMI HelpLine", d: "Weekdays. Mental health information and support.", call: "18009506264", show: "1-800-950-6264"}], web: [["988lifeline.org (chat online too)", "https://988lifeline.org/"]]},
     {id: "addiction", label: "Addiction", k: null, words: /recover|addict|substance|alcohol|drug|detox|sober/i, hot: [{t: "SAMHSA National Helpline", d: "Free, confidential, 24/7, English and Spanish. Treatment and support groups.", call: "18006624357", show: "1-800-662-4357"}], web: [["FindTreatment.gov", "https://findtreatment.gov/"]]},
@@ -258,17 +264,36 @@ textarea.copybox{width:100%;min-height:180px;margin-top:8px;background:var(--sur
   const svc = p => (p.h || "").split(";")[0].trim(), addr = p => ((p.h || "").split(";")[1] || "").trim();
   const tel = s => (s || "").replace(/[^\d+]/g, "");
   const dirs = p => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent([p.n, addr(p), p.t, p.s].filter(Boolean).join(", "));
+  // ---- my own local numbers (approved 11 Nov 2026, #13): typed by the pastor, kept only on this device, never in links or counters ----
+  const mine = () => { try { return JSON.parse(ls("gh-mine") || "[]"); } catch (e) { return []; } };
+  const saveMine = a => ls("gh-mine", JSON.stringify(a));
+  let adding = false;
+  function mineHTML() {
+    const a = mine();
+    // none saved yet: one small button, so the hotlines stay near the top during a call
+    if (!a.length && !adding) return `<div class="choices" style="margin-top:12px"><button type="button" class="pill" id="addMine" title="Your trusted local numbers, saved only on this device">＋ Add my own local numbers</button></div>`;
+    let h = `<h2>My local numbers</h2>`;
+    h += a.map((x, i) => `<div class="card hot slim mine"><div><div class="t">${esc(x.n)}</div>${x.note ? `<div class="m">${esc(x.note)}</div>` : ""}
+      <label class="m inc"><input type="checkbox" data-inc="${i}" ${x.inc ? "checked" : ""}> Add to copied list</label></div>
+      <div class="acts">${tel(x.ph).length >= 3 ? `<a class="act call" href="tel:${tel(x.ph)}">✆ <span class="num">${esc(x.ph)}</span></a>` : ""}<button type="button" class="act x" data-del="${i}" aria-label="Remove ${esc(x.n)}">✕</button></div></div>`).join("");
+    h += adding ? `<form class="card addf" id="addf"><input name="n" required placeholder="Name (like County food shelf)" aria-label="Name"><input name="ph" required inputmode="tel" placeholder="Phone" aria-label="Phone"><input name="note" placeholder="Note (optional, like ask for Mary)" aria-label="Note">
+        <div class="acts"><button class="act call" type="submit">Save</button><button class="act" type="button" id="addX">Cancel</button></div></form>`
+      : `<div class="choices"><button type="button" class="pill" id="addMine">＋ Add a number</button>${a.length ? `<button type="button" class="pill" id="eraseMine">Erase all</button>` : ""}</div>`;
+    return h + `<p class="note">${a.length ? "Saved only on this phone or computer." : "Add trusted local numbers (your county food shelf, a deacon, your Community Services center). They stay only on this device."}</p>`;
+  }
   function draw() {
-    const n = N(); let h = "";
+    const n = N(); let h = mineHTML();
     h += `<h2>Call first</h2>` + n.hot.map(x => at ? `<div class="card hot slim"><div class="t">${esc(x.t)}</div><div class="acts"><a class="act call" href="tel:${x.call}">✆ <span class="num">${esc(x.show)}</span></a>${x.text ? `<a class="act" href="sms:${x.text}">✉ Text</a>` : ""}</div></div>` : `<div class="card hot"><div class="t">${esc(x.t)}</div><div class="m">${esc(x.d)}</div><div class="acts"><a class="act call" href="tel:${x.call}">✆ Call <span class="num">${esc(x.show)}</span></a>${x.text ? `<a class="act" href="sms:${x.text}">✉ Text</a>` : ""}</div></div>`).join("");
+    h += `<p class="note">Hotline numbers checked on each service's own website, November 2026.</p>`;
     if (at) {
-      h += `<h2>Nearest to ${esc(at.label)}</h2>`;
+      h += `<h2>Nearest on our list to ${esc(at.label)}</h2>`;
       if (!rows.length) h += `<p class="msg">No ${n.id === "all" ? "" : esc(n.label.toLowerCase()) + " "}places on our list within 75 miles yet. 211 above can find more.</p>`;
       h += rows.slice(0, shown).map(({p, d}) => `<div class="card"><div class="t">${esc(p.n)}</div><div class="m">${esc(svc(p))}</div><div class="m">${esc(p.t)}, ${esc(p.s)} · ${d < 1 ? "under 1" : Math.round(d)} mi${addr(p) ? " · " + esc(addr(p)) : ""}</div>
         <div class="acts">${tel(p.ph).length >= 7 ? `<a class="act call" href="tel:${tel(p.ph)}">✆ <span class="num">${esc(p.ph)}</span></a>` : ""}<a class="act" href="${dirs(p)}" target="_blank" rel="noopener">➤ Directions</a>${p.u ? `<a class="act" href="${esc(p.u)}" target="_blank" rel="noopener">Website ↗</a>` : ""}</div></div>`).join("");
       if (rows.length > shown) h += `<button type="button" class="act more" id="more">Show 5 more (${rows.length - shown} left)</button>`;
       h += `<p class="note">Call ahead: hours and help change.</p>`;
     } else h += `<p class="msg">Type a town or ZIP above to see the nearest places.</p>`;
+    if (n.budget) h += `<h2>Longer-term money help</h2><p class="note">Not emergency help: budgeting and debt counseling for after the crisis.</p>` + n.budget.map(x => `<div class="card"><div class="t">${esc(x.t)}</div><div class="m">${esc(x.d)}</div><div class="acts">${x.call ? `<a class="act call" href="tel:${x.call}">✆ <span class="num">${esc(x.show)}</span></a>` : ""}<a class="act" href="${esc(x.u)}" target="_blank" rel="noopener">Website ↗</a></div></div>`).join("");
     h += `<h2>Helpful websites</h2>` + [...n.web, ADV].map(([t, u]) => `<div class="card"><div class="t">${esc(t)}</div><div class="acts"><a class="act" href="${esc(u)}" target="_blank" rel="noopener">Open ↗</a></div></div>`).join("");
     $("out").innerHTML = h; $("dock").hidden = false;
   }
@@ -289,22 +314,32 @@ textarea.copybox{width:100%;min-height:180px;margin-top:8px;background:var(--sur
   $("needs").onclick = e => { const b = e.target.closest("[data-n]"); if (!b) return; need = b.dataset.n; ls("gh-need", need);
     $("needs").querySelectorAll("[data-n]").forEach(x => x.setAttribute("aria-pressed", String(x === b))); if (at) rows = pick(); shown = 5; draw(); };
   $("out").onclick = e => { const c = e.target.closest("[data-ch]"); if (c) { $("where").value = c.dataset.ch.replace("|", ", "); search($("where").value); return; }
-    if (e.target.closest("#more")) { shown += 5; draw(); } };
+    if (e.target.closest("#more")) { shown += 5; draw(); return; }
+    if (e.target.closest("#addMine")) { adding = true; draw(); const f = $("addf"); f && f.n.focus(); return; }
+    if (e.target.closest("#addX")) { adding = false; draw(); return; }
+    if (e.target.closest("#eraseMine")) { const b = e.target.closest("#eraseMine");
+      if (b.dataset.sure) { saveMine([]); toast("Your numbers were erased from this device"); draw(); } else { b.dataset.sure = 1; b.textContent = "Tap again to erase all"; } return; }
+    const d = e.target.closest("[data-del]"); if (d) { const a = mine(); a.splice(+d.dataset.del, 1); saveMine(a); draw(); return; }
+    const inc = e.target.closest("[data-inc]"); if (inc) { const a = mine(); a[+inc.dataset.inc].inc = inc.checked; saveMine(a); } };
+  $("out").addEventListener("submit", e => { if (e.target.id !== "addf") return; e.preventDefault(); const f = e.target;
+    const a = mine(); a.push({n: f.n.value.trim(), ph: f.ph.value.trim(), note: f.note.value.trim(), inc: false}); saveMine(a); adding = false; draw(); });
   $("nearMe").onclick = () => { if (!navigator.geolocation) return toast("This phone did not share its location.");
     navigator.geolocation.getCurrentPosition(p => { $("where").value = ""; useSpot({lat: p.coords.latitude, lon: p.coords.longitude, label: "your location"}); }, () => toast("Location was not shared. Type the town instead."), {timeout: 10000}); };
   // ---- copy for a text (short) or an email (fuller) ----
   function copyText(full) {
     const n = N(), list = rows.slice(0, shown), L = [];
     L.push(`${n.id === "all" ? "Help" : n.label} near ${at ? at.label : "you"}:`);
+    mine().filter(x => x.inc).forEach(x => L.push(`${x.n}: ${x.ph}${full && x.note ? " (" + x.note + ")" : ""}`));   // only the ones the pastor ticked
     n.hot.forEach(x => L.push(`${x.t}: ${x.text ? "call or text" : "call"} ${x.show}${full ? " (" + x.d + ")" : ""}`));
     if (full) L.push("");
     list.forEach(({p, d}, i) => { L.push(`${i + 1}. ${p.n}${p.ph ? " " + p.ph : ""}, ${p.t} (${Math.max(1, Math.round(d))} mi)`);
       if (full) { if (svc(p)) L.push(`   ${svc(p)}`); if (addr(p)) L.push(`   ${addr(p)}, ${p.t}, ${p.s}`); if (p.u) L.push(`   ${p.u}`); } });
+    if (full && n.budget) { L.push(""); n.budget.forEach(x => L.push(`${x.t}: ${x.show ? x.show + ", " : ""}${x.u}`)); }
     if (full) { L.push(""); [...n.web, ADV].forEach(([t, u]) => L.push(`${t}: ${u}`)); }
     L.push("Call ahead: hours change."); if (full) L.push("From My Pastor Resource List");
     return L.join("\n");
   }
-  function toast(m) { const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.append(t); setTimeout(() => t.remove(), 2200); }
+  function toast(m) { document.querySelectorAll(".toast").forEach(x => x.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.append(t); setTimeout(() => t.remove(), 2200); }
   function doCopy(full) { const s = copyText(full);
     const ok = () => toast(full ? "Copied for email" : "Copied. Paste it into a text.");
     const fallback = () => { $("out").insertAdjacentHTML("afterbegin", `<textarea class="copybox" readonly>${esc(s)}</textarea>`); const tb = $("out").querySelector(".copybox"); tb.focus(); tb.select(); toast("Select all and copy"); };
