@@ -4,7 +4,27 @@
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const R = document.documentElement; R.classList.add("fxl");
 
-  // (box hover is CSS only now: gold outline + tiny raise, Daniel 11 Nov; the lean toward the mouse is gone)
+  // Boxes: the Resources box style (gold outline + tiny raise) is the default for every box on the site (Daniel, 11 Nov).
+  // The CSS lists the known boxes; this also finds any other box under the mouse (a bordered, rounded panel) and marks it .fxb.
+  const SKIP = "input,select,textarea,button,a,label,summary,.chip,.pill,.sbar,.track,.rqtrack,.track2,.track > *,.rqtrack > *,.track2 > *,svg,img,header,nav,dialog,.frame";   // .frame = the resource picture (stays still, Daniel)
+  function boxy(el) {
+    if (el.__fxb !== undefined) return el.__fxb;
+    let ok = false;
+    if (!el.matches(SKIP) && !el.closest(".track,.rqtrack,.track2,nav,header,.stickybar")) {
+      const cs = getComputedStyle(el), r = el.getBoundingClientRect(), rad = parseFloat(cs.borderTopLeftRadius) || 0;
+      ok = parseFloat(cs.borderTopWidth) > 0 && cs.borderTopStyle !== "none" && rad >= 8 && rad < r.height / 2 - 1 && r.width >= 120 && r.height >= 44
+        && r.width < innerWidth * .96 && !/fixed|sticky/.test(cs.position) && !el.querySelector(".track,.rqtrack,.track2,.sbar,#wStates");
+    }
+    return (el.__fxb = ok);
+  }
+  if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    addEventListener("pointerover", e => {
+      for (let el = e.target, n = 0; el && el !== document.body && n < 8; el = el.parentElement, n++) {
+        if (el.nodeType !== 1) continue;
+        if (boxy(el)) { el.classList.add("fxb"); break; }   // innermost box only
+      }
+    }, {passive: true});
+  }
 
   // carousels: each card learns how far it is from the middle (--d); the CSS bends the row by that
   const TRACKS = ".track,.rqtrack,.track2";
@@ -27,10 +47,14 @@
       if (p < 1) tr._fxr = requestAnimationFrame(step); else { tr._fxi = null; tr.style.scrollSnapType = ""; } };
     tr._fxr = requestAnimationFrame(step);
   }
+  // every carousel's arrows use it: Find resources and Map room (.carbtn), Serve and Speakers rows (.rqbtn), Speakers small rows (.arr)
   document.addEventListener("click", e => {
-    const b = e.target.closest ? e.target.closest(".carbtn[data-car]") : null, tr = b && b.parentElement.querySelector(".track");
+    const b = e.target.closest ? e.target.closest(".carbtn[data-car],.rqbtn,.arr") : null;
+    if (!b) return;
+    const tr = b.parentElement.querySelector(".track,.rqtrack,.track2") || (b.closest(".rqwrap") || b.parentElement).querySelector(".rqtrack,.track,.track2");
     if (!tr) return;
-    const tiles = [...tr.children], h = tr._fxi ?? tiles.findIndex(t => t.classList.contains("hot")), i = Math.max(0, Math.min(tiles.length - 1, (h < 0 ? 0 : h) + +b.dataset.d)), t = tiles[i];
+    const dir = b.dataset.d ? +b.dataset.d : b.classList.contains("l") ? -1 : 1;
+    const tiles = [...tr.children], h = tr._fxi ?? tiles.findIndex(t => t.classList.contains("hot")), i = Math.max(0, Math.min(tiles.length - 1, (h < 0 ? 0 : h) + dir)), t = tiles[i];
     if (!t) return;
     e.stopPropagation(); tr._fxi = i;   // replaces the page's own arrow handler (same target card)
     if (i !== h) { tiles[h]?.classList.remove("hot"); t.classList.add("hot"); }   // the next card starts rising at the click, not halfway (the page's own picker catches up)

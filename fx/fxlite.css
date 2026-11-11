@@ -51,12 +51,12 @@ html.fxl #qshare:hover{translate:0 -2px;box-shadow:0 8px 20px rgba(0,0,0,.25)}
 /* boxes, the default everywhere (Daniel, 11 Nov, modeled on the prayer-week day cards): a gold outline appears and the box rises
    ever so slightly, slow and smooth. Same for the coordinator box, Tell the coordinator, Groups needed, small groups, needs by name,
    partners, Who helps with what, the planning-session steps, the groups-in-need days, and the box beside each carousel. */
-html.fxl :is(.card,.grp,.info,.rqinfo,.wkday,.tool,.lsteps>li,.pcard,.needrow,.psec .gap,.listing,.rtile,.ptn,.gitem,.ecard,.ktile,.rlist,.area,.fbox,details.why,.vgroup,.irow,.pentry,.agenda-day,.tw-row,#roomInfo){
+html.fxl :is(.card,.grp,.info,.rqinfo,.wkday,.tool,.lsteps>li,.pcard,.needrow,.psec .gap,.listing,.rtile,.ptn,.gitem,.ecard,.ktile,.rlist,.area,.fbox,details.why,.vgroup,.irow,.pentry,.agenda-day,.tw-row,#roomInfo,.fxb){
   transition:translate .6s cubic-bezier(.22,.7,.18,1),border-color .5s ease,box-shadow .6s ease!important}
-html.fxl :is(.card,.grp,.info,.rqinfo,.wkday,.tool,.lsteps>li,.pcard,.needrow,.psec .gap,.listing,.rtile,.ptn,.gitem,.ecard,.ktile,.rlist,.area,.fbox,details.why,.vgroup,.irow,.pentry,.agenda-day,.tw-row,#roomInfo):hover{
+html.fxl :is(.card,.grp,.info,.rqinfo,.wkday,.tool,.lsteps>li,.pcard,.needrow,.psec .gap,.listing,.rtile,.ptn,.gitem,.ecard,.ktile,.rlist,.area,.fbox,details.why,.vgroup,.irow,.pentry,.agenda-day,.tw-row,#roomInfo,.fxb):hover{
   translate:0 -3px!important;transform:none!important;border-color:color-mix(in srgb,var(--gold) 75%,transparent)!important;box-shadow:0 10px 24px rgba(0,0,0,.25)!important}
 /* a box inside a box: only the inner one reacts */
-html.fxl :is(.pcard,.tool,.psec .gap):has(:is(.pcard,.needrow,.lsteps>li,details.why,.ptn,.gitem):hover){translate:none!important;border-color:var(--edge)!important;box-shadow:none!important}
+html.fxl :is(.pcard,.tool,.psec .gap,.fxb,.card,.grp,.info,.rqinfo,details.why):has(:is(.pcard,.needrow,.lsteps>li,details.why,.ptn,.gitem,.wkday,.fxb):hover){translate:none!important;border-color:var(--edge)!important;box-shadow:none!important}
 /* Map room states: the state under the pointer lifts a little, right away */
 html.fxl #wStates path{transform-box:fill-box;transition:transform .15s ease-out,fill .6s}
 html.fxl #wStates path:hover,html.fxl #wStates path.lit{transform:translateY(-3px);filter:drop-shadow(0 5px 3px rgba(0,0,0,.45))}
