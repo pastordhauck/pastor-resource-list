@@ -9,6 +9,8 @@
 
 /* Serve > Plan to serve > Our church plan: the verse box is gone (the same verse is already at the top; the top band still reads it) */
 #km-church .vcard{display:none!important}
+/* one resource: start below the Find resources / Speakers tab bar (it covered the picture's top), like the other Resources pages */
+html.rt #L-detail{padding-top:calc(var(--rtTop,58px) + 54px)!important}
 
 @media (prefers-reduced-motion: no-preference) {
 /* carousels: the row bends away gently; the middle card zooms and rises slowly into place */
@@ -46,15 +48,18 @@ html.fxl #qshare:hover{translate:0 -2px;box-shadow:0 8px 20px rgba(0,0,0,.25)}
 }
 
 @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
-/* boxes: one very soft hover style everywhere: a slow, slight lean toward the pointer, no lifting */
-html.fxl :is(.card,.grp,.info,.rqinfo,.wkday,.tool,.lsteps>li,.pcard,.listing,.rtile,.ptn,.gitem,.ecard,.ktile,.rlist,.area,.fbox,details.why,.sfield,.vgroup,.irow,.pentry,.agenda-day,.tw-row):hover{translate:none!important;transform:none}
-html.fxl :is(.card,.grp,.info,.rqinfo,.wkday,.tool,.lsteps>li,.pcard,.listing,.rtile,.ptn,.gitem,.ecard,.ktile,.rlist,.area,.fbox,details.why,.sfield,.vgroup,.irow,.pentry,.agenda-day,.tw-row){transition:transform .8s cubic-bezier(.22,.7,.18,1),box-shadow .8s ease,border-color .6s ease}
-/* --p grows with the box, so a wide box leans with the same feel as the small prayer-week day cards (Daniel's model, 11 Nov) */
-html.fxl .fxt{transform:perspective(var(--p,1400px)) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))!important;box-shadow:0 12px 28px rgba(0,0,0,.28)!important;
-  transition:transform .7s cubic-bezier(.22,.7,.18,1),box-shadow .8s ease,border-color .6s ease!important}
+/* boxes, the default everywhere (Daniel, 11 Nov, modeled on the prayer-week day cards): a gold outline appears and the box rises
+   ever so slightly, slow and smooth. Same for the coordinator box, Tell the coordinator, Groups needed, small groups, needs by name,
+   partners, Who helps with what, the planning-session steps, the groups-in-need days, and the box beside each carousel. */
+html.fxl :is(.card,.grp,.info,.rqinfo,.wkday,.tool,.lsteps>li,.pcard,.needrow,.psec .gap,.listing,.rtile,.ptn,.gitem,.ecard,.ktile,.rlist,.area,.fbox,details.why,.vgroup,.irow,.pentry,.agenda-day,.tw-row,#roomInfo){
+  transition:translate .6s cubic-bezier(.22,.7,.18,1),border-color .5s ease,box-shadow .6s ease!important}
+html.fxl :is(.card,.grp,.info,.rqinfo,.wkday,.tool,.lsteps>li,.pcard,.needrow,.psec .gap,.listing,.rtile,.ptn,.gitem,.ecard,.ktile,.rlist,.area,.fbox,details.why,.vgroup,.irow,.pentry,.agenda-day,.tw-row,#roomInfo):hover{
+  translate:0 -3px!important;transform:none!important;border-color:color-mix(in srgb,var(--gold) 75%,transparent)!important;box-shadow:0 10px 24px rgba(0,0,0,.25)!important}
+/* a box inside a box: only the inner one reacts */
+html.fxl :is(.pcard,.tool,.psec .gap):has(:is(.pcard,.needrow,.lsteps>li,details.why,.ptn,.gitem):hover){translate:none!important;border-color:var(--edge)!important;box-shadow:none!important}
 /* Map room states: the state under the pointer lifts a little, right away */
 html.fxl #wStates path{transform-box:fill-box;transition:transform .15s ease-out,fill .6s}
 html.fxl #wStates path:hover,html.fxl #wStates path.lit{transform:translateY(-3px);filter:drop-shadow(0 5px 3px rgba(0,0,0,.45))}
 }
 /* one resource: the picture sits raised off the page and level (not tilted); no hover effect */
-html.fxl #L-detail .frame{box-shadow:0 30px 70px rgba(0,0,0,.45),0 6px 16px rgba(0,0,0,.22);transform:translateY(-3px)}
+html.fxl #L-detail .frame{box-shadow:0 30px 70px rgba(0,0,0,.45),0 6px 16px rgba(0,0,0,.22)}   /* no upward shift: it cut off the picture's top */
