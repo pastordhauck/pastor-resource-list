@@ -639,7 +639,7 @@ function drawRows(box, key){
 }
 document.addEventListener("click", e => {
   const d = e.target.closest("[data-deep]"); if (d) { const [key, i, j] = d.dataset.deep.split(":"), it = ROWSETS[key][+i].items[+j]; return it.place ? openPlace(it.place, at(e)) : openDetail(it, at(e)); }
-  const a = e.target.closest("[data-all]"); if (a) { const [key, i] = a.dataset.all.split(":"), r = ROWSETS[key][+i]; return openList("Topic", r.title.replace(/^Explore |\.$/g, ""), `${fmt(r.count ?? r.items.length)} on the list${r.items.length < (r.count ?? 0) ? `; the draft shows the first ${r.items.length}` : ""}.`, [], r.items, at(e)); }
+  const a = e.target.closest("[data-all]"); if (a) { const [key, i] = a.dataset.all.split(":"), r = ROWSETS[key][+i]; return openList("Topic", r.title.replace(/^Explore |\.$/g, ""), `${fmt(r.count ?? r.items.length)} on the list${r.items.length < (r.count ?? 0) ? `; showing the first ${r.items.length}` : ""}.`, [], r.items, at(e)); }
   const m = e.target.closest("[data-more]"); if (m) { const key = m.dataset.more, n = Math.ceil(ROWSETS[key].length / ROWN); PAGE[key] = (PAGE[key] + 1) % n;
     const box = key === "h" ? $("lineups") : $("tRows"); drawRows(box, key); box.scrollIntoView({behavior: calm ? "auto" : "smooth", block: "start"}); }
 });
@@ -2510,19 +2510,25 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
           if (all.length || words.length < 2) items = all; else { loose = true; items = items.map(x => { const h = hay(x); return [words.filter(w => h.includes(w)).length, x]; }).filter(a => a[0]).sort((a, b) => b[0] - a[0]).map(a => a[1]); } }
         return _bf(items); };
       // the place saved in Settings: address/ZIP/city first, then the home church, then the map's start state.
-      // A ZIP has no town name, so the nearest town with places stands in (and is kept as prl-home-town for Serve's search too).
+      // An address or ZIP has no town name, so the nearest town with places stands in (kept as prl-home-town for Serve's search too).
+      const townFor = (xy, st) => { let best = "", bd = 1e18; if (xy) for (const x of P) if (x.st === st && x.p && x.xy) { const d = (x.xy[0] - xy[0]) ** 2 + (x.xy[1] - xy[1]) ** 2; if (d < bd) { bd = d; best = x.p; } } return best; };
+      // Serve asks this when its own town list cannot read what was typed (an address, a ZIP): "500 Pacific St. Holland MN 56139" -> "Pipestone, MN"
+      window.prlTownFor = q => { try { const f = typeof findHome === "function" && findHome(q); const t = f && townFor(f.xy, f.st); return t ? `${t}, ${f.st}` : ""; } catch (e) { return ""; } };
       const savedPlace = () => { const g = k => { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } };
         const h = g("prl-home"), c = g("prl-homechurch");
-        if (h && h.st && NAME[h.st]) { let best = "", bd = 1e18;
-          if (h.xy) for (const x of P) if (x.st === h.st && x.p && x.xy) { const d = (x.xy[0] - h.xy[0]) ** 2 + (x.xy[1] - h.xy[1]) ** 2; if (d < bd) { bd = d; best = x.p; } }
+        if (h && h.st && NAME[h.st]) { const best = townFor(h.xy, h.st);
           try { if (best) localStorage.setItem("prl-home-town", `${best}, ${h.st}`); } catch (e) {}
           return {st: h.st, city: best, label: h.label}; }
         if (c && c.st && NAME[c.st]) return {st: c.st, city: P.some(x => x.st === c.st && x.p === c.p) ? c.p : "", label: `${c.n} (${c.p}, ${c.st})`};
         let m = ""; try { m = localStorage.getItem("prl-mapstart") || ""; } catch (e) {}
         return NAME[m] ? {st: m, city: "", label: NAME[m]} : null; };
-      setTimeout(() => { try { savedPlace(); } catch (e) {} }, 1500);   // so Serve finds prl-home-town on its first open
+      try { savedPlace(); } catch (e) {}   // right away, so Serve finds prl-home-town on its first open
       const STOP = new Set("in near around the a an of for at to me my and or show find places place".split(" "));
-      $("roomForm").addEventListener("submit", e => { e.preventDefault(); const raw = $("roomQ").value.trim(); note.textContent = ""; words = []; if (!raw) { desk(); return; }
+      // Daniel, 11 Nov 2026 (phone): searching "vegan" lit every kind of place. A word search now lights only the kinds it found
+      // (vegan -> Services and businesses); clearing the search brings every kind back.
+      let keptKinds = null;
+      const restoreKinds = () => { if (keptKinds) { kindOn = keptKinds; keptKinds = null; if (typeof paint === "function") paint(); } };
+      $("roomForm").addEventListener("submit", e => { e.preventDefault(); const raw = $("roomQ").value.trim(); note.textContent = ""; words = []; if (!raw) { restoreKinds(); desk(); return; }
         let rest = " " + flat(raw) + " ", st = "", city = "";
         // a full state name anywhere, longest first ("west virginia" before "virginia"), or a two-letter code after a comma or "in"
         Object.keys(NAME).sort((a, b) => NAME[b].length - NAME[a].length).some(k => { const n = " " + flat(NAME[k]) + " "; if (rest.includes(n)) { st = k; rest = rest.replace(n, " "); return true; } });
@@ -2532,18 +2538,28 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
         const t = towns.find(p => rest.includes(" " + flat(p) + " ")); if (t) { city = t; rest = rest.replace(" " + flat(t) + " ", " "); if (!st) st = (P.find(x => x.p === t) || {}).st; }
         words = rest.split(" ").filter(w => w && !STOP.has(w)).map(stem);
         if (stack[0].id !== "L-room") section("L-room");
-        // no place typed and not inside a state yet: start from the place saved in Settings (Daniel, 11 Nov 2026); a typed place always wins
+        // no place typed: start from the place saved in Settings (Daniel, 11 Nov 2026: "every search should default to his saved settings");
+        // a typed place always wins. With nothing saved, a search inside a state or town stays there.
         let fromSaved = false;
-        if (!st && (LV.level === "us" || LV.level === "region")) { const sp = savedPlace(); if (sp) { st = sp.st; city = sp.city; fromSaved = true; } }
+        if (!st) { const sp = savedPlace(); if (sp) { st = sp.st; city = sp.city; fromSaved = true; } }
+        // light only the kinds of place the words found in that state
+        restoreKinds();
+        if (words.length) { const inSt = x => !st || x.st === st, has = x => { const h = hay(x); return words.every(w => h.includes(w)); };
+          let ks = new Set(P.filter(x => inSt(x) && has(x)).map(x => x.k)); if (!ks.size) ks = new Set(P.filter(x => inSt(x) && words.some(w => hay(x).includes(w))).map(x => x.k));
+          if (ks.size && ks.size < kindOn.size) { keptKinds = kindOn; kindOn = ks; } }
         if (st) { section("L-room"); goLevel({level: "state", st}, NAME[st]); if (city) goLevel({level: "city", st, city}, city); }
         else if (LV.level === "us" || LV.level === "region") { note.textContent = "Add a state or town to search for places, like “vegan restaurants in Minnesota”, or save your town in Settings."; return; }
-        else desk();
-        setTimeout(() => {   // the desk fills in after the zoom starts; count it then
-        const n = (deskItems || []).length, where = (city ? `${city}, ${st}` : st ? NAME[st] : LV.level === "city" ? `${LV.city}, ${LV.st}` : NAME[LV.st]) + (fromSaved ? " (your saved place; type another town or state to search there)" : "");
-        note.textContent = words.length ? (n ? `${loose ? "Closest matches for" : ""} ${words.join(" ")} in ${where}: ${fmt(n)}${n >= 200 ? "+" : ""} ${n === 1 ? "place" : "places"} on the desk below.`.trim() : `Nothing for “${words.join(" ")}” in ${where} yet.`) : `Showing ${where}.`;
-        if (words.length && n) { const k = L.querySelector(".desk"); if (k) setTimeout(() => k.scrollIntoView({behavior: calm ? "auto" : "smooth", block: "start"}), 200); }
-        }, 700); });
-      $("roomQ").addEventListener("input", () => { if (!$("roomQ").value.trim() && words.length) { words = []; note.textContent = ""; desk(); } });
+        else { if (typeof paint === "function") paint(); desk(); }
+        let widened = "";
+        const report = () => {   // the desk fills in after the zoom starts; count it then
+          const n = (deskItems || []).length;
+          // nothing near the town: show the whole state instead of an empty desk ("vegan" near a small town -> every vegan place in Minnesota)
+          if (!n && words.length && LV.level === "city" && !widened) { widened = LV.city; goLevel({level: "state", st: LV.st}, NAME[LV.st]); setTimeout(report, 700); return; }
+          const where = (LV.level === "city" ? `${LV.city}, ${LV.st}` : NAME[LV.st] || "the map") + (fromSaved && !widened ? " (your saved place; type another town or state to search there)" : "");
+          note.textContent = words.length ? (n ? `${widened ? `Nothing near ${widened}, so here is all of ${NAME[LV.st]}. ` : ""}${loose ? "Closest matches for " : ""}${words.join(" ")} in ${where}: ${fmt(n)}${n >= 200 ? "+" : ""} ${n === 1 ? "place" : "places"} on the desk below.` : `Nothing for “${words.join(" ")}” in ${where} yet.`) : `Showing ${where}.`;
+          if (words.length && n) { const k = L.querySelector(".desk"); if (k) setTimeout(() => k.scrollIntoView({behavior: calm ? "auto" : "smooth", block: "start"}), 200); } };
+        setTimeout(report, 700); });
+      $("roomQ").addEventListener("input", () => { if (!$("roomQ").value.trim() && words.length) { words = []; note.textContent = ""; restoreKinds(); desk(); } });
       // Search settings (Daniel, 11 Nov 2026: "I like those ideas. Build it"): a panel under the bar that drives the room's own controls
       let sortMode = "";
       const _bf2 = brandFilter;
@@ -2583,6 +2599,15 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
 
   // Daniel, 11 Nov 2026: "get rid of the search by person ... drop-down oval in the find resources ... we have speakers tab"
   { const st = document.createElement("style"); st.textContent = "#person{display:none!important}"; document.head.append(st); }
+
+  // ---- phone fixes (Daniel's phone screenshots, 11 Nov 2026) ----
+  // the page title was cut to "Resour" / "Map ro" next to Back (the main tabs below already say where you are), "Map room" broke onto
+  // two lines in uneven tabs, and the list view buttons (Grid, Carousel, List) were squeezed
+  { const st = document.createElement("style");
+    st.textContent = "@media (max-width:520px){html body .in:has(#back:not([hidden])) .trail{display:none!important}"
+      + "html body #seg button{flex:1 1 0!important;max-width:none!important;white-space:nowrap!important;font-size:14px}"
+      + "html body #tFilt [data-v]{flex:none!important;width:auto!important;min-width:0!important;padding:7px 12px!important;white-space:nowrap!important;font-size:14px!important}}";
+    document.head.append(st); }
 
   // ---- color styles (11 Nov 2026), shared with Serve and Speakers: work/design/style_plus.js
 // Color styles added 11 Nov 2026 (Daniel: "add in the study parchment, the private bank slate, the charcoal and gold ... use charcoal
@@ -2683,6 +2708,10 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
       .map(([k, [mu, bd]]) => { const s = k === "dark" ? 'html:not([data-style]),html[data-style="dark"]' : `html[data-style="${k}"]`;
         return (mu ? s.split(",").map(x => `${x}:root`).join(",") + `{--muted:${mu}!important;--fade:${mu}!important}` : "")
           + (bd ? s.split(",").map(x => `${x} :is(.btn.outline,.kitactions .btn,.acts .btn:not(.gold),.save-btn,.chip:not(.need))`).join(",") + `{border-color:${bd}!important}` : ""); }).join("")
+    // Connect your church with its photo: the light styles had turned the headline dark on the dark photo (Daniel's phone, 11 Nov 2026)
+    + `html body #chBand:has(#chPhoto[src]:not([src=""])) #chCopy :is(h1,h2,p,.eyebrow,.chtown,span){color:#fff!important;text-shadow:0 1px 10px rgba(0,0,0,.55)}`
+    // Serve's bottom kit bar on phones was fixed navy with faint text; it now takes the chosen style's own colors
+    + `html body .phone-kit{background:var(--glass2,var(--surface))!important;color:var(--ink)!important;border-top:1px solid var(--edge)!important}html body .phone-kit button{color:var(--gold2,var(--gold))!important;font-weight:700}`
     // Connect your church: the Save button had no fill in the ChatGPT/Gemini styles, so its text vanished
     + `html:is([data-style^="d_"],[data-style="parchment"]) #chForm .btn.gold{background:var(--gold)!important;border-color:var(--gold)!important}`);
   css.push(`html:is([data-style="light"],[data-style="linen"]) .acts .btn.gold{color:#1b1404!important}html:is([data-style="parchment"],[data-style="bank"]) .acts .btn.gold{color:#fff!important}`

@@ -841,6 +841,10 @@ draw();
       .map(([k, [mu, bd]]) => { const s = k === "dark" ? 'html:not([data-style]),html[data-style="dark"]' : `html[data-style="${k}"]`;
         return (mu ? s.split(",").map(x => `${x}:root`).join(",") + `{--muted:${mu}!important;--fade:${mu}!important}` : "")
           + (bd ? s.split(",").map(x => `${x} :is(.btn.outline,.kitactions .btn,.acts .btn:not(.gold),.save-btn,.chip:not(.need))`).join(",") + `{border-color:${bd}!important}` : ""); }).join("")
+    // Connect your church with its photo: the light styles had turned the headline dark on the dark photo (Daniel's phone, 11 Nov 2026)
+    + `html body #chBand:has(#chPhoto[src]:not([src=""])) #chCopy :is(h1,h2,p,.eyebrow,.chtown,span){color:#fff!important;text-shadow:0 1px 10px rgba(0,0,0,.55)}`
+    // Serve's bottom kit bar on phones was fixed navy with faint text; it now takes the chosen style's own colors
+    + `html body .phone-kit{background:var(--glass2,var(--surface))!important;color:var(--ink)!important;border-top:1px solid var(--edge)!important}html body .phone-kit button{color:var(--gold2,var(--gold))!important;font-weight:700}`
     // Connect your church: the Save button had no fill in the ChatGPT/Gemini styles, so its text vanished
     + `html:is([data-style^="d_"],[data-style="parchment"]) #chForm .btn.gold{background:var(--gold)!important;border-color:var(--gold)!important}`);
   css.push(`html:is([data-style="light"],[data-style="linen"]) .acts .btn.gold{color:#1b1404!important}html:is([data-style="parchment"],[data-style="bank"]) .acts .btn.gold{color:#fff!important}`

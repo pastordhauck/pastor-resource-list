@@ -1351,7 +1351,7 @@ renderTell();
   async function rfGo(ll,label){st.textContent='Looking for places near '+label+'…';center={ll,label};shown=60;try{await load(statesNear(ll,+$('#radius').value||25))}catch{}rfDraw();try{localStorage.setItem('serve-town',label)}catch{}}
   async function rfSearch(){const q=$('#location').value.trim();if(!q){st.textContent='Type your town and state, like Windom, MN, or tap Near me.';return}
    try{await ready()}catch{st.textContent='Real places load on the live site. This preview cannot reach them.';return}
-   const t=rfFindTown(q);if(!t){st.textContent=`We could not find “${q}”. Type the town and state, like Windom, MN, or try a bigger town nearby.`;return}
+   let t=rfFindTown(q);if(!t){try{const tw=parent!==window&&parent.prlTownFor&&parent.prlTownFor(q);if(tw)t=rfFindTown(tw)}catch{}}if(!t){st.textContent=`We could not find “${q}”. Type the town and state, like Windom, MN, or try a bigger town nearby.`;return}
    $('#location').value=t.label;rfGo(t.ll,t.label)}
   $('#rfChips').innerHTML=['All',...KINDS].map((k,i)=>`<button type="button" data-rfk="${i-1}" aria-pressed="${i===0}">${k}</button>`).join('');
   $('#rfChips').onclick=e=>{const b=e.target.closest('[data-rfk]');if(!b)return;kindSel=+b.dataset.rfk;$$('#rfChips button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));shown=60;rfDraw()};
@@ -2051,6 +2051,10 @@ html body .plansearch .svpills select{width:8.4em!important;text-overflow:ellips
       .map(([k, [mu, bd]]) => { const s = k === "dark" ? 'html:not([data-style]),html[data-style="dark"]' : `html[data-style="${k}"]`;
         return (mu ? s.split(",").map(x => `${x}:root`).join(",") + `{--muted:${mu}!important;--fade:${mu}!important}` : "")
           + (bd ? s.split(",").map(x => `${x} :is(.btn.outline,.kitactions .btn,.acts .btn:not(.gold),.save-btn,.chip:not(.need))`).join(",") + `{border-color:${bd}!important}` : ""); }).join("")
+    // Connect your church with its photo: the light styles had turned the headline dark on the dark photo (Daniel's phone, 11 Nov 2026)
+    + `html body #chBand:has(#chPhoto[src]:not([src=""])) #chCopy :is(h1,h2,p,.eyebrow,.chtown,span){color:#fff!important;text-shadow:0 1px 10px rgba(0,0,0,.55)}`
+    // Serve's bottom kit bar on phones was fixed navy with faint text; it now takes the chosen style's own colors
+    + `html body .phone-kit{background:var(--glass2,var(--surface))!important;color:var(--ink)!important;border-top:1px solid var(--edge)!important}html body .phone-kit button{color:var(--gold2,var(--gold))!important;font-weight:700}`
     // Connect your church: the Save button had no fill in the ChatGPT/Gemini styles, so its text vanished
     + `html:is([data-style^="d_"],[data-style="parchment"]) #chForm .btn.gold{background:var(--gold)!important;border-color:var(--gold)!important}`);
   css.push(`html:is([data-style="light"],[data-style="linen"]) .acts .btn.gold{color:#1b1404!important}html:is([data-style="parchment"],[data-style="bank"]) .acts .btn.gold{color:#fff!important}`
@@ -2077,4 +2081,4 @@ html body .plansearch .svpills select{width:8.4em!important;text-overflow:ellips
       box.innerHTML = STYLES.map(([v, l, bg, ac]) => `<button type="button" data-s="${v}" aria-pressed="${v === cur}"><i style="background:radial-gradient(circle,${ac} 0 38%,${bg} 40%)"></i>${l}</button>`).join(""); });
   }
   })();
-</script></body></html>
+</script><script>if(parent!==window)document.documentElement.classList.add('inframe')</script><style>html.inframe .phone-kit{display:none!important}@media(max-width:520px){html body .stickybar [data-sub]{padding-left:7px!important;padding-right:7px!important;font-size:13.5px!important}}</style></body></html>
