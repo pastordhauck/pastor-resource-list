@@ -13,19 +13,20 @@
 html.rt #L-detail{padding-top:calc(var(--rtTop,58px) + 54px)!important}
 
 @media (prefers-reduced-motion: no-preference) {
-/* carousels: the row bends away gently; the middle card zooms and rises slowly into place */
+/* carousels (Daniel, 12 Nov): flat cards, no bend; the middle card rises and grows a little in 0.4 s with a gold outline; glide 0.4 s.
+   Speeds follow the professional standard: nothing over 0.5 s. */
 /* the bend follows the scroll at once (no lag after a click); the zoom and raise of the middle card are separate and slow */
-html.fxl :is(.track,.rqtrack,.track2) > *{transform:perspective(1100px) rotateY(calc(var(--d,0) * -8deg)) translateZ(calc(var(--a,0) * -22px))!important;
-  translate:0 calc(var(--lift,0) * -8px)!important;scale:calc(1 + var(--lift,0) * .07)!important;transform-origin:50% 60%;
-  transition:transform .15s ease-out,translate .8s cubic-bezier(.25,.8,.25,1),scale .8s cubic-bezier(.25,.8,.25,1),opacity .8s ease,border-color .8s ease,box-shadow .8s ease!important}
-html.fxl :is(.track,.rqtrack,.track2) > .hot{--lift:1;opacity:1;box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 35%,transparent),0 16px 32px rgba(0,0,0,.4)!important}
+html.fxl :is(.track,.rqtrack,.track2) > *{transform:none!important;
+  translate:0 calc(var(--lift,0) * -6px)!important;scale:calc(1 + var(--lift,0) * .05)!important;transform-origin:50% 60%;
+  transition:translate .4s cubic-bezier(.22,.7,.18,1),scale .4s cubic-bezier(.22,.7,.18,1),opacity .4s ease,border-color .4s ease,box-shadow .4s ease!important}
+html.fxl :is(.track,.rqtrack,.track2) > .hot{--lift:1;opacity:1;box-shadow:0 0 0 1px var(--gold),0 14px 28px rgba(0,0,0,.38)!important}
 /* no zoom on the pictures inside cards */
 html.fxl :is(.tile,.tile2,.rqtile,.card,.rqcard,.rlist,.listing):hover :is(.th,.th2,.shot img,.lpic .th,img){transform:none!important}
 
 /* rows and sections rise softly as you reach them */
 html.fxl .fx-rev:not(.fx-in){opacity:0!important}
-html.fxl .fx-rev.fx-in{animation:fxlRev 1s cubic-bezier(.22,.7,.18,1) backwards!important}   /* not 'both': a lasting transform would trap fixed things inside */
-@keyframes fxlRev{from{opacity:0;transform:perspective(1400px) translate3d(0,30px,-60px) rotateX(4deg)}to{opacity:1;transform:none}}
+html.fxl .fx-rev.fx-in{animation:fxlRev .5s cubic-bezier(.22,.7,.18,1) backwards!important}   /* not 'both': a lasting transform would trap fixed things inside */
+@keyframes fxlRev{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 
 /* the search bar never animates (it used to replay its entrance when it settled back at the top); its Search button still can */
 html.fxl .sbar{animation:none!important}
@@ -34,7 +35,7 @@ html.fxl .sbar{animation:none!important}
 html.fxl :is(main,dialog,.rqlayer) :is(label,summary,h2,h3,h4,h5,blockquote,p),html.fxl .pvband .pvverse,html.fxl .psec>h4{translate:none!important}
 
 /* buttons: slow, smooth hover (not snappy) */
-html.fxl :is(main,dialog) :is(button,a,.btn,.pill,.chip){transition:translate .5s cubic-bezier(.22,.7,.18,1),transform .5s cubic-bezier(.22,.7,.18,1),background-color .4s,border-color .4s,color .4s,box-shadow .5s,opacity .4s}
+html.fxl :is(main,dialog) :is(button,a,.btn,.pill,.chip){transition:translate .15s cubic-bezier(.22,.7,.18,1),transform .15s cubic-bezier(.22,.7,.18,1),background-color .15s,border-color .15s,color .15s,box-shadow .15s,opacity .15s}
 /* Serve's verse band buttons keep their text color on hover */
 html.fxl .pvstep:hover{color:#1b1404!important}
 html.fxl:is([data-style="light"],[data-style="linen"],[data-style="gray"]) .pvstep:hover{color:#fff!important}
@@ -43,24 +44,37 @@ html.fxl :is(.pvstep,.pvplan):hover{translate:0 -2px!important}
 /* buttons inside the box to the right of a carousel (Add to kit, Website): no motion */
 html.fxl :is(.info,.rqinfo) :is(.btn,button,a):hover{transform:none!important;translate:none!important}
 /* "Copy link to share this with others": a small soft lift */
-html.fxl #qshare{transition:translate .6s cubic-bezier(.22,.7,.18,1),box-shadow .6s,border-color .4s}
+html.fxl #qshare{transition:translate .15s cubic-bezier(.22,.7,.18,1),box-shadow .15s,border-color .15s}
 html.fxl #qshare:hover{translate:0 -2px;box-shadow:0 8px 20px rgba(0,0,0,.25)}
 }
 
 @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
-/* boxes, the default everywhere (Daniel, 11 Nov, modeled on the prayer-week day cards): a gold outline appears and the box rises
-   ever so slightly, slow and smooth. Same for the coordinator box, Tell the coordinator, Groups needed, small groups, needs by name,
+/* boxes, the default everywhere (Daniel, 12 Nov, from the motion speed test): a soft gray outline appears and the box rises 2px in 0.2 s
+   (gold is kept for the selected carousel card). Same for the coordinator box, Tell the coordinator, Groups needed, small groups, needs by name,
    partners, Who helps with what, the planning-session steps, the groups-in-need days, and the box beside each carousel. */
 html.fxl :is(.card,.grp,.info,.rqinfo,.wkday,.tool,.lsteps>li,.pcard,.needrow,.psec .gap,.listing,.rtile,.ptn,.gitem,.ecard,.ktile,.rlist,.area,.fbox,details.why,.vgroup,.irow,.pentry,.agenda-day,.tw-row,#roomInfo,.fxb){
-  transition:translate .6s cubic-bezier(.22,.7,.18,1),border-color .5s ease,box-shadow .6s ease!important}
+  transition:translate .2s cubic-bezier(.22,.7,.18,1),border-color .2s ease,box-shadow .2s ease!important}
 html.fxl :is(.card,.grp,.info,.rqinfo,.wkday,.tool,.lsteps>li,.pcard,.needrow,.psec .gap,.listing,.rtile,.ptn,.gitem,.ecard,.ktile,.rlist,.area,.fbox,details.why,.vgroup,.irow,.pentry,.agenda-day,.tw-row,#roomInfo,.fxb):hover{
-  translate:0 -3px!important;transform:none!important;border-color:color-mix(in srgb,var(--gold) 75%,transparent)!important;box-shadow:0 10px 24px rgba(0,0,0,.25)!important}
+  translate:0 -2px!important;transform:none!important;border-color:color-mix(in srgb,currentColor 30%,transparent)!important;box-shadow:0 8px 20px rgba(0,0,0,.22)!important}
 /* a box inside a box: only the inner one reacts */
 html.fxl :is(.pcard,.tool,.psec .gap,.fxb,.card,.grp,.info,.rqinfo,details.why):has(:is(.pcard,.needrow,.lsteps>li,details.why,.ptn,.gitem,.wkday,.fxb):hover){translate:none!important;border-color:var(--edge)!important;box-shadow:none!important}
 /* Map room states: the state under the pointer lifts a little, right away */
 /* only under the mouse, and without a shadow filter: lifting the carousel's lit state (with a shadow) repainted the whole map and made the Map room carousel lag */
-html.fxl #wStates path{transform-box:fill-box;transition:transform .15s ease-out,fill .6s}
+html.fxl #wStates path{transform-box:fill-box;transition:transform .15s ease-out,fill .2s}
 html.fxl #wStates path:hover{transform:translateY(-3px)}
 }
 /* one resource: the picture sits raised off the page and level (not tilted); no hover effect */
 html.fxl #L-detail .frame{box-shadow:0 30px 70px rgba(0,0,0,.45),0 6px 16px rgba(0,0,0,.22)}   /* no upward shift: it cut off the picture's top */
+
+/* Site-wide speed limit (Daniel, 12 Nov 2026: "It should be the same throughout the entire site").
+   Professional standard he chose: nothing over 0.5 s. Page/tab zooms and opening zooms 0.4 s, rises 0.5 s,
+   picture and color changes 0.2-0.4 s. Pulsing map pins are a loop, not a transition, so they stay as they are. */
+@media (prefers-reduced-motion: no-preference) {
+html :is([id].tzin,.tzin,[id].tzout,.tzout,#dlgBox.zin,#dlgBox.zout,.wrap.tzin,.pvband,[id^="sub-"]:not([hidden]),[id^="km-"]:not([hidden])){animation-duration:.4s!important}
+html :is(.tzin,.rqlayer.on,.layer.on) [data-rise]{animation-duration:.5s!important;animation-delay:calc(.1s + var(--k,0) * 40ms)!important}
+html :is(#L-room .fresh,#L-room .wall.left.fresh>*,#L-room .wall.right.fresh>*,#L-room .wall.right.fresh>.regs>*){animation-duration:.5s!important}
+html :is(.rqlayer,main,.wrap){transition-duration:.4s!important}
+html dialog[open]::backdrop{animation-duration:.3s!important}
+html :is(.card .shot img,.frame img,.rqcard .shot .th,.rlist .lpic .th,.rqtile .th){transition-duration:.4s!important}
+html :is(.choro path,#bStates path){transition-duration:.2s!important}
+}

@@ -43,7 +43,7 @@
   // carousel arrows (Find resources, Map room): glide that starts moving the moment you click and settles softly.
   // The browser's own smooth scroll starts slowly, which read as lag (Daniel, 11 Nov).
   function glide(tr, x) {
-    cancelAnimationFrame(tr._fxr); const from = tr.scrollLeft, dx = x - from, dur = 650; let t0 = 0;
+    cancelAnimationFrame(tr._fxr); const from = tr.scrollLeft, dx = x - from, dur = 400; let t0 = 0;
     tr.style.scrollSnapType = "none";
     const step = now => { if (!t0) t0 = now; const p = Math.min(1, (now - t0) / dur); tr.scrollLeft = from + dx * (1 - Math.pow(1 - p, 3));
       if (p < 1) tr._fxr = requestAnimationFrame(step); else { tr._fxi = null; tr.style.scrollSnapType = "";
