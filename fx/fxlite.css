@@ -78,3 +78,7 @@ html dialog[open]::backdrop{animation-duration:.3s!important}
 html :is(.card .shot img,.frame img,.rqcard .shot .th,.rlist .lpic .th,.rqtile .th){transition-duration:.4s!important}
 html :is(.choro path,#bStates path){transition-duration:.2s!important}
 }
+
+/* Quick fixes (Daniel, 12 Nov 2026): the small gold UPPERCASE labels are an "AI look" tell. The ones that carry real
+   information (a resource's category, "✓ Adventist", a date) stay, as plain gray text in normal case. */
+html :is(.eyebrow,.info .k,.rqinfo .k,.rqcard .k,.cb .k){text-transform:none!important;letter-spacing:0!important;color:color-mix(in srgb,currentColor 62%,transparent)!important;font-weight:600!important}

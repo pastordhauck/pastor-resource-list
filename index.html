@@ -444,16 +444,16 @@ html[data-style="gray"] img{filter:grayscale(1)}
   <!-- MAIN SITE: home (not a room) -->
   <section class="layer on" id="L-home" aria-label="Resources">
     <div class="hero2">
-      <span class="eyebrow" data-rise>For pastors and church leaders</span>
-      <h1 data-rise style="--k:1">Everything your ministry needs, in one place.</h1>
+            <h1 data-rise style="--k:1">Resources for Adventist pastors and church leaders.</h1>
       <p data-rise style="--k:2">Sermons, Bible studies, kids and youth, health, printing and more.</p>
       <form class="sbar" id="qform" data-rise style="--k:3"><span aria-hidden="true">⌕</span><input id="q" placeholder="Search: VBS, revelation, diabetes, kids…" aria-label="Search"><button class="btn gold">Search</button></form><div id="qsug" hidden role="listbox" aria-label="Search suggestions"></div>
-      <div class="pills" data-rise style="--k:4"><a class="pill" href="https://gc.adventist.org/church-manual/" target="_blank" rel="noopener" style="text-decoration:none">Church Manual ↗</a><button class="pill" data-pill="free">Free</button><button class="pill" data-pill="near">Near you</button><button class="pill" data-pill="Spanish">Español</button><button class="pill" data-pill="Hmong">Hmong</button></div>
+      <div class="pills" data-rise style="--k:4"><a class="pill" href="https://gc.adventist.org/church-manual/" target="_blank" rel="noopener" style="text-decoration:none">Church Manual ↗</a><button class="pill" data-pill="free">Free</button><button class="pill" data-pill="near">Near you</button><button class="pill" data-pill="Spanish">Español</button><button class="pill" data-pill="Hmong">Hmong</button><button type="button" class="pill pmorebtn" aria-expanded="false" onclick="const p=this.parentElement,o=p.classList.toggle('open');this.setAttribute('aria-expanded',o);this.textContent=o?'Less':'More ▾'">More ▾</button></div>
+      <style>/* quick fix 12 Nov 2026 (Daniel): 4 choices under the search bar, the rest behind More */ .pills:not(.open) > :not([data-pill="free"]):not([data-pill="near"]):not([data-pill="Spanish"]):not([data-pill="Hmong"]):not(.pmorebtn){display:none!important} .pills .pmorebtn{order:99}</style>
       <select class="msel2" id="person" aria-label="Search by person" data-rise style="--k:5"></select>
       <div class="nums" data-rise style="--k:5"><div><b id="nTotal"></b>resources</div><div><b id="nCh"></b>Adventist churches</div><div><b>50</b>states, plus DC</div></div>
     </div>
     <div id="lineups"></div>
-    <div class="ghead"><span class="eyebrow">Every topic</span><h2>Pick a topic and go deeper.</h2></div>
+    <div class="ghead"><h2>Pick a topic and go deeper.</h2></div>
     <div class="groups" id="groups"></div>
     <section class="ghead appslot" id="appSlot"></section>
   </section>
@@ -645,7 +645,7 @@ document.addEventListener("click", e => {
 });
 // home: one "Explore" row per topic group (the churches live in the Map room)
 rowsBlock($("lineups"), "h", GROUPS.filter(g => g.title !== "Adventist churches").map(g => { const seen = new Set(), items = g.sets.flatMap(([n]) => SETS[n] || []).filter(x => !seen.has(x) && seen.add(x));
-  items.sort((a, b) => (b.pages.length ? 1 : 0) - (a.pages.length ? 1 : 0)); return {title: `Explore ${g.title.toLowerCase()}.`, count: items.length, items}; }));
+  items.sort((a, b) => (b.pages.length ? 1 : 0) - (a.pages.length ? 1 : 0)); return {title: g.title, count: items.length, items}; }));
 // every topic group opens as carousel rows, one row per heading (Evangelistic Series, Bible Studies ...)
 $("groups").innerHTML = GROUPS.map((g, i) => `<button class="grp" data-g="${i}"><b>${esc(g.title)}</b><small>${g.sets.map(s => esc(s[0])).join(" · ")}</small><em>${fmt(g.sets.reduce((a, s) => a + s[1], 0))} on the list · Go deeper →</em></button>`).join("");
 $("groups").onclick = e => { const b = e.target.closest("[data-g]"); if (!b) return; const g = GROUPS[+b.dataset.g];
@@ -2244,7 +2244,7 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     } }
   // home: redraw the topic list and the Explore rows with the new topics (same code as the page's own)
   rowsBlock($("lineups"), "h", GROUPS.filter(g => g.title !== "Adventist churches").map(g => { const seen = new Set(), items = g.sets.flatMap(([n]) => SETS[n] || []).filter(x => !seen.has(x) && seen.add(x));
-    items.sort((a, b) => (b.pages && b.pages.length ? 1 : 0) - (a.pages && a.pages.length ? 1 : 0)); return {title: `Explore ${g.title.toLowerCase()}.`, count: items.length, items}; }));
+    items.sort((a, b) => (b.pages && b.pages.length ? 1 : 0) - (a.pages && a.pages.length ? 1 : 0)); return {title: g.title, count: items.length, items}; }));
   $("groups").innerHTML = GROUPS.map((g, i) => `<button class="grp" data-g="${i}"><b>${esc(g.title)}<\/b><small>${g.sets.map(s => esc(s[0])).join(" · ")}<\/small><em>${fmt(g.sets.reduce((a, s) => a + s[1], 0))} on the list · Go deeper →<\/em><\/button>`).join("");
   // top tabs: Resources · Serve · Adventist professionals · Map room (Daniel, 8 Nov 2026)
   const TABS = [["serve", "Serve", {title: "Serve", sets: serveSets, url: SERVE_URL}], ["pro", "Adventist professionals", {title: "Adventist professionals", sets: proSets}]].filter(t => (t[2].url || t[2].sets.length) && (t[0] !== "pro" || PRO_TAB));
@@ -3154,7 +3154,7 @@ if ("serviceWorker" in navigator) {
   // No reload when a new helper takes over (Daniel, 9 Nov 2026: the app "blinks" 1-2 s after opening).
   // sw.js is network-first, so the page that just opened is already the newest; the new helper only refreshes the offline copy.
 }
-document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 12 Nov 2026, 10:31"; document.body.appendChild(f); });
+document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 12 Nov 2026, 10:32"; document.body.appendChild(f); });
 (() => {
   const bar = document.getElementById("installBar"), btn = document.getElementById("installBtn");
   const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone;
