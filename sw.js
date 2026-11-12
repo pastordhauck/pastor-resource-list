@@ -1,4 +1,4 @@
-const CACHE = "pastor-list-202611121133";
+const CACHE = "pastor-list-202611121232";
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png"]))); self.skipWaiting(); });
 // only this app's own old copies: the other list's app shares the web address
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith("pastor-list-") && k !== CACHE).map(k => caches.delete(k))))); self.clients.claim(); });
