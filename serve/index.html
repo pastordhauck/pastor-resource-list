@@ -1311,9 +1311,18 @@ renderTell();
   const ready=()=>TOWNS?Promise.resolve():Promise.all([getJ(SERVE+'towns.json'),getJ(SERVE+'states.json')]).then(([t,b])=>{TOWNS=t;BOX=b});
   const flat=v=>(v||'').toLowerCase().replace(/^st\.?\s/,'saint ').replace(/[^a-z0-9]/g,'');
   const mi=(a,b)=>{const R=3958.8,r=Math.PI/180,dl=(b[0]-a[0])*r,dn=(b[1]-a[1])*r,h=Math.sin(dl/2)**2+Math.cos(a[0]*r)*Math.cos(b[0]*r)*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.min(1,Math.sqrt(h)))};
+  const sndx=w=>{const c={b:1,f:1,p:1,v:1,c:2,g:2,j:2,k:2,q:2,s:2,x:2,z:2,d:3,t:3,l:4,m:5,n:5,r:6};let o=w[0]||'',last=c[o]||0;for(const ch of w.slice(1)){const v=c[ch]||0;if(v&&v!==last)o+=v;if(ch!=='h'&&ch!=='w')last=v}return (o+'000').slice(0,4)};
+  const lev=(a,b)=>{let p=[...Array(b.length+1).keys()];for(let i=1;i<=a.length;i++){const q=[i];for(let j=1;j<=b.length;j++)q[j]=Math.min(p[j]+1,q[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=q}return p[b.length]};
   function rfFindTown(q){const m=q.split(',').map(x=>x.trim()),t=flat(m[0]),s=(m[1]||'').toUpperCase().replace(/[^A-Z]/g,'').slice(0,2);let best=null;
    for(const k in TOWNS){const [n,ks]=k.split('|');if(s&&ks!==s)continue;const fn=flat(n);if(fn===t){if(!best||TOWNS[k][2]>best[1][2])best=[k,TOWNS[k]]}}
    if(!best)for(const k in TOWNS){const [n,ks]=k.split('|');if(s&&ks!==s)continue;if(flat(n).startsWith(t)&&t.length>2){if(!best||TOWNS[k][2]>best[1][2])best=[k,TOWNS[k]]}}
+   // Sound-alike or misspelled towns (Daniel, 12 Nov 2026: voice typing writes "Wyndham" for Windom): same Soundex or at most 2 letters off,
+   // preferring the user's own state (last search, saved home, home church), then the fewest changes, then the bigger town.
+   if(!best&&t.length>2){let raw='';try{raw=[localStorage.getItem('serve-town'),localStorage.getItem('prl-home'),localStorage.getItem('prl-homechurch')].join(' ')}catch{}
+    const pref=new Set((raw.match(/,\s*([A-Z]{2})\b|"(?:s|st|state)"\s*:\s*"([A-Z]{2})"/g)||[]).map(x=>x.slice(-3).replace(/[^A-Z]/g,'')));
+    const key=sndx(t);let bs=1e9;
+    for(const k in TOWNS){const [n,ks]=k.split('|');if(s&&ks!==s)continue;const fn=flat(n);if(Math.abs(fn.length-t.length)>3)continue;
+     const d=lev(fn,t),sa=sndx(fn)===key;if(!sa&&d>2)continue;const sc=d*10-(pref.has(ks)?40:0)-(sa?5:0)-Math.log10(1+(+TOWNS[k][2]||0));if(sc<bs){bs=sc;best=[k,TOWNS[k]]}}}
    return best?{label:best[0].replace('|',', '),ll:[best[1][0],best[1][1]]}:null}
   const statesNear=(ll,r)=>Object.keys(BOX).filter(k=>{const [x0,y0,x1,y1]=BOX[k],dy=r/69,dx=r/(69*Math.max(.2,Math.cos(ll[0]*Math.PI/180)));return ll[1]>=x0-dx&&ll[1]<=x1+dx&&ll[0]>=y0-dy&&ll[0]<=y1+dy});
   const load=sts=>Promise.all(sts.filter(k=>!loaded[k]).map(k=>loaded[k]=getJ(BASE+'help/'+k+'.json').then(rows=>{rows.forEach(p=>{p.id='hp-'+flat(p.n+p.t+p.s).slice(0,60);PL.push(p)})}).catch(()=>{delete loaded[k]})));
