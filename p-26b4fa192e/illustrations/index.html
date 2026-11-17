@@ -1,0 +1,1368 @@
+<meta charset="utf-8"><meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>{const h=document.documentElement,d=/[?&]dark\b/.test(location.search);h.classList.add("rb","rt");if(d)h.classList.add("rbdark");h.dataset.theme=d?"dark":"light"}</script>
+<title>Illustrations</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=Oswald:wght@500;700&family=Lora:ital,wght@0,600;0,700;1,600&family=Fraunces:opsz,wght@9..144,600&display=swap">
+<style>
+/* Layout: Sabbath School–app style. Quiet page, shelves of tall covers that slide sideways, a story page colored from its cover. Phone = bottom bar; PC = top bar, wider shelves, two-column story page. */
+:root{
+  --peek:#e8ebf7;
+  --bg:#f6f6fa; --surface:#ffffff; --ink:#1d1f26; --muted:#62677a; --line:#e3e4ec; --link:#3b5aa8;
+  --shadow:0 6px 16px rgba(30,32,60,.16),0 1px 3px rgba(30,32,60,.12);
+  --f-body:"Lato",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-cover:"Oswald","Arial Narrow",Impact,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--peek:#2c3040;--bg:#15161c;--surface:#1e2028;--ink:#eceef5;--muted:#9da2b4;--line:#2c2f3a;--link:#8fa8ec;--shadow:0 6px 18px rgba(0,0,0,.5),0 1px 3px rgba(0,0,0,.4);color-scheme:dark}}
+:root[data-theme="dark"]{--peek:#2c3040;--bg:#15161c;--surface:#1e2028;--ink:#eceef5;--muted:#9da2b4;--line:#2c2f3a;--link:#8fa8ec;--shadow:0 6px 18px rgba(0,0,0,.5),0 1px 3px rgba(0,0,0,.4);color-scheme:dark}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--link);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.top .wrap{display:flex;align-items:center;gap:14px;min-height:64px}
+.back{width:40px;height:40px;display:grid;place-items:center;border-radius:50%;margin-left:-8px}
+.back svg{width:24px;height:24px}
+.top h1{font-size:26px;font-weight:700;margin:0;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcnav{display:none;gap:4px}
+.pcnav button{padding:8px 14px;border-radius:999px;font-weight:700;color:var(--muted)}
+.pcnav button[aria-current="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.find{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:0 14px;height:40px;width:min(320px,100%)}
+.find svg{width:18px;height:18px;color:var(--muted);flex:none}
+.find input{border:0;background:none;outline:none;font:inherit;color:var(--ink);width:100%;min-width:0}
+.tophead{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding-bottom:6px}
+.tophead .find{width:100%}
+
+/* shelves */
+main{padding-bottom:110px}
+.shelf{margin-top:26px}
+.shelf-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.shelf-h h2{margin:0;font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.seeall{color:var(--link);font-size:17px;display:flex;align-items:center;gap:4px;padding:6px 0}
+.seeall svg{width:16px;height:16px}
+.row{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;padding:14px 16px 18px;margin:0 -16px;scrollbar-width:none}
+.row::-webkit-scrollbar{display:none}
+.item{flex:none;width:clamp(132px,36vw,168px);scroll-snap-align:start;text-align:left;display:flex;flex-direction:column;gap:12px}
+.item .nm{font-size:17px;font-weight:700;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.item .meta{font-size:13px;color:var(--muted);margin-top:-6px}
+.shelf-note{font-size:14px;color:var(--muted);margin:2px 0 0}
+
+/* covers: our own design, one look per source */
+.cover{position:relative;aspect-ratio:2/3;width:100%;max-width:100%;border-radius:8px;overflow:hidden;box-shadow:var(--shadow);color:#fff;
+  background:linear-gradient(160deg,var(--c1),var(--c2));transition:transform .25s ease}
+.cover::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.05) 0 2px,transparent 2px 7px)}
+.cover .src{position:absolute;top:10px;left:10px;right:10px;display:flex;align-items:center;gap:6px;font:700 9px/1.2 var(--f-body);letter-spacing:.08em;text-transform:uppercase;opacity:.92}
+.cover .src i{width:16px;height:16px;border-radius:4px;background:rgba(255,255,255,.22);display:grid;place-items:center;font-style:normal;font-size:10px}
+.cover .ttl{position:absolute;left:10px;right:10px;top:34%;font-family:var(--f-cover);font-weight:700;text-transform:uppercase;line-height:1.02;letter-spacing:.01em;font-size:clamp(17px,5.2cqw,22px);text-wrap:balance;color:var(--hi);text-shadow:0 2px 0 rgba(0,0,0,.18)}
+.cover .ttl b{display:block;color:#fff;font-weight:700}
+.cover .foot{position:absolute;left:10px;right:10px;bottom:10px;display:flex;justify-content:space-between;align-items:center;font:700 10px/1 var(--f-body);opacity:.9}
+.cover .dot{width:8px;height:8px;border-radius:50%;background:var(--hi);display:inline-block;margin-right:5px}
+.cover{container-type:inline-size}
+.cover .mark{position:absolute;right:-18%;bottom:12%;width:70%;aspect-ratio:1;border-radius:50%;border:2px solid rgba(255,255,255,.14)}
+.cover .mark::after{content:"";position:absolute;inset:16%;border-radius:50%;border:2px solid rgba(255,255,255,.10)}
+@media (hover:hover){.item:hover .cover{transform:translateY(-3px)}}
+
+.k-mission{--c1:#1f5f6e;--c2:#123c48;--hi:#f2c46b}
+.k-guide{--c1:#c45a3c;--c2:#8e3424;--hi:#ffe1a6}
+.k-iiw{--c1:#2b3f7a;--c2:#18244d;--hi:#e9c46a}
+.k-moment{--c1:#6b2f6e;--c2:#401a45;--hi:#f5b8d0}
+.k-mission.v1{--c1:#2a6b55;--c2:#163f33}.k-mission.v2{--c1:#2b5878;--c2:#16344c}
+.k-guide.v1{--c1:#cf7a2e;--c2:#93501a}.k-guide.v2{--c1:#b8455a;--c2:#7d2637}
+.k-iiw.v1{--c1:#3a4f8a;--c2:#1f2c58}.k-iiw.v2{--c1:#24526e;--c2:#122f43}
+.k-moment.v1{--c1:#5a3a7d;--c2:#33204d}.k-moment.v2{--c1:#7a3157;--c2:#4a1b35}
+
+/* see-all list (like the Keys Series screen) */
+.list{display:flex;flex-direction:column;gap:22px;margin-top:10px}
+.lrow{display:flex;align-items:flex-start;gap:18px;text-align:left;width:100%}
+.lrow .tx{padding-top:2px}
+.lrow .point{border-left:3px solid var(--line);padding-left:10px;margin-top:2px}
+/* phone: summary bar above the bottom tabs for the book you're on */
+.peek{position:fixed;left:0;right:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -6px 16px rgba(20,22,40,.10);
+  padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px))}
+.peek button{display:flex;flex-direction:column;gap:4px;text-align:left;width:100%}
+.peek .pk-t{font-weight:900;font-size:16px;display:flex;justify-content:space-between;gap:10px}
+.peek .pk-t small{font-weight:700;color:var(--muted);font-size:13px;white-space:nowrap}
+.peek .pk-s,.peek .pk-p{font-size:14px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.peek .pk-p{color:var(--muted)}.peek .pk-p b{color:var(--ink)}
+/* bar follows the site theme: a soft lighter tint in light mode, a lifted gray in dark mode */
+.peek{background:var(--peek);border-top:1px solid var(--line)}
+.peek .pk-p b{color:var(--link)}
+/* phone: the middle book is the raised one, so shelves snap books to the center */
+@media (max-width:899px){.item{scroll-snap-align:center}}
+body.peeking main{padding-bottom:260px}
+/* two bar choices to compare: "fades away" shows while you move, then hides after 2.5 s; "small" stays but is title + one line */
+.peek{transition:opacity .45s ease,transform .45s ease}
+body.bar-fade .peek:not(.on){opacity:0;transform:translateY(14px);pointer-events:none}
+body.bar-small .peek{padding-block:9px}
+body.bar-small .peek .pk-p{display:none}
+body.bar-small .peek .pk-s{-webkit-line-clamp:1;color:var(--muted)}
+body.peeking.bar-small main{padding-bottom:170px}
+.vlab{align-self:center;padding:0 6px 0 10px;font-size:14px;color:var(--muted);font-weight:700}
+.vsw.phoneonly{margin-left:6px}
+@media (min-width:900px){.phoneonly{display:none!important}}
+.item .cover{transition:transform .25s ease,box-shadow .25s ease}
+.item.cur .cover{transform:translateY(-10px);box-shadow:0 16px 28px rgba(30,32,60,.28),0 2px 4px rgba(30,32,60,.14)}
+.item.cur .nm{color:var(--link)}
+@media (min-width:900px){.peek{display:none!important}body.peeking main{padding-bottom:60px}.item.cur .cover{transform:none}.item.cur .nm{color:inherit}}
+.lrow .cover{width:112px;flex:none}
+.lrow .tx{min-width:0;display:flex;flex-direction:column;gap:6px}
+.lrow .nm{font-size:22px;font-weight:700;line-height:1.2}
+.lrow .meta{font-size:14px;color:var(--muted)}
+.lrow .sum{font-size:15px;color:var(--ink);line-height:1.45}
+.lrow .point{font-size:14px;color:var(--muted);line-height:1.4}
+.lrow .point b{color:var(--ink);font-weight:700}
+.lrow .cover{width:76px;border-radius:6px}
+/* list thumbnails: same cover, lettering scaled down so long words fit inside the small book */
+.lrow .cover .ttl{font-size:11px;left:7px;right:7px;top:30%;line-height:1.05;letter-spacing:0}
+.lrow .cover .src{top:7px;left:7px;font-size:0}
+.lrow .cover .src i{width:13px;height:13px;font-size:8px}
+.lrow .cover .foot{display:none}
+.cover .ttl{overflow-wrap:break-word}
+.lrow .nm{font-size:20px}
+.catbar{position:sticky;top:calc(64px + env(safe-area-inset-top,0px));z-index:4;display:flex;align-items:center;gap:4px;margin:14px -16px 6px;padding:8px 8px;background:var(--bg);border-bottom:1px solid var(--line)}
+.cats{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;scroll-behavior:smooth}
+.cats::-webkit-scrollbar{display:none}
+.cats button{flex:none;padding:8px 14px;border-radius:999px;font-weight:700;font-size:15px;color:var(--muted);border:1px solid var(--line);background:var(--surface)}
+.cats button[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.cstep{flex:none;width:36px;height:36px;border-radius:50%;font-size:26px;line-height:1;color:var(--ink);display:grid;place-items:center}
+@media (min-width:900px){.catbar{margin-inline:0;top:64px}}
+.vsw{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px;margin-top:8px}
+.vsw button{padding:6px 18px;border-radius:999px;font-size:15px;font-weight:700;color:var(--muted)}
+.vsw button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.listgrid{display:contents}
+
+/* story page */
+.hero{background:linear-gradient(180deg,var(--c1),var(--c2));color:#fff;position:relative}
+.hero .wrap{display:flex;flex-direction:column;align-items:center;text-align:center;padding-block:14px 26px;gap:14px}
+.hero .bar{width:100%;display:flex;justify-content:space-between}
+.hero .circ{width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,.18);display:grid;place-items:center;color:#fff}
+.hero .circ svg{width:24px;height:24px}
+.hero .circ[aria-pressed="true"]{background:#fff;color:var(--c2)}
+.hero .cover{width:min(190px,48vw);box-shadow:0 14px 30px rgba(0,0,0,.35)}
+.hero h1{font-size:clamp(28px,7vw,40px);line-height:1.1;margin:6px 0 0;font-weight:900;text-wrap:balance}
+.hero .sub{opacity:.85;font-size:17px}
+.readbtn{display:inline-flex;align-items:center;justify-content:center;min-width:200px;min-height:52px;padding:0 28px;border-radius:999px;background:rgba(0,0,0,.22);color:#fff;font-weight:900;font-size:18px;letter-spacing:.06em;text-decoration:none;text-transform:uppercase}
+.readbtn:hover{background:rgba(0,0,0,.32)}
+.hero .gist{max-width:62ch;text-align:left;font-size:17px;line-height:1.5;margin:0}
+.hero .gist button{color:#fff;text-decoration:underline;font-style:italic;opacity:.9}
+.facts{background:var(--bg)}
+.fact{display:flex;gap:18px;padding:18px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+.fact .lab{width:96px;flex:none;color:var(--muted);font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding-top:3px}
+.fact .val{font-size:18px;line-height:1.45;min-width:0}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tags span{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:15px}
+.full{border-bottom:1px solid var(--line)}
+.full summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:20px 0;font-size:19px;font-weight:900;color:var(--link)}
+.full summary::-webkit-details-marker{display:none}
+.full summary::after{content:"";width:10px;height:10px;border-right:2.5px solid currentColor;border-bottom:2.5px solid currentColor;transform:rotate(45deg);transition:transform .2s;margin-right:6px}
+.full[open] summary::after{transform:rotate(-135deg)}
+.full p{font-size:18px;line-height:1.55;margin:0 0 20px}
+.note{font-size:13px;color:var(--muted);padding:18px 0}
+
+/* bottom bar (phone) */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--bg);border-top:1px solid var(--line);
+  padding:8px max(16px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;justify-content:space-around}
+.tabbar button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--muted);padding:4px 14px;border-radius:999px;min-width:64px}
+.tabbar svg{width:26px;height:26px}
+.tabbar button[aria-current="true"]{color:var(--ink)}
+.tabbar button[aria-current="true"] .ic{background:color-mix(in srgb,var(--link) 18%,transparent)}
+.tabbar .ic{padding:4px 18px;border-radius:999px;display:grid;place-items:center}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:15px;z-index:9;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+.empty{color:var(--muted);padding:30px 0}
+
+/* PC */
+@media (min-width:900px){
+  .pcnav{display:flex}
+  .tabbar{display:none}
+  main{padding-bottom:60px}
+  .top h1{flex:0 0 auto}
+  .top .wrap{gap:22px}
+  .top .find{margin-left:auto}
+  .tophead .find{display:none}
+  .item{width:172px}
+  .row{gap:26px;padding:14px 0 18px;margin:0;scroll-snap-type:none;overflow-x:auto}
+  .list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 40px}
+  .hero .wrap{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"bar bar" "cov txt";text-align:left;align-items:center;column-gap:44px;padding-block:18px 40px}
+  .hero .bar{grid-area:bar}
+  .hero .cover{grid-area:cov;width:230px}
+  .hero .txt{grid-area:txt;display:flex;flex-direction:column;gap:16px;align-items:flex-start}
+  .facts .wrap{max-width:900px}
+}
+.hero .txt{display:contents}
+@media (min-width:900px){.hero .txt{display:flex}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+.view{animation:vin .22s ease both}
+/* ===== "See changes" version (ChatGPT + Gemini review, 14 Nov) ===== */
+.v2btn{position:fixed;top:calc(6px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:9;background:#e9c46a;color:#1d1f26;font:900 12px/1 var(--f-body);padding:7px 12px;border-radius:999px;border:0;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
+@media (prefers-color-scheme:light){html.v2:not([data-theme="dark"]){--bg:#f7f8fa;--peek:#edf0f5}}
+html.v2[data-theme="light"]{--bg:#f7f8fa;--peek:#edf0f5}
+html.v2 .cstep{display:none}
+html.v2 .cats{-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent);mask-image:linear-gradient(90deg,#000 82%,transparent);padding-right:24px}
+/* length band: green short, blue medium, red long */
+.lenb{position:absolute;left:0;right:0;bottom:0;height:4%;min-height:3px;border-top:1px solid rgba(255,255,255,.55)}
+.lenb.short{background:#2f9e55}.lenb.medium{background:#2f74d0}.lenb.long{background:#d23c32}
+.lenkey{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font:600 12px/1.3 var(--f-body);color:var(--muted);margin:2px 0 10px}
+.lenkey .lenb{position:static;display:inline-block;width:16px;height:6px;min-height:0;border:0;border-radius:3px;margin-right:-3px}
+/* PC: arrows to flip through a shelf */
+.rowwrap{position:relative}.rarr{display:none}
+@media (min-width:900px){
+  .rarr{display:grid;place-items:center;position:absolute;top:calc(14px + 7%);z-index:3;width:44px;height:44px;border-radius:50%;border:1px solid var(--line,#dde);background:var(--card,#fff);color:var(--ink,#1d1f26);font:400 30px/1 var(--f-body);padding-bottom:4px;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,.18);transition:opacity .2s}
+  .rarr.prev{left:-22px}.rarr.next{right:-22px}
+  .rarr:hover{background:var(--ink,#1d1f26);color:#fff}
+  .rarr[disabled]{opacity:0;pointer-events:none}
+}
+/* time goes under the name, not on the cover */
+html.v2 .c2 .foot{display:none}
+.item .mins{display:block;font-size:14px;font-weight:600;color:var(--muted);margin-top:3px}
+/* review round 2 */
+.lenf{display:flex;gap:6px;margin:4px 0 6px;overflow-x:auto;scrollbar-width:none}
+.lenf button{flex:none;white-space:nowrap;font:700 13px/1 var(--f-body);padding:8px 11px;border-radius:999px;border:1px solid var(--line);background:var(--card,#fff);color:var(--ink)}
+.lenf button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+html.v2 .hero .wrap{padding-block:10px 18px;gap:10px}
+html.v2 .hero .cover{width:min(140px,36vw)}
+@media (min-width:900px){html.v2 .hero .cover{width:170px}}
+html.v2 .lrow .sum,html.v2 .lrow .point{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+html.v2 .c2.s-mission{box-shadow:inset 0 0 0 1px rgba(0,0,0,.07),0 2px 5px rgba(0,0,0,.12),0 10px 22px rgba(0,0,0,.12)}
+/* PC: point at a book to see its summary */
+.hov{position:fixed;z-index:20;width:300px;padding:14px 16px;border-radius:12px;background:var(--card,#fff);color:var(--ink);border:1px solid var(--line);box-shadow:0 12px 32px rgba(20,22,40,.22);font:400 14px/1.45 var(--f-body);opacity:0;transform:translateY(4px);transition:opacity .15s,transform .15s;pointer-events:none}
+.hov.on{opacity:1;transform:none}
+.hov b.t{display:block;font-size:17px;line-height:1.25;font-weight:800}
+.hov .m{display:block;color:var(--muted);font-weight:600;font-size:13px;margin:3px 0 8px}
+.hov .p{display:block;margin-top:8px;padding-left:10px;border-left:3px solid var(--line);color:var(--muted)}.hov .p b{color:var(--ink)}
+/* PC shelves = the Resources page carousel: serif heading, "See all" pill, centered book lifts with a gold edge, faded edges, arrows step one book */
+@media (min-width:900px){
+  html.v2 .shelf{margin-top:34px}
+  html.v2 .shelf-h{justify-content:flex-start;align-items:flex-end}
+  html.v2 .shelf-h h2{font:600 clamp(24px,3.4vw,36px)/1.1 "Fraunces",Georgia,serif;letter-spacing:0;text-transform:none;color:var(--ink)}
+  html.v2 .seeall{margin-left:auto;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600;color:var(--ink);transition:transform .3s}
+  html.v2 .seeall:hover{transform:translateX(3px)}html.v2 .seeall svg{width:13px;height:13px}
+  html.v2 .rowwrap .row{gap:14px;padding:34px 45% 22px;scroll-snap-type:x mandatory;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+  html.v2 .rowwrap .item{width:178px;scroll-snap-align:center;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px 10px 12px;gap:10px;opacity:.92;transition:transform .5s cubic-bezier(.22,.7,.18,1),border-color .4s,box-shadow .4s,opacity .4s}
+  html.v2 .rowwrap .item .cover{transform:none!important}
+  html.v2 .rowwrap .item .nm{font-size:15px}html.v2 .rowwrap .item .mins{font-size:13px}
+  html.v2 .rowwrap .item.hot{transform:translateY(-14px) scale(1.12);opacity:1;border-color:rgba(224,182,90,.75);box-shadow:0 0 0 1px rgba(224,182,90,.35),0 18px 40px rgba(224,182,90,.2)}
+  html.v2 .rarr{top:50%;transform:translateY(-50%);width:36px;height:36px;font-size:22px;background:var(--surface);border:1px solid var(--line);box-shadow:none}
+  html.v2 .rarr.prev{left:4px}html.v2 .rarr.next{right:4px}
+  html.v2 .rarr:hover{background:#e0b65a;color:#1b1404;border-color:#e0b65a}
+}
+/* PC: info box beside each shelf, like the Resources page (shows the middle book, or the one you point at) */
+.info{display:none}
+@media (min-width:900px){
+  html.v2 .dwrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:center}
+  html.v2 .info{display:grid;gap:8px;align-content:start;min-height:210px;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--surface);box-shadow:0 2px 10px rgba(20,22,40,.06)}
+  html.v2 .info .k{font-size:12px;font-weight:600;color:var(--muted)}
+  html.v2 .info h3{margin:0;font:600 20px/1.2 "Fraunces",Georgia,serif;color:var(--ink)}
+  html.v2 .info p{margin:0;font-size:14px;line-height:1.45;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  html.v2 .info .pt{color:var(--muted)}html.v2 .info .pt b{color:var(--ink)}
+  html.v2 .info .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  html.v2 .info .acts button{font:700 13px/1 var(--f-body);padding:9px 14px;border-radius:999px;border:1px solid var(--line);color:var(--ink);background:none;transition:background .15s}
+  html.v2 .info .acts .gold{background:#e0b65a;border-color:#e0b65a;color:#1b1404}
+}
+/* covers: one style per source, no stripes or circles, one-color titles, size by title length */
+.c2{background:var(--b);color:var(--ink2);border-radius:4px 7px 7px 4px}
+.c2::before{display:none}
+.c2 .src{position:absolute;top:9%;left:10%;right:10%;font:700 max(6px,5cqw)/1.2 var(--f-body);letter-spacing:.14em;text-transform:uppercase;opacity:.85;display:block}
+.c2 .ttl{font-family:var(--f-body);text-transform:none;text-shadow:none;color:inherit;letter-spacing:0;font-weight:900;font-size:11.5cqw;line-height:1.12;top:26%;left:10%;right:10%}
+.c2.big .ttl{font-size:14cqw}.c2.long .ttl{font-size:9.5cqw}
+.c2 .foot{position:absolute;left:10%;right:10%;bottom:7%;font:700 max(6px,6cqw)/1 var(--f-body);opacity:.9;display:block}
+/* It Is Written: classic broadcast. Navy, centered serif title between gold hairlines */
+/* story page header color follows the new covers */
+html.v2 .hero.k-iiw{--c1:#7a5532;--c2:#4a3019}html.v2 .hero.k-guide{--c1:#145553;--c2:#0a2f30}html.v2 .hero.k-moment{--c1:#6e1424;--c2:#3a0811}html.v2 .hero.k-mission{--c1:#5f7d55;--c2:#3b5236}
+.s-iiw{--p:#e2c590;--b:linear-gradient(90deg,#3b2414 0 5%,rgba(0,0,0,.25) 5% 6%,transparent 6%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .25 0 0 0 0 .15 0 0 0 0 .05 0 0 0 .42 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),radial-gradient(110% 85% at 55% 45%,var(--p) 40%,#a97a45 120%);--ink2:#2e1d10}
+.s-iiw.t1{--p:#e8cf9f}.s-iiw.t2{--p:#d9b882}
+.s-iiw .src{font-family:"Lora",Georgia,serif;font-weight:600;letter-spacing:.06em;text-align:center;left:12%;right:6%;opacity:.85}
+.s-iiw .ttl,.hero .cover.s-iiw .ttl{font-family:"Oswald",var(--f-body);text-transform:uppercase;font-weight:700;text-align:center;line-height:1.08;top:30%;left:12%;right:6%;font-size:14cqw}
+.s-iiw.long .ttl,.hero .cover.s-iiw.long .ttl{font-size:11.5cqw}.s-iiw.big .ttl{font-size:16cqw}
+.s-iiw .foot{text-align:center;left:12%;right:6%;text-transform:uppercase;letter-spacing:.06em;font-size:max(6px,5cqw)}.s-iiw .foot::after{content:" read"}
+/* Mission: field journal. Earth tones, faint map contours, left title, dashed line above the time */
+.s-mission{--b:#faf3e6;--ink2:#26221c;--band:#a9c29a;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+.s-mission.t1{--band:#a8bfcf}.s-mission.t2{--band:#d9b98f}
+.s-mission .src{top:7%;left:0;right:0;padding:3.5% 0;background:var(--band);text-align:center;text-transform:none;letter-spacing:.01em;font-weight:600;font-size:max(7px,7cqw);opacity:1}
+.hero .cover.s-mission .ttl,.s-mission .ttl{text-align:left;font-family:"Lora",Georgia,serif;font-weight:700;line-height:1.08;top:27%;left:8%;right:8%;font-size:14cqw}
+.s-mission.long .ttl,.hero .cover.s-mission.long .ttl{font-size:11cqw}.s-mission.big .ttl{font-size:16cqw}
+.s-mission .ttl::after{content:"";display:block;width:30%;height:max(1.5px,1.3cqw);background:#e0a032;margin-top:9%}
+.s-mission .foot{text-align:center;font-weight:600}.s-mission .foot::after{content:" read"}
+/* Guide: bright adventure-book look (inspired by Guide's story books, not copied): vivid sky/jungle/dusk color with a soft sunburst, small serif label, big chunky yellow-to-red title */
+.s-guide{--b:radial-gradient(120% 80% at 50% 45%,#11504f,#072a2b);--ink2:#fff}
+.s-guide.t1{--b:radial-gradient(120% 80% at 50% 45%,#164a3a,#082a20)}.s-guide.t2{--b:radial-gradient(120% 80% at 50% 45%,#173f5c,#0a2236)}
+.s-guide .src{text-align:center;text-transform:none;letter-spacing:.01em;font-size:max(7px,7.5cqw);opacity:.95;top:8%}
+.s-guide .ttl{font-family:"Oswald",var(--f-body);text-transform:uppercase;font-weight:700;text-align:center;line-height:1;letter-spacing:0;top:22%;left:6%;right:6%;font-size:17cqw;
+  background:linear-gradient(180deg,#ff6a1a 0%,#ff9a1f 45%,#ffd23a 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  -webkit-text-stroke:max(.3px,.35cqw) #5a1a04;filter:drop-shadow(0 2px 0 rgba(0,0,0,.55))}
+.s-guide.long .ttl{font-size:14cqw}.s-guide.big .ttl{font-size:20cqw}
+.s-guide .foot{text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.4)}.s-guide .foot::after{content:" read"}
+/* Sermon moments: modern. Charcoal with a bold color block across the bottom */
+/* Sermon moments, A: Majestic Burgundy */
+.s-moment{--b:linear-gradient(90deg,#c9a24a 0 4%,#7d6020 4% 4.6%,transparent 4.6%),repeating-linear-gradient(45deg,rgba(255,200,150,.06) 0 1px,transparent 1px 14px),repeating-linear-gradient(-45deg,rgba(255,200,150,.06) 0 1px,transparent 1px 14px),radial-gradient(120% 85% at 55% 40%,#6e1424,#3a0811);--ink2:#f3e3c4}
+.s-moment.t1{--b:linear-gradient(90deg,#c9a24a 0 4%,#7d6020 4% 4.6%,transparent 4.6%),repeating-linear-gradient(45deg,rgba(255,200,150,.06) 0 1px,transparent 1px 14px),repeating-linear-gradient(-45deg,rgba(255,200,150,.06) 0 1px,transparent 1px 14px),radial-gradient(120% 85% at 55% 40%,#5e1430,#300818)}
+.s-moment .src{font-family:"Lora",Georgia,serif;font-weight:600;letter-spacing:.08em;text-align:center;color:#d9b76a;left:12%;right:6%}
+.s-moment .ttl,.hero .cover.s-moment .ttl{font-family:"Oswald",var(--f-body);text-transform:uppercase;font-weight:700;text-align:center;line-height:1.05;top:28%;left:12%;right:6%;font-size:15cqw;
+  background:linear-gradient(180deg,#fff6e6 0%,#fbe8c8 45%,#f2a23a 75%,#e07a1f 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 2px rgba(0,0,0,.5))}
+.s-moment.long .ttl,.hero .cover.s-moment.long .ttl{font-size:11cqw;top:24%}.s-moment.big .ttl{font-size:17cqw}
+.s-moment .foot{font-family:"Lora",Georgia,serif;font-style:italic;font-weight:400;text-align:center;left:12%;right:6%;color:#e8d3a8}.s-moment .foot::after{content:" read"}
+/* small list covers: keep the title, drop the tiny label and time */
+.lrow .c2 .src,.lrow .c2 .foot{display:none}
+.lrow .c2 .ttl{font-size:11.5cqw;top:24%}
+@keyframes vin{from{opacity:.4;transform:translateX(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.view{animation:none}}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap">
+<style id="rbCss">
+/* ===== Rebrand (Daniel's approved mockup v60): base rules, before the mockup's own CSS (rb_mock.css, made by gencss.py) ===== */
+html.rb body{background:var(--bg);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased}
+html.rb :where(.rb-top,.rb-rail,#resTabs,.rb-view,.rb-menu,.rb-pop,.rb-peek,#rbDetail,#tCards,#tRows,#lineups) :where(button){font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0;margin:0}
+html.rb :where(.rb-view,#rbDetail) :where(h1,h2,h3){text-wrap:balance;margin:0;font-family:var(--font)}
+html.rb .rb-view h1{font-size:clamp(28px,3.2vw,40px);line-height:1.15;letter-spacing:-.02em;font-weight:700;max-width:760px}
+html.rb :where(.rb-view,#rbDetail) :where(a){color:inherit}
+html.rb .rb-view :focus-visible,html.rb .rb-top :focus-visible,html.rb .rb-rail :focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:6px}
+:root.rb.rb{--bg:#f6f1e7; --side:#efe8da; --card:#ffffff; --ink:#1f1b16; --muted:#6b6257; --line:#e2d9c8; --acc:#8c5a2b; --accink:#ffffff; --soft:#efe6d6; --shadow:rgba(60,40,10,.16); --paper:#ffffff; --paperink:#1f1b16; --font:"Source Sans 3","Segoe UI",system-ui,sans-serif; --ease:cubic-bezier(.22,.7,.18,1);}
+:root.rb.rb.rbdark{--bg:#0f141e; --side:#121926; --card:#1a2130; --ink:#eaecef; --muted:#8b99a8; --line:#263044; --acc:#c29b62; --accink:#0f141e; --soft:#1d2535; --shadow:rgba(0,0,0,.45); color-scheme:dark;}
+html.rb .rb-top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:28px;height:64px; padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));background:var(--bg);border-bottom:1px solid var(--line)}
+html.rb .rb-brand{display:flex;align-items:center;gap:26px;min-width:0}
+html.rb .rb-logo{font-weight:700;font-size:17px;white-space:nowrap}
+html.rb .rb-tabs{display:flex;gap:22px}
+html.rb .rb-tabs button{color:var(--muted);font-weight:500;font-size:15px;padding:20px 0 18px;border-bottom:2px solid transparent;transition:color .15s var(--ease),border-color .15s var(--ease)}
+html.rb .rb-tabs button:hover{color:var(--ink)}
+html.rb .rb-tabs button[aria-current="page"]{color:var(--ink);border-bottom-color:var(--acc)}
+html.rb .rb-search{justify-self:center;width:min(640px,100%);display:flex;align-items:center;height:44px;border:1px solid var(--line);border-radius:12px;background:var(--card);padding:0 5px 0 14px;gap:10px}
+html.rb .rb-search svg{color:var(--muted);flex:none}
+html.rb .rb-search input{flex:1;min-width:0;border:0;background:none;font:inherit;color:var(--ink);font-size:15px;outline:none}
+html.rb .rb-search input::placeholder{color:var(--muted)}
+html.rb .rb-search .rb-sep{width:1px;height:22px;background:var(--line);flex:none}
+html.rb .rb-search .rb-where{flex:0 0 150px}
+html.rb .rb-go{background:var(--acc);color:var(--accink);font-weight:600;font-size:15px;padding:7px 14px;border-radius:9px;transition:filter .15s var(--ease)}
+html.rb .rb-go:hover{filter:brightness(1.08)}
+html.rb .rb-right{display:flex;align-items:center;gap:6px;color:var(--muted)}
+html.rb .rb-ib{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 10px;border-radius:9px;transition:background-color .15s var(--ease),color .15s var(--ease)}
+html.rb .rb-ib:hover{background:var(--soft);color:var(--ink)}
+html.rb .rb-count{font-size:12px;font-weight:700;background:var(--soft);color:var(--ink);border-radius:999px;padding:0 7px}
+html.rb .rb-frame{display:grid;grid-template-columns:76px 1fr;min-height:calc(100% - 64px)}
+html.rb .rb-rail{position:sticky;top:calc(64px + env(safe-area-inset-top,0px));height:calc(100vh - 64px);border-right:1px solid var(--line);background:var(--side);padding:18px 0 14px;display:flex;flex-direction:column;justify-content:space-between}
+html.rb .rb-rbtn{display:flex;flex-direction:column;align-items:center;width:60px;margin:0 auto 8px;border-radius:12px;padding:8px 2px;color:var(--muted);transition:background-color .15s var(--ease),color .15s var(--ease)}
+html.rb .rb-rbtn span{font-size:11px;font-weight:500;margin-top:4px}
+html.rb .rb-rbtn:hover{color:var(--ink)}
+html.rb .rb-rbtn[aria-current="page"]{background:var(--soft);color:var(--ink)}
+html.rb .rb-rbtn[aria-current="page"] span{font-weight:700}
+html.rb .rb-rprint{border-top:1px solid var(--line);padding-top:10px;position:relative}
+html.rb .rb-details,html.rb .rb-finfo{cursor:pointer}
+html.rb .rb-alld{font-size:13px;font-weight:600;color:var(--acc);margin:4px 0 10px}
+@media (hover:none){html.rb .rb-details,html.rb .rb-finfo{display:none!important}
+}html.rb .rb-t3{display:flex;justify-content:center;gap:28px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin:-8px 0 30px}
+html.rb .rb-t3 button{background:none;border:0;padding:10px 0 12px;font:inherit;font-size:15px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+html.rb .rb-t3 button:hover{color:var(--ink)}
+html.rb .rb-t3 button[aria-current]{color:var(--ink);font-weight:600;border-bottom-color:var(--acc)}
+html.rb .rb-main{padding:36px max(40px,env(safe-area-inset-right,0px)) 80px 44px;min-width:0}
+html.rb .rb-view{animation:rb-viewin .35s var(--ease) both}
+@keyframes rb-viewin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}html.rb .rb-sub{color:var(--muted);font-size:17px;margin:8px 0 4px;max-width:70ch}
+html.rb .rb-stats{color:var(--muted);font-size:14px;margin:6px 0 20px;font-variant-numeric:tabular-nums}
+html.rb .rb-opts{display:flex;flex-wrap:wrap;gap:22px;align-items:center;margin:0 0 30px;position:relative}
+html.rb .rb-opt{display:inline-flex;align-items:center;gap:6px;font-size:15px;color:var(--muted);font-weight:500;transition:color .15s var(--ease)}
+html.rb .rb-opt:hover{color:var(--ink)}
+html.rb .rb-opt.rb-set{color:var(--ink);font-weight:600}
+html.rb .rb-opt svg{width:11px;height:11px}
+html.rb .rb-views{margin-left:auto;display:flex;gap:16px}
+html.rb .rb-views button{font-size:14px;color:var(--muted);padding-bottom:3px;border-bottom:2px solid transparent;transition:color .15s var(--ease)}
+html.rb .rb-views button[aria-pressed="true"]{color:var(--ink);font-weight:600;border-bottom-color:var(--acc)}
+html.rb .rb-menu{position:absolute;z-index:20;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 16px 36px var(--shadow);padding:6px;min-width:220px}
+html.rb .rb-menu button{display:flex;justify-content:space-between;width:100%;text-align:left;padding:8px 12px;border-radius:8px;font-size:15px}
+html.rb .rb-menu button:hover{background:var(--soft)}
+html.rb .rb-menu button[aria-checked="true"]::after{content:"✓";color:var(--acc);font-weight:700}
+html.rb .rb-row{margin-bottom:42px;position:relative}
+html.rb .rb-rowh{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 14px}
+html.rb .rb-rowh h2{font-size:23px;letter-spacing:-.01em}
+html.rb .rb-rowh .rb-rr{display:flex;align-items:center;gap:12px}
+html.rb .rb-seeall{color:var(--acc);font-weight:600;font-size:15px}
+html.rb .rb-arrow{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;font-size:16px;color:var(--ink);background:var(--card);transition:background-color .15s var(--ease)}
+html.rb .rb-arrow:hover{background:var(--soft)}
+html.rb .rb-strip{display:flex;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:4px 2px 8px;margin:0 -2px}
+html.rb .rb-strip::-webkit-scrollbar{display:none}
+html.rb .rb-card{flex:0 0 clamp(220px,22vw,290px);scroll-snap-align:start;text-align:left;border-radius:14px}
+@media (min-width:1100px){html.rb .rb-strip .rb-card,html.rb .rb-rstrip .rb-rcard{flex-basis:calc((100% - 60px)/4)}
+}@media (min-width:821px) and (max-width:1099px){html.rb .rb-strip .rb-card,html.rb .rb-rstrip .rb-rcard{flex-basis:calc((100% - 40px)/3)}
+}html.rb .rb-card img{width:100%;aspect-ratio:16/10;object-fit:cover;object-position:top;border-radius:14px;display:block;border:1px solid var(--line);transition:border-color .2s var(--ease),transform .2s var(--ease)}
+html.rb .rb-card b{display:block;margin-top:10px;font-size:15px}
+html.rb .rb-card small{color:var(--muted);font-size:13px}
+html.rb .rb-card:hover img,html.rb .rb-card.rb-on img{border:1px solid var(--acc);box-shadow:0 0 0 1px var(--acc)}
+html.rb .rb-details{position:absolute;z-index:8;right:0;top:44px;bottom:8px;width:min(360px,46%);background:var(--card);border-radius:16px;border:1px solid color-mix(in srgb,var(--ink) 28%,transparent);box-shadow:-18px 0 40px var(--shadow); padding:20px 22px;display:flex;flex-direction:column;opacity:0;transform:translateX(16px);pointer-events:none;transition:opacity .2s var(--ease),transform .2s var(--ease)}
+html.rb .rb-details.rb-show{opacity:1;transform:none;pointer-events:auto}
+html.rb .rb-details .rb-k{color:var(--muted);font-size:13px}
+html.rb .rb-details h3{font-size:22px;margin:2px 0 8px}
+html.rb .rb-details p{margin:0 0 14px;color:var(--muted);font-size:15px}
+html.rb .rb-acts{display:flex;gap:10px;margin-top:auto;flex-wrap:wrap}
+html.rb .rb-btn{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:14px;padding:9px 15px;border-radius:9px;transition:filter .15s var(--ease),background-color .15s var(--ease)}
+html.rb .rb-btn.rb-pri{background:var(--acc);color:var(--accink)}
+html.rb .rb-btn.rb-pri:hover{filter:brightness(1.08)}
+html.rb .rb-btn.rb-sec{border:1px solid var(--line);font-weight:500}
+html.rb .rb-btn.rb-sec:hover{background:var(--soft)}
+html.rb .rb-feat{display:flex;align-items:center;gap:14px}
+html.rb .rb-ftrack{display:flex;gap:14px;align-items:center;flex:none}
+html.rb .rb-fcard{flex:none;width:185px;border-radius:14px;background:var(--card);overflow:hidden;opacity:.72;text-align:left;transition:opacity .4s var(--ease),transform .4s var(--ease),box-shadow .4s var(--ease),width .4s var(--ease)}
+html.rb .rb-fcard img{width:100%;aspect-ratio:16/10;object-fit:cover;object-position:top;display:block}
+html.rb .rb-fcard div{padding:10px 12px 12px}
+html.rb .rb-fcard small{color:var(--muted);font-size:13px;display:block}
+html.rb .rb-fcard.rb-mid{width:250px;opacity:1;transform:translateY(-6px);box-shadow:0 0 0 1px color-mix(in srgb,var(--ink) 28%,transparent),0 16px 34px var(--shadow)}
+html.rb .rb-finfo{flex:1;min-width:0;padding-left:6px}
+html.rb .rb-finfo .rb-k{color:var(--muted);font-size:13px}
+html.rb .rb-finfo h3{font-size:24px;margin:2px 0 8px}
+html.rb .rb-finfo p{margin:0 0 16px;color:var(--muted)}
+html.rb .rb-finfo{flex:0 1 360px;background:var(--side);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:none;align-self:center}
+html.rb .rb-finfo h3{font-size:22px}
+html.rb .rb-finfo .rb-acts{display:flex;gap:10px;flex-wrap:wrap}
+html.rb .rb-finfo .rb-btn{border-radius:999px;text-decoration:none;padding:9px 18px}
+html.rb .rb-finfo .rb-btn.rb-sec{border:1px solid var(--acc);color:var(--acc)}
+html.rb .rb-fwin{padding-bottom:44px;margin-bottom:-30px}
+@media (min-width:821px){html.rb .rb-feat{position:relative}
+html.rb .rb-feat .rb-fcard{width:var(--ft,0px)}
+html.rb .rb-feat .rb-fcard.rb-mid{width:calc(var(--ft,200px) + 12px)}
+html.rb .rb-feat .rb-fcard{padding:8px}
+html.rb .rb-feat .rb-fcard img,html.rb .rb-feat .rb-fcard .rb-mono{border-radius:10px}
+html.rb .rb-feat .rb-fcard div{padding:8px 4px 4px}
+html.rb .rb-view{max-width:1300px;margin-inline:auto}
+html.rb .rb-feat > .rb-arrow{position:absolute;top:50%;translate:0 -50%;z-index:3;background:color-mix(in srgb,var(--card) 85%,transparent)}
+html.rb .rb-feat > .rb-arrow[data-feat="-1"]{left:12px}
+html.rb .rb-feat{flex-wrap:nowrap}
+html.rb .rb-feat .rb-fwin{width:auto;flex:1 1 0;min-width:0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 70px,#000 calc(100% - 70px),transparent);mask-image:linear-gradient(90deg,transparent,#000 70px,#000 calc(100% - 70px),transparent)}
+html.rb .rb-feat .rb-finfo{flex:0 0 300px;padding:16px 18px}
+html.rb .rb-feat .rb-finfo h3{font-size:20px;margin:2px 0 6px}
+html.rb .rb-feat .rb-finfo p{margin:0 0 10px;font-size:15px}
+html.rb .rb-feat .rb-finfo .rb-acts{flex-wrap:nowrap;gap:8px}
+html.rb .rb-feat .rb-finfo .rb-btn{padding:8px 14px;font-size:14px;white-space:nowrap}
+}html.rb .rb-fcard .rb-mono{display:grid;place-items:center;aspect-ratio:16/10;background:linear-gradient(180deg,#2a3746,#223040);color:#d9b26b;font-size:44px;font-weight:700;letter-spacing:.04em}
+html.rb.rbdark .rb-finfo{background:#1e2838;border-color:#344154}
+html.rb .rb-list{border-top:1px solid var(--line)}
+html.rb .rb-li{display:grid;grid-template-columns:120px 1fr auto;gap:18px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+html.rb .rb-li img{width:120px;aspect-ratio:16/10;object-fit:cover;object-position:top;border-radius:10px;border:1px solid var(--line)}
+html.rb .rb-li b{display:block}
+html.rb .rb-li small{color:var(--muted)}
+html.rb .rb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:22px}
+html.rb .rb-grid .rb-card{flex:none}
+html.rb .rb-results{display:flex;gap:36px;align-items:flex-start}
+html.rb .rb-places{flex:1;min-width:0;border-top:1px solid var(--line)}
+html.rb .rb-place{display:flex;justify-content:space-between;gap:16px;padding:16px 0;border-bottom:1px solid var(--line)}
+html.rb .rb-place b{display:block;font-size:16px}
+html.rb .rb-place small{color:var(--muted);font-size:14px}
+html.rb .rb-place .rb-mi{color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+html.rb .rb-map{flex:0 0 min(380px,38%);min-height:440px;border-radius:14px;background:var(--soft);position:relative;overflow:hidden}
+html.rb .rb-map svg{position:absolute;inset:0;width:100%;height:100%}
+html.rb .rb-row3{display:flex;justify-content:center;gap:28px;border-bottom:1px solid var(--line);margin:-6px 0 28px}
+html.rb .rb-row3 button{padding:0 0 12px;font-size:15px;color:var(--muted);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s var(--ease)}
+html.rb .rb-row3 button[aria-current="page"]{color:var(--ink);font-weight:600;border-bottom-color:var(--acc)}
+html.rb .rb-steps{list-style:none;margin:24px 0 0;padding:0;max-width:760px}
+html.rb .rb-steps li{display:grid;grid-template-columns:52px 1fr;gap:2px 14px;padding:20px 0;border-top:1px solid var(--line)}
+html.rb .rb-steps li:last-child{border-bottom:1px solid var(--line)}
+html.rb .rb-n{font-size:28px;font-weight:700;color:var(--muted);line-height:1.1;font-variant-numeric:tabular-nums}
+html.rb .rb-steps li.rb-cur .rb-n{color:var(--acc)}
+html.rb .rb-steps h3{font-size:19px}
+html.rb .rb-steps p{margin:4px 0 6px;color:var(--muted)}
+html.rb .rb-more{color:var(--acc);font-weight:600;font-size:14px}
+html.rb .rb-extra{color:var(--muted);margin:6px 0 0;font-size:15px;max-width:62ch}
+html.rb .rb-tag{font-size:12px;font-weight:600;color:var(--acc);margin-left:8px}
+html.rb .rb-recipes{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:0 36px;border-top:1px solid var(--line)}
+html.rb .rb-recipe{padding:16px 0;border-bottom:1px solid var(--line)}
+html.rb .rb-recipe b{display:block}
+html.rb .rb-recipe small{color:var(--muted)}
+html.rb .rb-pop{position:absolute;z-index:40;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 40px var(--shadow);padding:16px 18px;min-width:260px}
+html.rb .rb-pop h4{margin:0 0 10px;font-size:15px}
+html.rb .rb-seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:14px}
+html.rb .rb-seg button{flex:1;padding:7px 10px;font-size:14px;color:var(--muted);transition:background-color .15s var(--ease)}
+html.rb .rb-seg button[aria-pressed="true"]{background:var(--acc);color:var(--accink);font-weight:600}
+html.rb .rb-pop .rb-note{color:var(--muted);font-size:13px;margin:0}
+html.rb .rb-plist button{display:block;width:100%;text-align:left;padding:9px 10px;border-radius:9px}
+html.rb .rb-plist button:hover{background:var(--soft)}
+html.rb .rb-plist small{display:block;color:var(--muted);font-size:13px}
+html.rb .rb-scrim{position:fixed;inset:0;background:rgba(20,14,6,.38);z-index:50;display:flex;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+html.rb .rb-pc{width:min(1100px,100%);height:min(720px,100%);background:var(--bg);border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.35);display:grid;grid-template-columns:300px 1fr;overflow:hidden}
+html.rb .rb-pcl{border-right:1px solid var(--line);padding:20px 14px;overflow:auto;background:var(--side)}
+html.rb .rb-pcl h2{font-size:22px;margin:0 6px 12px}
+html.rb .rb-pcl button{display:block;width:100%;text-align:left;padding:10px 12px;border-radius:10px;margin-bottom:2px}
+html.rb .rb-pcl button:hover{background:var(--soft)}
+html.rb .rb-pcl button[aria-current="true"]{background:var(--card);box-shadow:0 0 0 1px var(--acc)}
+html.rb .rb-pcl b{display:block;font-size:15px}
+html.rb .rb-pcl small{color:var(--muted);font-size:13px}
+html.rb .rb-pcr{display:flex;flex-direction:column;min-width:0}
+html.rb .rb-pch{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid var(--line)}
+html.rb .rb-pch h3{font-size:21px;margin-right:auto}
+html.rb .rb-pch select{font:inherit;font-size:14px;padding:7px 10px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+html.rb .rb-stage{flex:1;position:relative;perspective:1400px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--soft)}
+html.rb .rb-sheet{position:absolute;width:min(380px,62%);aspect-ratio:8.5/11;background:var(--paper);color:var(--paperink);border-radius:4px;box-shadow:0 10px 30px rgba(0,0,0,.18); padding:6% 7%;font-size:11px;line-height:1.45;transform-origin:50% 100%;transition:transform .32s var(--ease),opacity .32s var(--ease)}
+html.rb .rb-sheet h5{font-size:15px;margin:0 0 4px}
+html.rb .rb-sheet .rb-sm{color:#6b6257;font-size:9.5px;margin:0 0 10px}
+html.rb .rb-sheet .rb-ln{border-bottom:1px solid #d9d0c0;height:16px;margin:0 0 4px}
+html.rb .rb-sheet .rb-box{border:1px solid #d9d0c0;border-radius:3px;padding:8px;margin:0 0 8px}
+html.rb .rb-sheet .rb-foot{position:absolute;left:7%;right:7%;bottom:4%;display:flex;justify-content:space-between;color:#8a8070;font-size:8.5px}
+html.rb .rb-bold .rb-sheet{font-size:13px}
+html.rb .rb-bold .rb-sheet h5{font-size:18px}
+html.rb .rb-pcf{display:flex;align-items:center;justify-content:center;gap:14px;padding:12px;border-top:1px solid var(--line)}
+html.rb .rb-pcf .rb-pg{font-size:14px;color:var(--muted);min-width:56px;text-align:center;font-variant-numeric:tabular-nums}
+html.rb .rb-toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;z-index:60;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+html.rb .rb-card img{transition:border-color .2s var(--ease),box-shadow .2s var(--ease),translate .2s var(--ease)}
+html.rb .rb-card:hover img{border-color:color-mix(in srgb,var(--ink) 28%,transparent);box-shadow:0 8px 20px var(--shadow);translate:0 -2px}
+html.rb .rb-card.rb-on img{border-color:color-mix(in srgb,var(--ink) 28%,transparent);box-shadow:0 8px 20px var(--shadow);translate:0 -2px}
+html.rb .rb-row.rb-pre{opacity:0;transform:translateY(10px)}
+html.rb .rb-row.rb-in{transition:opacity .5s var(--ease),transform .5s var(--ease)}
+html.rb .rb-fwin{overflow:hidden;width:648px;max-width:100%;flex:none;padding:10px 0 14px}
+html.rb .rb-fwin .rb-ftrack{transition:transform .4s var(--ease)}
+html.rb .rb-finfo{transition:opacity .2s var(--ease)}
+html.rb .rb-zscrim{position:fixed;inset:0;z-index:45;background:rgba(20,14,6,0);transition:background-color .38s var(--ease)}
+html.rb .rb-zscrim.rb-on{background:rgba(20,14,6,.32)}
+html.rb .rb-zpanel{position:fixed;z-index:46;background:var(--card);border-radius:18px;box-shadow:0 30px 70px rgba(0,0,0,.3);overflow:hidden; transition:left .38s var(--ease),top .38s var(--ease),width .38s var(--ease),height .38s var(--ease),border-radius .38s var(--ease)}
+html.rb .rb-zpanel .rb-zin{opacity:0;transition:opacity .18s var(--ease) .16s;height:100%;overflow:auto}
+html.rb .rb-zpanel.rb-open .rb-zin{opacity:1}
+html.rb .rb-zpanel img.rb-hero{width:100%;aspect-ratio:16/8;object-fit:cover;object-position:top;display:block}
+html.rb .rb-zbody{padding:20px 24px 24px}
+html.rb .rb-zbody .rb-k{color:var(--muted);font-size:13px}
+html.rb .rb-zbody h3{font-size:26px;margin:4px 0 10px}
+html.rb .rb-zbody p{color:var(--muted);margin:0 0 14px}
+html.rb .rb-zclose{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card);border:1px solid var(--line);font-size:18px;z-index:2}
+html.rb .rb-opic{position:relative;display:grid;place-items:center;aspect-ratio:16/10;border-radius:12px;background:radial-gradient(circle at 30% 25%,rgba(224,182,90,.25),#18264c 70%) #18264c;overflow:hidden}
+html.rb .rb-opic .rb-big{font-size:58px;line-height:1}
+html.rb .rb-opic .rb-s1,html.rb .rb-opic .rb-s2{position:absolute;font-size:24px}
+html.rb .rb-opic .rb-s1{left:12%;top:12%}
+html.rb .rb-opic .rb-s2{right:12%;bottom:12%}
+html.rb .rb-rcard{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:8px;display:grid;gap:8px;align-content:start;transition:translate .2s var(--ease),box-shadow .2s var(--ease),border-color .2s var(--ease)}
+html.rb .rb-rcard:hover{translate:0 -2px;border-color:color-mix(in srgb,var(--ink) 28%,transparent);box-shadow:0 8px 20px var(--shadow)}
+html.rb .rb-rcard .rb-rb{padding:4px 8px 8px}
+html.rb .rb-meta{font-size:12px;color:var(--muted)}
+html.rb .rb-rcard h3{font-size:18px;margin:2px 0 6px;line-height:1.25}
+html.rb .rb-need{font-size:14px;color:var(--muted);margin:0 0 10px}
+html.rb .rb-ract{font-size:13px;color:var(--acc);font-weight:600;display:flex;gap:8px;flex-wrap:wrap}
+html.rb .rb-ract button{color:var(--acc);font-weight:600}
+html.rb .rb-rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}
+html.rb .rb-rlist{display:grid;gap:12px}
+html.rb .rb-rli{display:grid;grid-template-columns:200px 1.1fr 1fr;gap:20px;align-items:start;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:8px 18px 8px 8px}
+html.rb .rb-rli .rb-opic{aspect-ratio:4/3}
+html.rb .rb-rli ol{margin:6px 0 8px;padding-left:20px;font-size:14px}
+html.rb .rb-rstrip .rb-rcard{flex:0 0 clamp(220px,22vw,270px);scroll-snap-align:start}
+html.rb .rb-qr{display:inline-grid;grid-template-columns:repeat(7,4px);gap:0;vertical-align:middle;float:right;margin-left:6px}
+html.rb .rb-qr i{width:4px;height:4px;background:#1f1b16}
+html.rb .rb-qr i.rb-o{background:transparent}
+@media (max-width:820px){html.rb .rb-top{grid-template-columns:1fr auto;height:auto;row-gap:10px;padding-block:10px;gap:10px 14px}
+html.rb .rb-search{grid-column:1/-1;grid-row:2;justify-self:stretch;width:100%}
+html.rb .rb-search .rb-where{flex-basis:100px}
+html.rb .rb-tabs{gap:14px}
+html.rb .rb-tabs button{padding:6px 0;white-space:nowrap;font-size:14px}
+html.rb .rb-logo{display:none}
+html.rb .rb-frame{grid-template-columns:1fr}
+html.rb .rb-rail{position:fixed;top:auto;bottom:0;left:0;right:0;height:auto;flex-direction:row;justify-content:space-around;z-index:30;border-right:0;border-top:1px solid var(--line); padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+html.rb .rb-rail > div{display:flex;gap:4px}
+html.rb .rb-rbtn{margin:0;width:64px}
+html.rb .rb-rprint{border-top:0;padding-top:0;border-left:0;padding-left:0;display:flex;gap:4px}
+html.rb .rb-main{padding:22px max(16px,env(safe-area-inset-right,0px)) 110px max(16px,env(safe-area-inset-left,0px))}
+html.rb .rb-results{flex-direction:column}
+html.rb .rb-map{flex-basis:auto;width:100%;min-height:260px}
+html.rb .rb-details{position:static;width:auto;margin-top:12px;display:none}
+html.rb .rb-details.rb-show{display:flex}
+html.rb .rb-feat{flex-wrap:wrap}
+html.rb .rb-ftrack{flex:1 1 100%;overflow-x:auto}
+html.rb .rb-views{margin-left:0}
+html.rb .rb-li{grid-template-columns:84px 1fr}
+html.rb .rb-li img{width:84px}
+html.rb .rb-li .rb-btn{display:none}
+html.rb .rb-pc{grid-template-columns:1fr;grid-template-rows:auto 1fr;height:100%}
+html.rb .rb-pcl{max-height:180px;border-right:0;border-bottom:1px solid var(--line)}
+html.rb .rb-rli{grid-template-columns:110px 1fr}
+html.rb .rb-rli > :last-child{grid-column:1/-1}
+html.rb .rb-fwin{width:100%}
+}html.rb .rb-rhero{--c1:#145553;--c2:#0a2f30;background:linear-gradient(180deg,var(--c1),var(--c2));color:#fff;margin:-36px -40px 0 -44px}
+html.rb .rb-rhero .rb-wrap{max-width:900px;margin:0 auto;padding:14px 24px 26px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px}
+html.rb .rb-rhero .rb-bar{width:100%;display:flex;justify-content:space-between}
+html.rb .rb-rhero .rb-circ{width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,.18);display:grid;place-items:center;color:#fff;font-size:22px;transition:background-color .15s var(--ease)}
+html.rb .rb-rhero .rb-circ:hover{background:rgba(0,0,0,.3)}
+html.rb .rb-rhero .rb-circ[aria-pressed="true"]{background:#fff;color:var(--c2)}
+html.rb .rb-rhero .rb-pic{width:min(300px,78vw);aspect-ratio:16/10;object-fit:cover;object-position:top;border-radius:8px;box-shadow:0 14px 30px rgba(0,0,0,.35);display:block}
+html.rb .rb-rhero h1{color:#fff;font-size:clamp(28px,6vw,40px);line-height:1.1;margin:4px 0 0;font-weight:700;max-width:none}
+html.rb .rb-rhero .rb-sub{color:#fff;opacity:.85;font-size:17px;margin:0}
+html.rb .rb-rhero .rb-txt{display:contents}
+html.rb .rb-readbtn{display:inline-flex;align-items:center;justify-content:center;min-width:200px;min-height:52px;padding:0 28px;border-radius:999px;background:rgba(0,0,0,.22);color:#fff;font-weight:700;font-size:18px;letter-spacing:.06em;text-decoration:none;text-transform:uppercase;transition:background-color .15s var(--ease)}
+html.rb .rb-readbtn:hover{background:rgba(0,0,0,.32)}
+html.rb .rb-rfacts{max-width:900px;margin:0 auto;padding:0 24px}
+html.rb .rb-rfacts .rb-full{border-bottom:1px solid var(--line)}
+html.rb .rb-rfacts summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:20px 0;font-size:19px;font-weight:700;color:var(--acc)}
+html.rb .rb-rfacts summary::-webkit-details-marker{display:none}
+html.rb .rb-rfacts summary::after{content:"";width:10px;height:10px;border-right:2.5px solid currentColor;border-bottom:2.5px solid currentColor;transform:rotate(45deg);transition:transform .2s;margin-right:6px}
+html.rb .rb-rfacts .rb-full[open] summary::after{transform:rotate(-135deg)}
+html.rb .rb-rfacts .rb-full p{font-size:18px;line-height:1.55;margin:0 0 20px}
+html.rb .rb-fact{display:flex;gap:18px;padding:18px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+html.rb .rb-fact .rb-lab{width:110px;flex:none;color:var(--muted);font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding-top:3px}
+html.rb .rb-fact .rb-val{font-size:18px;line-height:1.45;min-width:0}
+html.rb .rb-fact .rb-val a{color:var(--acc)}
+html.rb .rb-rfacts .rb-sum{font-size:19px;line-height:1.55;margin:0;padding:24px 0 20px;border-bottom:1px solid var(--line)}
+html.rb .rb-rfacts .rb-note{font-size:13px;color:var(--muted);padding:18px 0}
+@media (min-width:821px){html.rb .rb-rhero .rb-wrap{padding-block:18px 40px;gap:16px}
+html.rb .rb-rhero .rb-pic{width:440px}
+html.rb .rb-rfacts{max-width:760px}
+}@media (max-width:820px){html.rb .rb-rhero{margin:-22px -16px 0}
+html.rb .rb-rhero .rb-wrap,html.rb .rb-rfacts{padding-inline:16px}
+}html.rb .rb-rfacts .rb-use{font-size:18px;line-height:1.5;margin:0;padding:18px 0;border-bottom:1px solid var(--line)}
+html.rb .rb-rfacts .rb-use b{display:block;font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+html.rb .rb-rtags{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+html.rb .rb-rtag{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:#fff;background:rgba(0,0,0,.2);border-radius:999px;padding:5px 12px}
+html.rb .rb-rtag button{color:#fff;text-decoration:underline;font-weight:600}
+html.rb .rb-pills{display:flex;flex-wrap:wrap;gap:8px}
+html.rb .rb-pills button{border:1px solid var(--line);border-radius:999px;padding:5px 13px;font-size:15px;background:var(--card);transition:background-color .15s var(--ease)}
+html.rb .rb-pills button:hover{background:var(--soft)}
+html.rb .rb-rsec{padding:26px 0 6px}
+html.rb .rb-rsec h2{font-size:21px;margin:0 0 4px}
+html.rb .rb-rsec .rb-k{color:var(--muted);font-size:14px;margin:0 0 14px}
+html.rb .rb-mini{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px}
+html.rb .rb-mini a{display:block;text-decoration:none;border-radius:12px}
+html.rb .rb-mini img,html.rb .rb-mini .rb-noimg{width:100%;aspect-ratio:16/10;object-fit:cover;object-position:top;border-radius:12px;border:1px solid var(--line);display:block;background:var(--soft);transition:translate .2s var(--ease),box-shadow .2s var(--ease),border-color .2s var(--ease)}
+html.rb .rb-mini a:hover img,html.rb .rb-mini a:hover .rb-noimg{translate:0 -2px;box-shadow:0 8px 20px var(--shadow);border-color:color-mix(in srgb,var(--ink) 28%,transparent)}
+html.rb .rb-mini b{display:block;font-size:15px;margin-top:8px;line-height:1.3}
+html.rb .rb-mini small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--muted);font-size:13px;margin-top:2px}
+html.rb .rb-used{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+html.rb .rb-used .rb-stamp{border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:14px;color:var(--muted)}
+html.rb .rb-mynote{width:100%;min-height:70px;margin-top:12px;font:inherit;font-size:15px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;resize:vertical}
+html.rb .rb-report{border-top:1px solid var(--line);margin-top:28px;padding:16px 0 4px}
+html.rb .rb-report summary{cursor:pointer;color:var(--muted);font-size:15px;list-style:none}
+html.rb .rb-report summary::-webkit-details-marker{display:none}
+html.rb .rb-report summary:hover{color:var(--ink)}
+html.rb .rb-report .rb-why{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 10px}
+html.rb .rb-report .rb-why button{border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:14px;background:var(--card)}
+html.rb .rb-report .rb-why button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+html.rb .rb-home{width:100%;font:inherit;font-size:15px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink);margin-bottom:6px}
+html.rb .rb-subbar{position:sticky;top:calc(64px + env(safe-area-inset-top,0px));z-index:29;display:flex;justify-content:center;gap:28px;height:48px;background:var(--bg);border-bottom:1px solid var(--line); padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));overflow-x:auto;scrollbar-width:none}
+html.rb .rb-subbar[hidden]{display:none}
+html.rb .rb-subbar button{flex:none;border-bottom:2px solid transparent;color:var(--muted);font-weight:500;font-size:15px;padding:0 2px;white-space:nowrap;transition:color .15s var(--ease),border-color .15s var(--ease)}
+html.rb .rb-subbar button:hover{color:var(--ink)}
+html.rb .rb-subbar button[aria-current="page"]{color:var(--ink);font-weight:600;border-bottom-color:var(--acc)}
+@media (min-width:821px){html.rb .rb-rail{top:calc(112px + env(safe-area-inset-top,0px));height:calc(100vh - 112px)}
+}html.rb .rb-rail > div:first-child:empty{display:none}
+html.rb .rb-mynote{min-height:44px;height:44px;padding:10px 14px;resize:none;overflow:hidden}
+html.rb .rb-usedrow{padding:18px 0;border-bottom:1px solid var(--line)}
+html.rb .rb-usedrow .rb-lab{color:var(--muted);font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+@media (max-width:820px){html.rb .rb-subbar{position:static;justify-content:flex-start;gap:22px}
+html.rb .rb-mini{display:block;border-top:1px solid var(--line)}
+html.rb .rb-mini a{padding:13px 0;border-bottom:1px solid var(--line);border-radius:0}
+html.rb .rb-mini img,html.rb .rb-mini .rb-noimg,html.rb .rb-mini small{display:none}
+html.rb .rb-mini b{margin:0;color:var(--acc);font-size:16px}
+html.rb .rb-mini b::after{content:" ↗";font-weight:500}
+}html.rb .rb-rbtn{position:relative}
+html.rb .rb-rcount{position:absolute;top:4px;right:8px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--acc);color:var(--accink);font-size:11px;line-height:18px;font-weight:700}
+html.rb .rb-rcount:empty,html.rb .rb-rcount[data-z]{display:none}
+html.rb .rb-mine .rb-li{cursor:pointer}
+html.rb .rb-mine .rb-stampl{color:var(--muted);font-size:13px}
+@media (max-width:820px){html.rb .rb-feat > .rb-arrow,html.rb .rb-feat .rb-finfo{display:none}
+html.rb .rb-feat .rb-fcard,html.rb .rb-feat .rb-fcard.rb-mid{width:72%;opacity:1;transform:none;box-shadow:0 0 0 1px var(--line)}
+html.rb .rb-ftrack{scroll-snap-type:x mandatory}
+html.rb .rb-feat .rb-fcard{scroll-snap-align:start}
+}@media (max-width:820px){html.rb .rb-rail{justify-content:space-around}
+html.rb .rb-rail > div{gap:0}
+html.rb .rb-rbtn{width:60px}
+}:root.rb.rb{--topbg:#1f2b36;--topink:#f3efe7;--topmuted:rgba(243,239,231,.68);--topacc:#d9b26b}
+:root.rb.rb.rbdark{--topbg:#1b2433}
+html.rb .rb-top{background:var(--topbg);border-bottom-color:transparent;color:var(--topink)}
+html.rb .rb-logo{color:var(--topink)}
+html.rb .rb-tabs button{color:var(--topmuted)}
+html.rb .rb-tabs button:hover,html.rb .rb-tabs button[aria-current="page"]{color:var(--topink)}
+html.rb .rb-tabs button[aria-current="page"]{border-bottom-color:var(--topacc)}
+html.rb .rb-right{color:var(--topmuted)}
+html.rb .rb-ib:hover{background:rgba(255,255,255,.1);color:var(--topink)}
+html.rb .rb-search{border-color:transparent}
+html.rb .rb-rhero{--c3:#145553;color:var(--ink)}
+html.rb .rb-rhero h1,html.rb .rb-rhero .rb-sub,html.rb .rb-rhero .rb-circ{color:var(--ink)}
+html.rb .rb-rhero .rb-sub{opacity:1;color:var(--muted)}
+html.rb .rb-rhero .rb-circ{background:rgba(255,255,255,.7);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+html.rb .rb-rhero .rb-circ:hover{background:#fff}
+html.rb .rb-rhero .rb-circ[aria-pressed="true"]{background:var(--c3);color:#fff}
+html.rb .rb-rhero .rb-pic{box-shadow:0 10px 24px rgba(40,30,10,.16)}
+html.rb .rb-readbtn{background:var(--c3);color:#fff}
+html.rb .rb-readbtn:hover{background:color-mix(in srgb,var(--c3) 85%,#000)}
+html.rb .rb-rhero .rb-sub{color:#4f473d}
+html.rb .rb-rtag{color:var(--ink);background:rgba(255,255,255,.65)}
+html.rb .rb-rtag button{color:var(--ink)}
+html.rb.rbdark .rb-rhero .rb-sub{color:#c3cad3}
+html.rb.rbdark .rb-rtag{background:rgba(255,255,255,.1)}
+html.rb.rbdark .rb-rhero{background:linear-gradient(180deg,color-mix(in srgb,var(--c3) 38%,#0f141e),color-mix(in srgb,var(--c3) 24%,#0f141e))}
+html.rb.rbdark .rb-rhero .rb-circ{background:rgba(255,255,255,.1)}
+html.rb.rbdark .rb-rhero .rb-circ[aria-pressed="true"]{background:#eaecef;color:#0f141e}
+html.rb.rbdark .rb-readbtn{background:color-mix(in srgb,var(--c3) 55%,#eaecef);color:#0f141e}
+html.rb .rb-kindtag{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+html.rb .rb-rhero{--c3:var(--acc);background:linear-gradient(180deg,#ede6da,#e7dfd1);border-bottom:2px solid #d6ccbb}
+html.rb .rb-rhero .rb-kindtag{color:#5c5246}
+html.rb .rb-readbtn{background:var(--acc);color:#fff}
+html.rb .rb-readbtn:hover{background:color-mix(in srgb,var(--acc) 85%,#000)}
+html.rb .rb-rhero .rb-circ[aria-pressed="true"]{background:var(--acc);color:#fff}
+html.rb.rbdark .rb-rhero{background:linear-gradient(180deg,#1d2535,#1a2130);border-bottom:2px solid #273145}
+html.rb.rbdark .rb-rhero .rb-kindtag{color:#aab4c0}
+html.rb .rb-subbar{background:var(--side)}
+html.rb.rbdark .rb-readbtn{background:var(--acc);color:#0f141e}
+html.rb .rb-rhero{--c3:#c29b62;background:linear-gradient(180deg,#2a3746,#223040);border-bottom:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+html.rb .rb-rhero h1,html.rb .rb-rhero .rb-circ{color:#fff}
+html.rb .rb-rhero .rb-sub{color:#c9d1da}
+html.rb .rb-rhero .rb-kindtag{color:#d9c9ae}
+html.rb .rb-rtag{color:#eef1f4;background:rgba(255,255,255,.12)}
+html.rb .rb-rtag button{color:#eef1f4}
+html.rb .rb-rhero .rb-circ{background:rgba(255,255,255,.14);box-shadow:none}
+html.rb .rb-rhero .rb-circ:hover{background:rgba(255,255,255,.24)}
+html.rb .rb-rhero .rb-circ[aria-pressed="true"]{background:#c29b62;color:#0f141e}
+html.rb .rb-rhero .rb-pic{outline:1px solid rgba(255,255,255,.14);box-shadow:0 12px 28px rgba(0,0,0,.45)}
+html.rb .rb-readbtn{background:#c29b62;color:#0f141e}
+html.rb .rb-readbtn:hover{background:#d4ad72}
+html.rb.rbdark .rb-rhero{background:linear-gradient(180deg,#26354d,#1f2c40);border-bottom:1px solid #324461}
+@media (min-width:821px){html.rb .rb-rhero .rb-wrap{padding-block:16px 30px;gap:12px}
+html.rb .rb-rhero .rb-pic{width:360px}
+}html.rb.rbdark .rb-readbtn:hover{background:color-mix(in srgb,var(--acc) 85%,#fff)}
+html.rb.rbdark .rb-rhero .rb-circ[aria-pressed="true"]{background:var(--acc);color:#0f141e}
+@media (prefers-reduced-motion:reduce){}html.rb .rb-list[hidden]{display:none!important}
+html.rb .rb-list:has(.rb-lrow){border-top:0;display:flex;flex-direction:column;gap:12px}
+html.rb .rb-lrow{grid-template-columns:200px 1fr auto;gap:22px;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;transition:border-color .15s var(--ease)}
+html.rb .rb-lrow:hover{border-color:color-mix(in srgb,var(--ink) 25%,transparent)}
+html.rb .rb-lrow > img,html.rb .rb-lrow > .rb-mono{width:200px;aspect-ratio:16/10;border-radius:10px;border:0}
+html.rb .rb-lrow > .rb-mono{display:grid;place-items:center;background:linear-gradient(180deg,#2a3746,#223040);color:#d9b26b;font-size:36px;font-weight:700;letter-spacing:.04em}
+html.rb .rb-lrow .rb-lk{display:block;color:var(--acc);font-size:13px;font-weight:600}
+html.rb .rb-lrow b{font-size:19px;margin:2px 0 4px}
+html.rb .rb-lrow p{margin:0;color:var(--muted);display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+html.rb .rb-lrow .rb-lacts{display:flex;gap:8px;padding-right:8px}
+html.rb .rb-lrow .rb-btn{border-radius:999px;text-decoration:none;padding:8px 14px;font-size:14px;white-space:nowrap}
+html.rb .rb-lrow .rb-btn.rb-sec{border:1px solid var(--acc);color:var(--acc)}
+@media (max-width:820px){html.rb .rb-lrow{grid-template-columns:96px 1fr;gap:12px}
+html.rb .rb-lrow > img,html.rb .rb-lrow > .rb-mono{width:96px;font-size:22px}
+html.rb .rb-lrow .rb-lacts{display:none}
+html.rb .rb-lrow b{font-size:16px}
+}html.rb .rb-card .rb-mono,html.rb .rb-rhero .rb-pic.rb-mono{display:grid;place-items:center;aspect-ratio:16/10;background:linear-gradient(180deg,#2a3746,#223040);color:#d9b26b;font-size:40px;font-weight:700;letter-spacing:.04em;border-radius:10px}
+html.rb .rb-rhero .rb-pic{object-fit:cover;object-position:top}
+html.rb .rb-slinks{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:6px}
+html.rb .rb-slinks a{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:999px;border:1.5px solid rgba(255,255,255,.45);color:#fff;font-weight:600;font-size:15px;text-decoration:none;transition:background-color .15s var(--ease)}
+html.rb .rb-slinks a:hover{background:rgba(255,255,255,.12)}
+html.rb .rb-slinks a:first-child{background:#c29b62;border-color:#c29b62;color:#0f141e}
+html.rb .rb-slinks a:first-child:hover{background:#d4ad72}
+html.rb .rb-rfacts.rb-spk .rb-sh2{font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:28px 0 8px;font-weight:700}
+html.rb .rb-rfacts.rb-spk .rb-about p{font-size:18px;line-height:1.6;margin:0 0 14px}
+html.rb .rb-rfacts.rb-spk .rb-about .rb-sh{font-size:19px;margin:20px 0 6px;color:var(--ink)}
+html.rb .rb-rfacts.rb-spk .rb-full{border-top:1px solid var(--line);margin-top:8px}
+html.rb .rb-rfacts.rb-spk .rb-full p{font-size:17px}
+html.rb .rb-stags{display:flex;flex-wrap:wrap;gap:8px;padding-top:22px}
+html.rb .rb-stags span{font-size:14px;font-weight:600;padding:5px 12px;border-radius:999px;background:var(--soft);color:var(--ink)}
+html.rb .rb-stags .rb-ok{background:#e3efe6;color:#2f6b3a}
+html.rb.rbdark .rb-stags .rb-ok{background:#1f3326;color:#7fbf8a}
+html.rb .rb-rfacts.rb-spk .rb-contact{display:flex;flex-direction:column;gap:8px}
+html.rb .rb-rfacts.rb-spk .rb-crow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:17px;padding:10px 14px;background:var(--card);border:1px solid var(--line);border-radius:12px}
+html.rb .rb-rfacts.rb-spk .rb-crow a{color:var(--acc);font-weight:600}
+html.rb .rb-rfacts.rb-spk .rb-pending{color:var(--muted);font-size:16px;margin:10px 0}
+html.rb .rb-rfacts.rb-spk .rb-note a{color:var(--muted)}
+@media (max-width:820px){html.rb .rb-slinks a{order:3}
+html.rb .rb-slinks a[data-k=web]{order:0}
+html.rb .rb-slinks a[data-k=inv]{order:1}
+html.rb .rb-slinks::before{content:"";flex-basis:100%;order:2;height:0}
+html.rb .rb-slinks a[data-k=feat]{order:4}
+}html.rb .rb-rfacts.rb-spk .rb-crow code{font-family:inherit;font-weight:600;font-size:16px;user-select:all;overflow-wrap:anywhere}
+html.rb .rb-rfacts.rb-spk .rb-crow button,html.rb .rb-rfacts.rb-spk .rb-crow code ~ a{font-size:14px;font-weight:600;border-radius:8px;padding:5px 12px;border:1px solid var(--line);background:var(--soft);color:var(--ink);text-decoration:none}
+html.rb .rb-invf{margin-top:8px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+html.rb .rb-invf summary{cursor:pointer;font-weight:700;color:var(--acc);font-size:17px}
+html.rb .rb-invf[open]{display:grid;gap:10px}
+html.rb .rb-invf label{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+html.rb .rb-invf input,html.rb .rb-invf select,html.rb .rb-invf textarea{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;font-size:15px;width:100%;box-sizing:border-box}
+html.rb .rb-invf .rb-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+html.rb .rb-invf .rb-acts{display:flex;flex-wrap:wrap;gap:8px}
+html.rb .rb-invf .rb-acts a,html.rb .rb-invf .rb-acts button{font-size:14px;font-weight:600;border-radius:999px;padding:8px 14px;border:1px solid var(--line);background:var(--soft);color:var(--ink);text-decoration:none}
+html.rb .rb-invf .rb-acts .rb-go{background:var(--acc);border-color:var(--acc);color:#fff}
+html.rb.rbdark .rb-invf .rb-acts .rb-go{color:#0f141e}
+html.rb .rb-glance{display:grid;grid-template-columns:max-content 1fr;gap:6px 22px;margin:0;font-size:17px}
+html.rb .rb-glance dt{color:var(--muted)}
+html.rb .rb-glance dd{margin:0}
+html.rb .rb-savebtn{margin-top:22px;font-size:16px;font-weight:600;padding:10px 18px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+@media (max-width:820px){html.rb .rb-invf .rb-row2{grid-template-columns:1fr}
+html.rb .rb-glance{grid-template-columns:1fr;gap:0}
+html.rb .rb-glance dd{margin-bottom:8px}
+}html.rb .rb-rfacts.rb-spk .rb-crow,html.rb .rb-invf > summary{min-height:52px;box-sizing:border-box}
+html.rb .rb-rfacts.rb-spk .rb-crow{padding:8px 14px}
+html.rb .rb-rfacts.rb-spk .rb-crow button,html.rb .rb-rfacts.rb-spk .rb-crow code ~ a{padding:3px 12px}
+html.rb .rb-invf{padding:0 14px;margin-top:8px}
+html.rb .rb-invf > summary{display:flex;align-items:center;gap:6px}
+html.rb .rb-invf[open]{padding-bottom:14px}
+html.rb .rb-rfacts.rb-spk .rb-glance{margin-top:4px}
+html.rb .rb-rfacts.rb-spk .rb-savebtn{margin-top:16px}
+html.rb .rb-rfacts.rb-spk .rb-invf > summary{padding:0;min-height:50px;font-size:17px}
+html.rb .rb-spkhero .rb-circ svg{display:block}
+html.rb .rb-slinks a svg{flex:none}
+html.rb .rb-slinks a:not(:first-child){border-color:rgba(255,255,255,.28);font-weight:500;font-size:14.5px;padding:7px 14px;color:#dfe5ec}
+html.rb .rb-slinks a[data-k=inv]{border-color:rgba(255,255,255,.5);color:#fff;font-weight:600}
+html.rb .rb-tagsdd{text-align:center;padding-top:16px}
+html.rb .rb-tagsdd summary{list-style:none;display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;font-weight:600;color:var(--muted);padding:6px 14px;border:1px solid var(--line);border-radius:999px;background:var(--card)}
+html.rb .rb-tagsdd summary::-webkit-details-marker{display:none}
+html.rb .rb-tagsdd summary::after{content:"";width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .2s}
+html.rb .rb-tagsdd[open] summary::after{transform:rotate(-135deg) translateY(-1px)}
+html.rb .rb-tagsdd .rb-stags{justify-content:center;padding-top:12px}
+html.rb .rb-savebtn{display:inline-flex;align-items:center;gap:8px}
+html.rb .rb-savebtn svg{width:17px;height:17px}
+html.rb .rb-rfacts.rb-spk .rb-crow svg{color:var(--muted)}
+html.rb .rb-slinks .rb-lm{position:relative}
+html.rb .rb-slinks .rb-lm > summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;border:1.5px solid rgba(255,255,255,.28);color:#dfe5ec;font-weight:500;font-size:14.5px;transition:background-color .15s var(--ease)}
+html.rb .rb-slinks .rb-lm > summary::-webkit-details-marker{display:none}
+html.rb .rb-slinks .rb-lm > summary:hover{background:rgba(255,255,255,.12)}
+html.rb .rb-slinks .rb-lm.rb-lead > summary{background:#c29b62;border-color:#c29b62;color:#0f141e;font-weight:600;font-size:15px;padding:8px 16px}
+html.rb .rb-slinks .rb-lm[data-k=inv] > summary{border-color:rgba(255,255,255,.5);color:#fff;font-weight:600}
+html.rb .rb-slinks .rb-car{width:6px;height:6px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .2s}
+html.rb .rb-slinks .rb-lm[open] .rb-car{transform:rotate(-135deg) translateY(-1px)}
+html.rb .rb-slinks .rb-lm .rb-lmenu{position:absolute;top:calc(100% + 6px);left:0;z-index:5;min-width:220px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px;box-shadow:0 10px 24px rgba(0,0,0,.25);display:flex;flex-direction:column;text-align:left}
+html.rb .rb-slinks .rb-lm .rb-lmenu a{display:block;border:0!important;background:none!important;color:var(--ink)!important;font-weight:500;font-size:15px;padding:9px 12px;border-radius:8px}
+html.rb .rb-slinks .rb-lm .rb-lmenu a:hover{background:var(--soft)!important}
+@media (max-width:820px){html.rb .rb-slinks > *{order:3}
+html.rb .rb-slinks > [data-k=web]{order:0}
+html.rb .rb-slinks > [data-k=inv]{order:1}
+html.rb .rb-slinks > [data-k=feat]{order:4}
+}:root.rb.rb{--toph:64px;--subh:48px}
+html.rb .rb-subbar{top:calc(var(--toph) + env(safe-area-inset-top,0px))}
+html.rb .rb-opts{position:sticky;top:calc(var(--toph) + var(--subh) + env(safe-area-inset-top,0px));z-index:28;background:var(--bg);margin-inline:-12px;padding:12px 12px;margin-bottom:18px;border-bottom:1px solid transparent;transition:border-color .2s}
+html.rb .rb-opts.rb-stuck{border-bottom-color:var(--line)}
+@media (max-width:820px){html.rb .rb-subbar{position:sticky}
+html.rb .rb-opts{gap:14px 18px;padding:10px 12px}
+}html.rb .rb-rfacts summary::after,html.rb .rb-tagsdd summary::after,html.rb .rb-slinks .rb-car{content:"";border:0;width:var(--cv);height:var(--cv);flex:none;background:currentColor;opacity:.7;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center/contain no-repeat;transform:none;transition:transform .2s}
+html.rb .rb-rfacts summary::after{--cv:20px;margin-right:2px}
+html.rb .rb-tagsdd summary::after{--cv:14px}
+html.rb .rb-slinks .rb-car{--cv:14px}
+html.rb .rb-rfacts details[open] > summary::after,html.rb .rb-tagsdd[open] summary::after,html.rb .rb-slinks .rb-lm[open] .rb-car{transform:rotate(180deg)}
+html.rb .rb-opt svg{opacity:.85}
+html.rb .rb-subbar,html.rb .rb-opts{transition:transform .25s var(--ease),border-color .2s}
+html.rb.hidebars .rb-subbar{transform:translateY(-100%)}
+html.rb.hidebars .rb-opts.rb-stuck{transform:translateY(calc(-100% - var(--subh)))}
+html.rb .rb-ofil{display:flex;flex-wrap:wrap;gap:22px;align-items:center}
+html.rb .rb-views svg{display:none}
+html.rb .rb-mono.rb-fb{background:#ece5d8;color:#5c5346;font-size:30px;letter-spacing:.04em;width:100%}
+html.rb.rbdark .rb-mono.rb-fb{background:#2c2a26;color:#cbbfa8}
+@media (max-width:820px){html.rb .rb-feat .rb-fcard,html.rb .rb-feat .rb-fcard.rb-mid{width:66%}
+html.rb .rb-fcard img,html.rb .rb-fcard .rb-mono{aspect-ratio:16/9}
+html.rb .rb-opts{flex-wrap:nowrap;gap:12px}
+html.rb .rb-ofil{flex-wrap:nowrap;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none;gap:18px;-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}
+html.rb .rb-ofil::-webkit-scrollbar{display:none}
+html.rb .rb-opt{white-space:nowrap;flex:none}
+html.rb .rb-views{flex:none;gap:0;border:1px solid var(--line);border-radius:9px;overflow:hidden;margin-left:0}
+html.rb .rb-views button{display:grid;place-items:center;width:34px;height:32px;padding:0;border:0!important;color:var(--muted)}
+html.rb .rb-views button + button{border-left:1px solid var(--line)!important}
+html.rb .rb-views button[aria-pressed="true"]{background:var(--card);color:var(--acc)}
+html.rb .rb-views svg{display:block;width:17px;height:17px}
+html.rb .rb-views span{display:none}
+html.rb .rb-rowh h2{font-size:20px;line-height:1.25}
+html.rb .rb-seeall{font-size:14px;white-space:nowrap}
+html.rb .rb-search{height:44px}
+html.rb .rb-go{font-size:14px;padding:6px 12px;border-radius:8px}
+html.rb .rb-subbar{height:44px;gap:24px}
+html.rb .rb-subbar button{font-size:15px}
+}html.rb .rb-peek{display:none}
+@media (max-width:820px){html.rb .rb-peek{display:block;position:fixed;left:0;right:0;bottom:var(--railh,64px);z-index:25;background:var(--side);border:1px solid var(--line);border-bottom:0;border-radius:16px 16px 0 0;box-shadow:0 -4px 16px var(--shadow);padding:14px 16px;transition:opacity .45s ease,transform .45s ease}
+html.rb .rb-peek:not(.rb-on){opacity:0;transform:translateY(14px);pointer-events:none}
+html.rb .rb-peek button{display:flex;flex-direction:column;gap:3px;text-align:left;width:100%}
+html.rb .rb-peek .rb-pk-t{font-weight:700;font-size:16px;display:flex;justify-content:space-between;gap:10px}
+html.rb .rb-peek .rb-pk-t small{font-weight:600;color:var(--acc);font-size:13px;white-space:nowrap;border:1.5px solid var(--acc);border-radius:999px;padding:2px 10px;align-self:center}
+html.rb .rb-peek .rb-pk-k{color:var(--muted);font-size:13px}
+html.rb .rb-peek .rb-pk-s{color:var(--muted);font-size:14px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+}@media (max-width:820px){html.rb .rb-rail{display:grid!important;grid-template-columns:repeat(5,1fr);justify-items:center}
+html.rb .rb-rail > div,html.rb .rb-rail .rb-rprint{display:contents}
+html.rb .rb-rail .rb-rbtn{width:auto;min-width:56px}
+}@media (max-width:820px){html.rb .rb-feat .rb-fcard,html.rb .rb-feat .rb-fcard.rb-mid{transform:scale(.9);opacity:.72;transition:transform .3s var(--ease),opacity .3s var(--ease),box-shadow .3s var(--ease)}
+html.rb .rb-feat .rb-fcard.rb-cur,html.rb .rb-ftrack:not(:has(.rb-cur)) .rb-fcard:first-child{transform:none;opacity:1;box-shadow:0 0 0 1px color-mix(in srgb,var(--ink) 28%,transparent),0 14px 28px var(--shadow)}
+html.rb .rb-feat .rb-fwin{padding-top:12px;padding-bottom:22px}
+}@media (max-width:820px){html.rb .rb-feat .rb-fwin{container-type:inline-size}
+html.rb .rb-feat .rb-fcard,html.rb .rb-feat .rb-fcard.rb-mid{width:70cqw;scroll-snap-align:center}
+html.rb .rb-ftrack{padding-inline:15cqw;scroll-padding-inline:15cqw;gap:4px}
+}@media (max-width:820px){html.rb .rb-grid .rb-card{transition:box-shadow .3s var(--ease)}
+html.rb .rb-grid .rb-card.rb-cur{box-shadow:0 0 0 1px color-mix(in srgb,var(--ink) 28%,transparent),0 14px 28px var(--shadow)}
+}html.rb .rb-fcard b,html.rb .rb-fcard small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:820px){html.rb .rb-main{padding-bottom:calc(var(--railh,64px) + var(--peekh,150px) + 24px)}
+}@media (max-width:820px){html.rb .rb-menu{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+}html.rb .rb-mynote{field-sizing:content;height:auto;min-height:48px;line-height:1.45}
+html.rb .rb-pills button{white-space:nowrap}
+@media (max-width:820px){html.rb .rb-fact:has(.rb-pills){flex-direction:column;gap:10px}
+html.rb .rb-fact:has(.rb-pills) .rb-lab{width:auto}
+}@media (min-width:821px){html.rb .rb-peek{display:block;position:fixed;bottom:0;left:var(--railw,76px);right:0;z-index:25;background:var(--side);border:1px solid var(--line);border-bottom:0;border-radius:16px 16px 0 0;box-shadow:0 -4px 16px var(--shadow);padding:16px 44px 18px;transition:opacity .3s ease,transform .3s ease}
+html.rb .rb-peek:not(.rb-on){opacity:0;transform:translateY(14px);pointer-events:none}
+html.rb .rb-peek button{display:flex;flex-direction:column;gap:4px;text-align:left;width:100%;max-width:1300px;margin:0 auto}
+html.rb .rb-peek .rb-pk-t{font-weight:700;font-size:18px;display:flex;justify-content:space-between;gap:10px}
+html.rb .rb-peek .rb-pk-t small{font-weight:600;color:var(--acc);font-size:14px;white-space:nowrap;border:1.5px solid var(--acc);border-radius:999px;padding:3px 12px;align-self:center}
+html.rb .rb-peek .rb-pk-k{color:var(--muted);font-size:14px}
+html.rb .rb-peek .rb-pk-s{color:var(--muted);font-size:15px;line-height:1.45}
+html.rb .rb-main:has(.rb-grid){padding-bottom:170px}
+html.rb .rb-grid .rb-card.rb-cur img{border-color:color-mix(in srgb,var(--ink) 35%,transparent)}
+}@media (min-width:821px){html.rb .rb-peek{padding:10px 44px 12px}
+html.rb .rb-peek button{display:grid;grid-template-columns:auto 1fr auto;column-gap:14px;row-gap:2px;align-items:baseline}
+html.rb .rb-peek .rb-pk-t{display:contents}
+html.rb .rb-peek .rb-pk-t small{grid-column:3;grid-row:1 / span 2;align-self:center}
+html.rb .rb-peek .rb-pk-k{grid-column:2;grid-row:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.rb .rb-peek .rb-pk-s{grid-column:1 / 3;grid-row:2;white-space:normal;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+html.rb .rb-main:has(.rb-grid){padding-bottom:110px}
+}@media (min-width:821px){html.rb.hidebars .rb-subbar{transform:none}
+html.rb.hidebars .rb-opts.rb-stuck{transform:translateY(-100%)}
+}/* ===== Rebrand: fitting the mockup onto the live app (after rb_mock.css) =====
+   The live app scrolls inside fixed layers (.stage > .layer), not the window, so the mockup's top bar, tab bar and left bar are fixed
+   and the stage sits between them. */
+/* the live app's own color names follow the rebrand palette, so every tab (Map room, Serve wrapper, Help, Settings) matches */
+:root.rb.rb{--sans:var(--font);--serif:var(--font);--glass:color-mix(in srgb,var(--card) 90%,transparent);--glass2:var(--card);--edge:var(--line);--dim:#8a8070;
+  --gold:var(--acc);--gold2:#6f4520;--goldlight:#6f4520;--room:var(--side);--wall:var(--card);--surface:var(--card);--surface2:var(--soft);--panel:var(--card);--panel2:var(--soft);
+  --fade:var(--muted);--card1:var(--soft);--card2:var(--card);--homebg:var(--side);--roombg:var(--side);--fx-topbg:var(--bg);--slow:.45s;--toph:64px;--subh:48px;color-scheme:light}
+:root.rb.rb.rbdark{--dim:#6b7a8c;--gold2:#d4ad72;--goldlight:#d4ad72;color-scheme:dark}
+html.rb body{font-size:16px}
+
+/* the live top bar is replaced by the mockup's; its buttons stay in the page (hidden) so every id and handler keeps working */
+html.rb header.top{display:none!important}
+html.rb .rb-top{position:fixed;top:0;left:0;right:0;z-index:70;padding-top:env(safe-area-inset-top,0px);height:calc(64px + env(safe-area-inset-top,0px))}
+html.rb .rb-top .rb-tabs button{white-space:nowrap}
+html.rb #rbSearch{justify-self:center;width:min(640px,100%);position:relative}
+html.rb.rb-noq #rbSearch{visibility:hidden}   /* Serve and Map room have their own search bar */
+html.rb #qform{display:flex!important;align-items:center;gap:10px;height:44px;width:100%!important;margin:0!important;padding:0 5px 0 14px!important;border:1px solid transparent!important;border-radius:12px!important;
+  background:var(--card)!important;box-shadow:none!important;position:static!important;transform:none!important;animation:none!important;backdrop-filter:none!important;max-width:none!important;opacity:1!important}
+html.rb #qform > span{color:var(--muted);display:flex;font-size:0}
+html.rb #qform input{flex:1;min-width:0;border:0!important;background:none!important;font:inherit;color:var(--ink);font-size:15px;outline:none;padding:0!important;box-shadow:none!important;height:auto}
+html.rb #qform input::placeholder{color:var(--muted)}
+html.rb #qform #qsl{color:var(--muted);padding:0 4px;background:none;border:0}
+html.rb #qform > button.btn{background:var(--acc)!important;color:var(--accink)!important;font-weight:600;font-size:15px;padding:7px 14px!important;border-radius:9px!important;border:0!important;box-shadow:none!important;min-height:0;height:auto;line-height:1.5}
+html.rb #ssLine{display:none!important}
+html.rb #ssp,html.rb #ssp.ssfollow{position:absolute!important;top:52px!important;left:0!important;right:0!important;width:100%!important;margin:0!important;z-index:72!important;max-height:calc(100vh - 140px)!important;overflow:auto!important;
+  background:var(--card)!important;color:var(--ink);border:1px solid var(--line)!important;border-radius:14px!important;box-shadow:0 18px 40px var(--shadow)!important}
+html.rb #qsug{position:absolute!important;top:50px;left:0;right:0;z-index:72;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:0 16px 36px var(--shadow);overflow:hidden}
+html.rb #rbGear{color:var(--topmuted)}
+html.rb #setp{position:fixed!important;top:calc(var(--toph) + 4px)!important;right:16px!important;left:auto!important;bottom:auto!important;z-index:76!important;width:min(340px,calc(100vw - 32px))!important;max-height:calc(100vh - var(--toph) - 24px);overflow:auto;
+  background:var(--card)!important;color:var(--ink)!important;border:1px solid var(--line)!important;border-radius:14px!important;box-shadow:0 18px 40px var(--shadow)!important;backdrop-filter:none!important;font-family:var(--font)}
+
+/* tab bar under the top bar = the live #resTabs, in the mockup's look */
+html.rb #resTabs{position:fixed;top:var(--toph)!important;left:0;right:0;z-index:69;height:48px;gap:28px;background:var(--side)!important;border-bottom:1px solid var(--line)!important;transition:transform .25s var(--ease)}
+html.rb #resTabs button{font:500 15px/1 var(--font)!important;color:var(--muted)!important;border-bottom:2px solid transparent!important;padding:0 2px!important}
+html.rb #resTabs button:hover{color:var(--ink)!important}
+html.rb #resTabs button[aria-selected=true]{color:var(--ink)!important;font-weight:600!important;border-bottom-color:var(--acc)!important}
+
+/* the stage sits under the top bar and beside the left bar; layers scroll inside it */
+html.rb .stage{top:var(--toph);left:76px}
+html.rb .layer{padding-top:0!important}
+html.rb.rt #L-home.rb-main,html.rb.rt #L-topic.rb-main,html.rb.rt #L-detail.rb-main{padding-top:calc(var(--subh) + 36px)!important}
+html.rb.rt #L-spk{padding-top:var(--subh)!important}
+html.rb #L-serve{padding-top:0!important}
+html.rb #L-home:has(#qform.sbar.follow)::before{display:none!important}
+html.rb .layer.rb-main{padding:36px 40px 80px 44px}
+html.rb .layer.rb-main > *{max-width:1300px;margin-inline:auto}
+html.rb .layer.rb-main > #rbDetail{max-width:none}
+html.rb #L-room{background:var(--bg)!important}
+html.rb .rb-rail{position:fixed;top:calc(var(--toph) + 48px);left:0;bottom:0;width:76px;height:auto;z-index:68}   /* the mockup's left bar always starts under the tab bar's line, on every tab */
+html.rb .rb-rail .rb-rbtn{background:none;border:0;font-family:var(--font)}
+html.rb #appSlot,html.rb #groups,html.rb .ghead,html.rb #L-home > .hero2,html.rb #tform,html.rb #tFilt,html.rb #tCarNav,html.rb .qtop,html.rb #qtop{display:none!important}
+html.rb #L-detail .dgrid{display:none!important}
+
+/* home and topic pages */
+/* the drop-down row is sticky inside the scrolling layer, so its wrappers must not box it in */
+html.rb #rbHome,html.rb #rbTOpts{display:contents}
+/* sticky offsets count from inside the layer's top padding (36px PC, 22px phone; the tab bar's height is already in it) */
+html.rb .rb-opts,html.rb.rt .rb-opts{top:-36px;margin-inline:-12px}
+html.rb #L-home > p.note{color:var(--muted);font-size:14px}
+html.rb #L-home > p.note .chip{background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:999px}
+html.rb #L-topic .lhead{margin:0 0 10px;gap:6px;max-width:1300px}
+html.rb #L-topic .lhead > *{animation:none!important}
+html.rb #tEye{color:var(--muted);font:600 13px var(--font);letter-spacing:.06em;text-transform:uppercase}
+html.rb #tTitle{font:700 clamp(28px,3.2vw,40px)/1.15 var(--font);letter-spacing:-.02em;color:var(--ink);margin:0;text-wrap:balance}
+html.rb #tSub{color:var(--muted);font-size:17px;margin:0;max-width:70ch}
+html.rb #tChips{display:flex;flex-wrap:wrap;gap:8px}
+html.rb #tChips :is(.chip,button,a){background:var(--card);border:1px solid var(--line);border-radius:999px;color:var(--ink);font:500 14px var(--font);padding:5px 13px}
+html.rb #rbTBack{color:var(--acc);font-weight:600;font-size:15px;justify-self:start;background:none;border:0;padding:0}
+html.rb #tQ{width:min(640px,100%);margin:0 0 14px}
+html.rb #tQ input{background:var(--card)!important;border:1px solid var(--line)!important;color:var(--ink)!important;border-radius:12px!important;font-family:var(--font)}
+html.rb #rpFind{background:var(--side)!important;border:1px solid var(--line)!important;color:var(--ink)!important;border-radius:16px!important}
+html.rb .rb-cards{display:block}
+html.rb .rb-morebtn{display:block;margin:22px auto 0;border:1px solid var(--line)!important;background:var(--card)!important;border-radius:999px!important;padding:9px 18px!important;font-weight:600!important;color:var(--acc)!important}
+html.rb .rb-fcard,html.rb .rb-card,html.rb .rb-li{font-family:var(--font)}
+html.rb .rb-menu{max-height:min(70vh,520px);overflow-y:auto}
+html.rb .rb-menu .rb-mh{display:block;padding:10px 12px 4px;color:var(--muted);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+html.rb .rb-menu a{display:flex;width:100%;padding:8px 12px;border-radius:8px;font-size:15px;text-decoration:none;color:var(--ink)}
+html.rb .rb-menu a:hover{background:var(--soft)}
+html.rb .rb-menu,html.rb .rb-pop{z-index:75}
+html.rb .rb-toast{z-index:90}
+html.rb .rb-peek{z-index:60}
+
+/* resource page */
+html.rb #rbDetail .rb-rhero{margin:-36px -40px 0 -44px}
+/* page dots (not in the mockup) sit on the picture's lower edge, so the page keeps the mockup's spacing */
+html.rb .rb-rhero .rb-pgs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1;margin-bottom:-21px;transform:translateY(-24px)}
+html.rb #rbDetail .rb-rhero h1{letter-spacing:-.02em}
+html.rb .rb-rhero .rb-pgs button{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.7);box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+html.rb .rb-rhero .rb-pgs button[aria-current=true]{background:#c29b62}
+html.rb .rb-fact .rb-val small{display:block;color:var(--muted);font-size:14px}
+html.rb .rb-report .rb-btn{margin-top:12px;text-decoration:none}
+
+/* phone */
+@media (max-width:820px){
+  html.rb .rb-top{height:auto;padding-top:calc(10px + env(safe-area-inset-top,0px));padding-bottom:10px}
+  html.rb .stage{left:0;bottom:var(--railh,64px)}
+  html.rb .rb-rail,html.rb.rt .rb-rail{top:auto;bottom:0;left:0;right:0;width:auto}
+  html.rb #resTabs{justify-content:flex-start;gap:24px;height:44px;overflow-x:auto;scrollbar-width:none}
+  html.rb.hidebars #resTabs{transform:translateY(-100%)}
+  html.rb .layer.rb-main{padding:22px 16px 110px}
+  html.rb.rt #L-home.rb-main,html.rb.rt #L-topic.rb-main,html.rb.rt #L-detail.rb-main{padding-top:calc(var(--subh) + 22px)!important}
+  html.rb #rbDetail .rb-rhero{margin:-22px -16px 0}
+  html.rb .rb-opts,html.rb.rt .rb-opts{top:-22px}
+  html.rb #rbSearch{grid-column:1/-1;grid-row:2;justify-self:stretch;width:100%;margin-bottom:16px}
+  html.rb.rb-noq #rbSearch{display:none}
+  html.rb #qform > button.btn{font-size:14px;padding:6px 12px!important;border-radius:8px!important}
+  html.rb #setp{right:8px!important}
+}
+@media (min-width:821px){html.rb.hidebars #resTabs{transform:none}}
+/* the live "New here? Take the tour" offer: one line, above the bottom bar on phones */
+html.rb #tourOffer{width:max-content;max-width:calc(100vw - 24px);white-space:nowrap;font-family:var(--font)}
+@media (max-width:820px){html.rb #tourOffer{bottom:calc(var(--railh,64px) + 12px)!important}}
+/* Map room search = the top search bar's look (44px, 12px corners, card color, accent button) */
+html.rb #roomForm{height:44px;border-radius:12px!important;padding:0 5px 0 14px!important;background:var(--card)!important;border:1px solid var(--line)!important;box-shadow:none!important}
+html.rb #roomForm input{font:15px var(--font)!important;height:auto}
+html.rb #roomForm .rgo{height:auto;border-radius:9px!important;border:0!important;background:var(--acc)!important;color:var(--accink)!important;font:600 15px/1.5 var(--font)!important;padding:7px 14px!important}
+@media (max-width:820px){html.rb #roomForm .rgo{font-size:14px!important;padding:6px 12px!important;border-radius:8px!important}}
+/* check 2 fixes (16 Nov): suggestion rows dividers in Light, long web addresses stay in their card, long "More from" headings wrap */
+html.rb #qsug button{border-bottom-color:var(--line)}
+html.rb .rb-card small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+html.rb .rb-rsec>h2{overflow-wrap:anywhere}
+/* restyle (16 Nov, Daniel): the Map room in the rebrand's style. Text at least 13px and dark enough in Light and Dark, no decorative
+   capitals, buttons = primary / outline pill / chips. Colors, sizes and weights only; nothing is moved. */
+html.rb #L-room :is(.wtitle,.eyebrow,.info .k){font:600 13px var(--font);letter-spacing:0;text-transform:none}
+html.rb #L-room .wtitle{color:var(--muted)}
+html.rb #L-room :is(.eyebrow,.info .k){color:var(--gold2)}
+html.rb #L-room :is(.tile b,.tile small,.stat .lab,.stat dl,.scale,.fbox span,.langs button,.subhint,.desk .dh small,.zoomwrap .zl,.vlab,.tag,.recenter,.area small,.dlist button small){font-size:13px}
+html.rb #L-room :is(.tile small,.subhint,.desk .dh small,.zoomwrap .zl,.scale,.stat .lab,.stat dt,.info p){color:var(--muted)}
+html.rb #L-room .desk{background:linear-gradient(180deg,transparent,var(--side))}
+/* the desk tiles stay readable: only the picture of the tiles you are not on is dimmed */
+html.rb #L-room .tile{opacity:1}
+html.rb #L-room .tile:not(.hot) .th img{opacity:.6}
+html.rb #L-room .fbox[aria-pressed="false"]{opacity:1}
+html.rb #L-room .fbox[aria-pressed="false"] :is(i,b){opacity:.75}
+html.rb #L-room .fbox[aria-pressed="true"]{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 8%,var(--card))}
+/* buttons */
+html.rb #L-room .btn{font:600 14px var(--font);border-radius:999px;background:transparent;border:1px solid var(--acc);color:var(--gold2)}
+html.rb #L-room .btn.gold{background:var(--acc);border-color:var(--acc);color:var(--accink)}
+html.rb #L-room :is(.subtabs button,.langs button,.reg,.dq button,.recenter,.carbtn){background:var(--card);border:1px solid var(--line);color:var(--ink);font-family:var(--font);font-weight:500}
+html.rb #L-room :is(.subtabs button,.reg) :is(b,em){color:var(--muted)}
+html.rb #L-room :is(.subtabs button,.langs button,.dq button)[aria-pressed="true"],html.rb #L-room .reg.on{background:var(--acc);border-color:var(--acc);color:var(--accink);font-weight:600}
+html.rb #L-room :is(.subtabs button[aria-pressed="true"],.reg.on) :is(b,em){color:var(--accink)}
+/* town names on the wall: a light halo in Light (the dark halo made dark names unreadable), soft names less faint */
+html.rb:not(.rbdark) #wLabels :is(text,circle){stroke:rgba(255,255,255,.92)}
+html.rb #wLabels text.soft{opacity:.8}
+/* page dots over the band picture: white and dark rings, so a dot shows on light and dark pictures; the current one is filled */
+html.rb .rb-rhero .rb-pgs button{background:#fff;box-shadow:0 0 0 1.5px #1f1b16,0 0 0 2.5px rgba(255,255,255,.9)}
+html.rb .rb-rhero .rb-pgs button[aria-current=true]{background:#8c5a2b;box-shadow:0 0 0 1.5px #fff,0 0 0 2.5px #1f1b16}
+/* check 4 (16 Nov): match v60 exactly. Row and section headings 700; the slate band in Dark keeps v60's circle, tag chip and summary colors
+   (the mockup's general Dark rules were winning over its band rules here); no stray body margin */
+html.rb :is(.rb-rowh,.rb-rsec)>h2{font-weight:700}
+html.rb.rbdark .rb-rhero .rb-circ{background:rgba(255,255,255,.14)}
+html.rb.rbdark .rb-rtag{background:rgba(255,255,255,.12)}
+html.rb.rbdark .rb-rhero .rb-sub{color:#c9d1da}
+html.rb body{margin:0}
+/* page dots: invisible 28px tap area around each 9px dot, nothing moves (16 Nov) */
+html.rb .rb-rhero .rb-pgs button{position:relative}
+html.rb .rb-rhero .rb-pgs button::after{content:"";position:absolute;inset:-9px -3px}
+/* check 5 (16 Nov) */
+/* Dark: the search box no longer melts into the top bar (same 1px line as the Map room search); the height stays 44px */
+html.rb.rbdark #qform{border-color:var(--line)!important}
+/* Dark: the note box placeholder in the muted text color (was 3.5:1) */
+html.rb .rb-mynote::placeholder{color:var(--muted);opacity:1}
+/* no text under 13px: the left bar / bottom bar labels and the drop-down group headings */
+html.rb .rb-rbtn span{font-size:13px}
+html.rb .rb-menu .rb-mh{font-size:13px}
+/* Map room: "‹ United States" beside the state name; brand pills fade at the right edge like the other scroll rows;
+   the state card sits on the right when the chosen state is in the west; a bigger invisible tap area around each small dot */
+html.rb #rbRBack{color:var(--acc);font:600 13px var(--font);background:none;border:0;padding:0;margin-right:10px;cursor:pointer}
+html.rb #rbRBack[hidden]{display:none}
+html.rb #L-room #brandtabs{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 48px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 48px),transparent)}
+html.rb #stat.rb-statR{left:auto;right:14px}
+html.rb #bDots circle:not(.out){stroke:transparent;stroke-width:12px;vector-effect:non-scaling-stroke}
+/* a Serve dialog dims the top bar, tab bar and left bar too (the frame's own backdrop color) */
+html.rb.rb-scrim :is(.rb-top,#resTabs,#rbRail)::after{content:"";position:absolute;inset:0;background:#020711c9;z-index:100;cursor:pointer}
+</style>
+<style id="illuCss">
+/* ===== Bridge: the rebrand's site look on everything AROUND the v29 covers. Cover rules (.cover, .c2, .s-*) are not touched. ===== */
+:root.rb.rb{--link:var(--acc);--peek:var(--side)}
+/* covers keep v29's own shadow (the site's --shadow is a color, v29's is a full shadow) */
+html.rb .cover{--shadow:0 6px 16px rgba(30,32,60,.16),0 1px 3px rgba(30,32,60,.12)}
+html.rb.rbdark .cover{--shadow:0 6px 18px rgba(0,0,0,.5),0 1px 3px rgba(0,0,0,.4)}
+
+/* page frame: fixed top bar + sub-tab line; side rail on PC, bottom bar on phone (sizes from fitBars) */
+/* v29 slid each view in sideways; on phones that briefly widened the page (and the bottom bar slipped down), so views fade in instead */
+html.rb .view{animation-name:illfade}@keyframes illfade{from{opacity:.4}}
+html.rb body{margin:0;padding-top:calc(var(--toph,64px) + var(--subh,48px));padding-left:var(--railw,76px)}
+@media (max-width:820px){html.rb body{padding-bottom:var(--railh,64px)}}
+html.rb #resTabs{display:flex;justify-content:center;align-items:stretch}
+html.rb #resTabs button{background:none;cursor:pointer}
+@media (max-width:820px){html.rb #resTabs{justify-content:flex-start;padding:0 16px}}
+html.rb #qform input::-webkit-search-cancel-button{display:none}
+.v2btn{display:none!important}
+
+/* page heading = the site's page h1 */
+html.rb .ill-head,html.rb main.wrap{max-width:1384px;margin:0 auto;padding:36px 40px 0 44px}
+html.rb main.wrap{padding-top:22px;padding-bottom:80px}
+html.rb .ill-head{display:flex;align-items:center;gap:10px}
+html.rb .ill-head h1{margin:0;font:700 clamp(28px,3.2vw,40px)/1.15 var(--font);letter-spacing:-.02em;color:var(--ink)}
+html.rb .ill-head .back{width:40px;height:40px;display:grid;place-items:center;border-radius:50%;margin-left:-8px;color:var(--ink)}
+html.rb .ill-head .back:hover{background:var(--soft)}
+html.rb .ill-head .back svg{width:22px;height:22px}
+@media (max-width:820px){html.rb .ill-head,html.rb main.wrap{padding:22px 16px 0}html.rb main.wrap{padding-top:14px;padding-bottom:110px}}
+html.rb body.peeking main.wrap{padding-bottom:200px}
+@media (min-width:900px){html.rb body.peeking main.wrap{padding-bottom:80px}}
+
+/* filters + view switch row = the site's options row (not sticky here, the list view has its own sticky source bar) */
+html.rb .ill-opts.rb-opts{position:static;top:auto;margin:0 0 6px;padding:0;background:none;border:0;transform:none}
+html.rb .lenf{margin:0;flex:1 1 auto;min-width:0}
+html.rb .lenf button{font:500 14px/1 var(--font);padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+html.rb .lenf button[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:var(--accink);font-weight:600}
+html.rb .ill-opts .rb-views{margin-left:auto}
+
+/* shelf headings = the site's row heading with "See all N ›" */
+html.rb .shelf{margin-top:30px}
+html.rb .shelf .rb-rowh{margin:0 0 4px}
+html.rb .shelf .rb-rowh h2{margin:0;font-family:var(--font);color:var(--ink)}
+html.rb .shelf-note{color:var(--muted)}
+html.rb .item .nm{font-weight:600}
+html.rb .item .mins{font-weight:400}
+
+/* PC rows = the Start here carousel: cards on the sand page, middle card lifts, sand info box beside, round arrows */
+@media (min-width:900px){
+  html.v2.rb .shelf .rb-rowh{margin-bottom:0}
+  html.v2.rb .rowwrap .item{background:none;border:0;padding:0;box-shadow:none}  /* Daniel 16 Nov: no white card around covers (looked like a portrait); side books full strength */
+  html.v2.rb .rowwrap .row{gap:26px}  /* Daniel 16 Nov: open spacing like the Sabbath School app and the phone shelves */
+  html.v2.rb .rowwrap .item.hot{opacity:1;border-color:transparent;transform:translateY(-6px) scale(1.12);box-shadow:none;background:none}
+  html.v2.rb .rarr{width:30px;height:30px;font:400 16px/1 var(--font);padding:0;border:1px solid var(--line);background:color-mix(in srgb,var(--card) 85%,transparent);color:var(--ink)}
+  html.v2.rb .rarr.prev{left:12px}html.v2.rb .rarr.next{right:12px}
+  html.v2.rb .rarr:hover{background:var(--soft);color:var(--ink);border-color:var(--line)}
+  html.v2.rb .info{background:var(--side);border:1px solid var(--line);border-radius:16px;box-shadow:none;padding:16px 18px;align-self:center;min-height:0}
+  html.v2.rb.rbdark .info{background:#1e2838;border-color:#344154}
+  html.v2.rb .info .k{font-size:13px;font-weight:400}
+  html.v2.rb .info h3{font:700 20px/1.2 var(--font);margin:2px 0 4px}
+  html.v2.rb .info p{font-size:15px}
+  html.v2.rb .info .acts{flex-wrap:nowrap;margin-top:8px}
+  html.v2.rb .info .acts button{font:600 14px/1 var(--font);padding:9px 14px;border-radius:999px;border:1px solid var(--acc);color:var(--acc);white-space:nowrap}
+  html.v2.rb .info .acts .gold{background:var(--acc);border-color:var(--acc);color:var(--accink)}
+}
+
+/* list view: source bar under the sub-tabs, site pills */
+html.rb .catbar{top:calc(var(--toph,64px) + var(--subh,48px));background:var(--bg);border-color:var(--line)}
+html.rb .cats button{font:500 14px/1 var(--font);padding:9px 14px;color:var(--muted);background:var(--card);border-color:var(--line)}
+html.rb .cats button[aria-selected="true"]{background:var(--acc);border-color:var(--acc);color:var(--accink);font-weight:600}
+html.rb .lrow .nm{font-weight:700}
+
+/* phone summary bar = the site's peek bar */
+html.rb .peek{background:var(--side);border:1px solid var(--line);border-bottom:0;border-radius:16px 16px 0 0;box-shadow:0 -4px 16px var(--shadow);padding:12px 16px}
+html.rb .peek .pk-t{font-weight:700}
+html.rb .peek .pk-t small{font-weight:600;color:var(--acc);font-size:13px;border:1.5px solid var(--acc);border-radius:999px;padding:2px 10px;align-self:center}
+html.rb .peek .pk-s,html.rb .peek .pk-p{color:var(--muted)}
+html.rb .peek .pk-p b{color:var(--ink)}
+html.rb .toast{font-family:var(--font);bottom:calc(var(--railh,64px) + 24px)}
+
+/* story page: v29 structure, band color still from the cover; site fonts, round buttons and gold main button */
+html.rb .hero h1{font:700 clamp(28px,6vw,40px)/1.1 var(--font);color:#fff;max-width:none}
+html.rb .hero .circ{background:rgba(255,255,255,.14)}
+html.rb .hero .circ:hover{background:rgba(255,255,255,.24)}
+html.rb .hero .circ[aria-pressed="true"]{background:#c29b62;color:#0f141e}
+html.rb .readbtn{background:#c29b62;color:#0f141e;font-weight:700;letter-spacing:.06em}
+html.rb .readbtn:hover{background:#c29b62;filter:brightness(1.08)}
+html.rb .full summary{font-weight:700;color:var(--acc)}
+html.rb .fact .lab{width:110px}
+html.rb .tags span{background:var(--card)}
+html.rb .facts .wrap{padding-bottom:40px}
+</style>
+<script>if(/[?&]embed\b/.test(location.search)){const h=document.documentElement,L=["light","linen","gray","parchment","bank","d_merlot","d_mist","d_harvest","d_alabaster"];
+const f=()=>{let s="parchment";try{s=localStorage.getItem("prl-style")||"parchment"}catch(e){}const d=!L.includes(s);h.classList.add("inapp");h.classList.toggle("rbdark",d);h.dataset.theme=d?"dark":"light"};
+f();addEventListener("storage",e=>{if(e.key==="prl-style")f()})}</script>
+<style>html.inapp #rbTop,html.inapp #resTabs,html.inapp #rbRail{display:none!important}
+/* Daniel 16 Nov (approval): PC middle book lifts at 1.05 and side books stay full strength (the draft file still had 1.12 and v29's .92) */
+@media (min-width:900px){html.v2.rb .rowwrap .item{opacity:1}html.v2.rb .rowwrap .item.hot{transform:translateY(-6px) scale(1.05)}}
+/* check 5 round 4: on phones (360-412 wide, any text size) the length chips scroll sideways like the site's other pill rows:
+   one line, chips keep their size, no scrollbar, the #brandtabs right-edge fade; the end padding lets the last chip clear the fade */
+@media (max-width:899px){html.inapp .lenf{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-right:48px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 48px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 48px),transparent)}
+html.inapp .lenf::-webkit-scrollbar{display:none}html.inapp .lenf button{flex:none}}</style>
+
+<!-- rebrand shell (mockup v60): top bar, left bar (bottom bar on phones), summary bar. Filled and wired by the rebrand script. -->
+<header class="rb-top" id="rbTop">
+  <div class="rb-brand"><span class="rb-logo">My Pastor Resource List</span>
+    <nav class="rb-tabs" id="rbTabs" aria-label="Main"><button type="button" data-rbmain="res" aria-current="page">Resources</button><button type="button" data-rbmain="serve">Serve</button><button type="button" data-rbmain="map">Map room</button></nav></div>
+  <div id="rbSearch"><form class="sbar" id="qform" role="search"><span aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><input id="q" placeholder="Search stories: forgiveness, prayer…" aria-label="Search illustrations" autocomplete="off"><button class="btn gold">Search</button></form></div>
+  <div class="rb-right"><button type="button" class="rb-ib" id="rbGear" title="Settings" aria-label="Settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.820l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.830-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg></button></div>
+</header>
+<aside class="rb-rail" id="rbRail" aria-label="Your things"><div><button type="button" class="rb-rbtn" data-go="library" title="My study"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4V3Z"/></svg><span>My study</span></button><button type="button" class="rb-rbtn" title="Recent"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Recent</span></button><button type="button" class="rb-rbtn" title="My notes"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg><span>My notes</span></button>
+<button type="button" class="rb-rbtn" title="Print"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></svg><span>Print</span></button></div>
+<div class="rb-rprint"><button type="button" class="rb-rbtn" title="Help"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg><span>Help</span></button></div></aside>
+
+
+<nav id="resTabs" aria-label="Resources"><button type="button" data-rt="res" aria-selected="false">Find resources</button><button type="button" data-rt="spk" aria-selected="false">Speakers</button><button type="button" data-rt="ill" aria-selected="true">Illustrations</button></nav>
+<div id="app"></div>
+<div class="toast" id="toast" role="status"></div>
+<div class="peek" id="peek" aria-live="polite" hidden></div>
+<button class="v2btn" id="v2btn" type="button" hidden></button>
+
+
+<script>
+const DATA={"mission": [{"t": "From Despair to Destiny", "u": "https://ssnet.org/blog/26d-05-inside-story-from-despair-to-destiny/", "gist": "In early 1906, a young Slovenian man named Albin Močnik was standing on a bridge in Germany, ready to take his own life due to deep despair. However, a stranger stopped him and led him to two Adventist shoemaking families. The quiet, consistent faith of these families touched Albin so deeply that he decided to turn toward God and was baptized just a few months later. This moment served as a major turning point, shifting his path from death to a life of dedicated service. Albin became a pioneer for the Adventist faith in the Balkans, facing immense obstacles including language barriers, imprisonment, and the horrors of World War I. Despite these hardships, he translated religious materials, composed hymns, and preached tirelessly. His persistence eventually led to him becoming the first president of the Yugoslav Union Conference. By the time he died, he had secured legal recognition for the church and established a lasting foundation for the faith in his homeland, proving how one life changed by grace can impact an entire nation.", "lesson": "God can transform a person's deepest despair into a powerful mission of hope and service.", "themes": "transformation, perseverance, missionary zeal, courage, God's grace", "bible": "John 10:10, 2 Timothy 1:7, Matthew 5:16", "good": "sermon, Bible study, youth, children's story", "kids": false}, {"t": "A School for Berta", "u": "https://ssnet.org/blog/26d-04-inside-story-a-school-for-berta/", "gist": "Berta, a qualified teacher in Krakow, Poland, was looking for a new job. She discovered an opening at a brand-new Seventh-day Adventist school located near Warsaw. Although she was initially hesitant because the location was so far from her home, she began to notice several friends mentioning the school to her. Sensing a possible divine nudge, Berta prayed for guidance and decided to apply for two positions simultaneously, promising to accept whichever school responded first. To her surprise, the Adventist school was the first to contact her. However, she felt conflicted about moving her sixteen-year-old son, Jacob, away from his friends. After praying and offering him the choice to stay behind, Jacob chose to move with her, expressing a desire to be near his mother. Berta accepted the position and eventually became the school's principal. The move proved to be a blessing, as Jacob found a new community of friends and became active in the church. Berta now views her journey as a clear example of God's perfect providence.", "lesson": "When we surrender our plans to God and trust His guidance, He can lead us into unexpected blessings for our families and ministries.", "themes": "Divine guidance, Trusting God, Obedience, Family ministry, Providence", "bible": "Proverbs 3:5-6, Psalm 32:8, Isaiah 30:21", "good": "sermon, Bible study, youth", "kids": true}, {"t": "Begun in a Bar", "u": "https://ssnet.org/blog/26c-13-inside-story-begun-in-a-bar/", "gist": "Leenus was a former pastor of another denomination who converted to the Seventh-day Adventist faith after studying the Voice of Prophecy. Driven by a passion for the truth, he began a massive evangelistic effort, registering 360 people for Bible studies. Although he initially expected to lead the local congregation, his success led the church to appoint him as a Global Mission pioneer to reach unreached areas. In a new town, he faced a significant hurdle: the only available meeting place was a shop that had previously functioned as a bar. The local community mocked the idea of worshipping in such a 'wicked' location, causing Leenus to face potential discouragement. However, he chose to trust in God's sovereignty, viewing the humble beginning as a testimony of divine power. He persevered until God provided the resources and land to build a proper sanctuary. Today, the congregation thrives in a new building, serving as a visible sign of God's expanding work and faithfulness.", "lesson": "God can transform any situation or place into a testimony of His power when we trust His plan over our own preferences.", "themes": "missionary work, trusting God, perseverance, divine provision, evangelism", "bible": "Matthew 5:16, Philippians 4:19, Isaiah 43:19", "good": "sermon, Bible study, youth, children's story", "kids": false}, {"t": "Jake’s Prayer Journey", "u": "https://ssnet.org/blog/26c-10-inside-story-jakes-prayer-journey/", "gist": "Jake is a dedicated church planter living in a region where very few people know about Jesus. To stay spiritually grounded, he begins a personal project of writing down his monthly prayer requests to track how God answers them. While working with a small group to disciple new believers, Jake meets two very different men. The first is Omar, a cook who has secretly followed Christ for fifteen years out of fear for his safety. The second is Wassim, a former refugee who found peace in Christianity while living abroad and is now seeking deeper understanding. Both men express a desire to be baptized. Jake begins meeting with them regularly to study the Bible and discuss their faith. By the end of the first month, Jake reflects on his prayer journal with awe. He realizes that God has directly answered his request to teach the Word, and he feels energized and ready to continue this ministry with divine strength.", "lesson": "When we faithfully commit our desires to God in prayer, He provides the specific opportunities and strength needed to fulfill His calling.", "themes": "prayer, evangelism, discipleship, God's faithfulness, courage", "bible": "Philippians KJV, Matthew KJV, 1 Thessalonians KJV", "good": "sermon, Bible study, youth", "kids": false}, {"t": "Mission Begins Young", "u": "https://ssnet.org/blog/26c-09-inside-story-mission-begins-young/", "gist": "Myron Iseminger was a young man who grew up inspired by missionary stories but never imagined he would actually become one. In the late 1970s, after seeing his sister volunteer in Japan, he decided to spend a year in the Middle East to teach English and gain ministerial experience. This trip became a major turning point for him; by visiting his students' homes and hearing their personal struggles, he learned to replace judgment with empathy and love for people from different cultures. This experience sparked a lifelong calling to missions. To prepare, he pursued a second degree in business, recognizing that mission work requires practical management. He also sought a spouse who shared his vision, eventually marrying Candace, who traveled abroad with him. They eventually secured a position as a treasurer in Egypt. Despite the challenges of working with limited resources, Myron found deep fulfillment in serving on the front lines. His journey shows that when we surrender our plans to God, He can orchestrate a life of service far greater than we could have imagined.", "lesson": "When we surrender our personal plans to God's calling, He can lead us into a life of service that exceeds our own imagination.", "themes": "missionary calling, empathy, trusting God, service, cultural awareness", "bible": "Matthew 6:33, Isaiah 6:8, Proverbs 16:9", "good": "sermon, Bible study, youth", "kids": false}, {"t": "Spirit-led Encounters", "u": "https://ssnet.org/blog/26c-08-inside-story-spirit-led-encounters/", "gist": "A missionary couple serving in a restricted, unnamed country prayed for God to help them establish a home church. Although they expected only foreigners at first, God began opening doors to the local population. The turning point occurred when the missionary met a taxi driver named Salman. They bonded over faith, and the missionary discovered that Salman had no Christian community to join. The missionary invited Salman and his wife to their home worship, where they both grew in their devotion to Jesus. The ripple effect continued when Salman shared his faith with his brother, Faisal, who was also a secret believer. Despite being previously rejected by a formal church due to religious restrictions, Faisal joined the home group. After years of prayer, the brothers eventually shared their faith with their parents. While some family members rejected them, the missionary couple saw this as a clear sign of God's providence in providing a safe haven for believers in a difficult land.", "lesson": "God sovereignly orchestrates divine connections to provide spiritual fellowship and safety for those seeking Him in restricted places.", "themes": "missionary work, divine providence, spiritual fellowship, courage, evangelism", "bible": "Matthew 18:20, Acts 1:8, Romans 10:15", "good": "sermon, Bible study, youth", "kids": false}, {"t": "Meeting the General", "u": "https://ssnet.org/blog/26c-07-inside-story-meeting-the-general/", "gist": "The story follows a missionary couple facing a dire crisis in a restricted country. They were at risk of being deported because of a technicality on the wife's passport, making it nearly impossible to secure a temporary residence card. Feeling desperate, the husband turned to God for a miracle. When they arrived at the immigration office, the clerk was unable to help and directed them to a high-ranking official. To their shock, the 'general' turned out to be a kind young man who was simply studying English and aspiring to work for the United Nations. He processed their paperwork instantly without questioning the complications. The author felt the Holy Spirit prompting him to offer the young man help with his English. This simple act of kindness sparked a lasting friendship. What began as a desperate plea for legal safety ended with a divine connection, as God not only solved their immediate problem but also opened a door for a new relationship and shared ministry goals.", "lesson": "God often answers our most desperate prayers by opening doors that lead to His greater purposes for our lives.", "themes": "God's providence, answered prayer, divine intervention, missionary life, unexpected blessings", "bible": "Matthew 6:33, Philippians 4:6, Proverbs 3:5", "good": "sermon, Bible study, youth", "kids": true}, {"t": "High-end Fashion for Christ", "u": "https://ssnet.org/blog/26c-04-inside-story-high-end-fashion-for-christ/", "gist": "Isabelle is a successful fashion designer and organizer based in New York City. While she works in the high-pressure world of runway shows and celebrity fashion, she maintains a deep commitment to her Seventh-day Adventist faith. After being miraculously healed from a serious injury, Isabelle felt a profound calling to serve others. She now balances her professional career with volunteer work at an urban ministry center. However, her ministry isn't limited to her volunteer hours; she intentionally integrates her faith into her entire career. Before every show, she prays with the models and staff to provide them with peace in a competitive environment. She also uses her press releases and designs to prompt the public to examine their spiritual lives and seek God. By being a consistent example of Christ's love and peace, she has become a 'center of influence' herself. People she works with are often drawn to her faith, leading her to invite them into church programs and Bible studies.", "lesson": "Every believer can become a center of influence by intentionally reflecting Christ's character and love in their everyday professional lives.", "themes": "missionary heart, center of influence, faith and work, testimony, peace, healing", "bible": "Matthew 5:16, 1 Peter 3:15, Colossians 3:23", "good": "sermon, Bible study, children's story, youth", "kids": false}, {"t": "Two Dreams", "u": "https://ssnet.org/blog/26c-03-inside-story-two-dreams/", "gist": "This story follows Dante Herrmann, a young man born in Germany who was considered a medical miracle after his mother struggled for years to conceive. Due to health issues as an infant, his family moved to the Canary Islands. As a teenager, Dante struggled with school and eventually dropped out to work as a handyman. Seeking quick wealth, he turned to drug dealing and made a spiritual pact with the devil, symbolized by a tattoo. Although he had money, he felt a profound emptiness and guilt over the harm he was causing others. After fleeing to Germany and eventually returning to the islands, he quit drugs and became a tattoo artist. His life changed drastically when his father won a massive legal settlement, offering Dante a share of the wealth. However, after reading the Bible, Dante realized that material riches couldn't fill his inner void. He surrendered his life to Jesus, discovering that true wealth is found in a relationship with God. Today, he serves as a pastor in Germany.", "lesson": "True fulfillment and wealth are found not in material success or worldly pleasures, but in surrendering one's heart to Jesus.", "themes": "Redemption, True Wealth, Repentance, God's Grace, Overcoming Addiction", "bible": "Proverbs 10:22, John 10:10, Luke 12:15", "good": "sermon, Bible study, youth", "kids": false}, {"t": "A Touch That Transforms", "u": "https://ssnet.org/blog/26c-02-inside-story-a-touch-that-transforms/", "gist": "This story follows two women in Brazil, Fabiola and Luisa, who were both facing devastating personal crises. Fabiola was battling a breast cancer diagnosis during the height of the COVID-19 pandemic, while Luisa was dealing with a broken marriage, a serious health issue caused by her husband's infidelity, and her mother's Alzheimer's disease. Both women felt overwhelmed by despair and were searching for a reason to keep going. In a remarkable twist of fate, both women experienced a similar intervention: their dogs accidentally stepped on their television remotes, switching the channel to a Christian network. This divine coincidence allowed them to encounter the Gospel during their darkest hours. For Fabiola, the messages helped her reframe her illness as an opportunity for spiritual growth rather than a punishment. For Luisa, the content helped her identify her depression, leading her to seek treatment and find spiritual renewal. Both women were transformed from states of hopelessness to lives of purpose and faith, illustrating how God can use simple means to reach those in need.", "lesson": "God can use the most unexpected circumstances to bring His healing message to those in their deepest despair.", "themes": "God's providence, healing, hope, overcoming depression, divine intervention", "bible": "Mark 5, Psalm 34:18, Matthew 11:28", "good": "sermon, Bible study, children's story, youth", "kids": false}], "guide": [{"t": "Lock the Gates", "u": "https://www.guidemagazine.org/stories/lock-the-gates/", "gist": "This story describes a person who has finally finished a long, exhausting struggle or battle. Having reached their destination, they approach a castle representing their personal sanctuary. The turning point occurs when the individual decides to enter the gates and lock them firmly from the inside. They are seeking total isolation and a permanent end to the demands of others. As they retreat into the darkness of the castle, they deliberately turn off the lights to hide from the world. Outside, people are crying out and begging for entry, but the narrator describes these pleas as nothing more than the wind. The story concludes with the narrator feeling a sense of finality and accomplishment in their solitude. They have successfully shut out everyone else to live in a private, dark space where they no longer have to pretend or interact with society. It is a narrative of complete withdrawal and the desire for absolute privacy after a period of conflict.", "lesson": "The story illustrates the danger of isolating oneself from others and the spiritual danger of choosing a path of loneliness and darkness over community.", "themes": "isolation, withdrawal, loneliness, spiritual darkness, rejection", "bible": "Matthew 24:13, John 10:10, Psalm 23:4", "good": "sermon, Bible study, children's story, youth", "kids": false}, {"t": "Around the World with God", "u": "https://www.guidemagazine.org/stories/around-the-world-with-god/", "gist": "Nolan Vance is a scientist who successfully creates a high-tech robot named A.C.B. After praying for God's guidance to use his invention for good, Nolan decides to test the robot's teleportation abilities. They instantly travel from the USA to South Africa, though the landing is quite rough. While recovering, they meet a friendly local girl named Thandi, who introduces them to Pastor Daniel. Pastor Daniel is a missionary from the United Kingdom who is currently working on building a church in the Kimberley region. The robot identifies that they need more rocks for the construction project, and the trio works together to gather materials. After a successful night of labor, Pastor Daniel thanks them for their help before Nolan and his robot teleport away to their next destination, Italy. The story highlights how technology and human effort can be combined to serve God's kingdom.", "lesson": "When we dedicate our talents and technology to God, He can use them to accomplish His work in unexpected places.", "themes": "serving God, technology and faith, missionary work, cooperation, God's providence", "bible": "Matthew 25:21, 1 Peter 4:10, Colossians 3:23", "good": "sermon, Bible study, children's story, youth", "kids": true}, {"t": "Understand the Word of God", "u": "https://www.guidemagazine.org/stories/understand-the-word-of-god/", "gist": "This story focuses on a powerful prophetic warning found in the book of Zephaniah. It describes a scene where God declares His intention to completely clear the earth of all living things, including humans, animals, birds, and fish. The narrative explains that this isn't just a random act of destruction, but a divine 'wake-up call' for humanity. The turning point occurs when the text identifies the specific targets of this judgment: the wicked and their idols. The author clarifies that these idols are not just physical objects, but represent the false things people worship that lead them into spiritual confusion and stumbling. The story concludes by explaining the ultimate purpose of this judgment: God intends to gather His true believers into heaven while removing the corruption and falsehoods of the world. It serves as a sobering reminder of the finality of God's judgment and the necessity of turning away from false worship toward the true Creator.", "lesson": "God's judgment serves as a final warning to turn away from false idols and find true security in Him.", "themes": "Judgment, Idolatry, True Worship, Spiritual Awareness, God's Sovereignty", "bible": "Zephaniah 1, 1 John 5:21, Exodus 20:3", "good": "sermon, Bible study, youth", "kids": false}, {"t": "Soccer for God: Leap for It!", "u": "https://www.guidemagazine.org/stories/soccer-for-god-leap-for-it/", "gist": "The story describes a soccer match where a father stepped in to play as the goalkeeper for a team of children. During the game, the situation became intense when it came down to a one-on-one penalty kick. The father found himself facing off against a formidable opponent who played on a professional team. Because of the striker's skill, the father knew that a standard defensive move would likely fail. In a split second, the father made a risky, unconventional decision. He shifted his entire body weight onto his left foot, appearing to commit to one side of the goal. This move deceived the professional striker, who expected a predictable reaction. However, as the ball was launched into the air, the father used that initial momentum to spring across the goal and make a spectacular save. The story concludes with the realization that the father's unconventional strategy worked perfectly, proving that sometimes a surprising move can overcome a seemingly impossible obstacle.", "lesson": "God can use unexpected strategies and faith to overcome challenges that seem far too large for us to handle.", "themes": "overcoming obstacles, faith, unexpected victories, courage, trusting God", "bible": "Matthew 17:20, Philippians 4:13, Isaiah 41:10", "good": "sermon, Bible study, children's story, youth", "kids": true}, {"t": "Mending an Injured Heart", "u": "https://www.guidemagazine.org/stories/mending-an-injured-heart/", "gist": "A thirteen-year-old girl and her father spend a hot day practicing soccer on a makeshift field at a church. Despite the lack of proper equipment and the intense heat, they push themselves to their physical limits, practicing drills and taking turns scoring goals. The girl feels exhausted, but she enjoys the bonding time with her father. Later, the father reveals a heavy burden he has been carrying regarding his career. He explains that he had been facing significant workplace harassment and spiritual opposition, leaving him feeling defeated and stressed. He shares that their time playing soccer provided a vital emotional and spiritual refresh for him. He credits God for intervening in his job situation, leading to a new position and a raise. The story ends with the girl realizing that her simple act of spending time with her father provided him with the strength and peace he needed to overcome his trials.", "lesson": "Simple acts of devotion and spending quality time with loved ones can provide the spiritual refreshment needed to endure life's hardest trials.", "themes": "spiritual refreshment, perseverance, family bonds, God's provision, overcoming trials", "bible": "Matthew 11:28, Isaiah 40:31, Philippians 4:6-7", "good": "sermon, Bible study, youth, children's story", "kids": true}, {"t": "Soccer for God: It’s Not Over Yet", "u": "https://www.guidemagazine.org/stories/soccer-for-god-its-not-over-yet/", "gist": "A young boy and his father head to a local park to play a game of soccer as the sun begins to set. They decide to take turns playing as the goalie and the striker, practicing their skills on the field. During the game, the boy notices a pattern in how they react to the action. At one point, the father misses a shot and walks away without much effort, while the boy realizes he had the opportunity to relax after a save but chose to stay focused. The turning point occurs when the father tries to score but fails to notice the boy already sprinting toward the other goal. The boy scores easily because he was prepared and proactive, while his father was caught off guard. The story concludes with the boy reflecting on the difference between being prepared and being lazy. He realizes that both he and his father had the option to slack off, but the outcome of the game depended on who chose to remain attentive and ready for the next move.", "lesson": "Spiritual success depends on our willingness to remain prepared and attentive rather than becoming complacent in our faith.", "themes": "preparedness, spiritual alertness, discipline, faithfulness, perseverance", "bible": "Matthew 24:42, 1 Peter 5:8, Ephesians 6:10", "good": "sermon, Bible study, youth, children's story", "kids": false}, {"t": "Soccer for God: Taking My Vows", "u": "https://www.guidemagazine.org/stories/soccer-for-god-taking-my-vows/", "gist": "The story follows a young boy who spent a year building a reputation as the best goalie on his school's recess field. One day, a small kindergartner asked to try the position. Although the boy felt he should let the younger child have a turn, his teammates insisted he stay in the goal because they relied on his skills. Feeling flattered by their praise, the boy agreed to a strict promise never to leave the goal. Later, during a school soccer tournament in a gymnasium, his sister asked if she could take his place. Despite his love for her, the boy felt trapped by the promise he had made to his teammates. He struggled with the internal conflict of wanting to be a loyal brother while trying to keep his word to his friends. Ultimately, he had to say no, which caused a long-lasting rift between him and his sister. The narrator reflects on this experience, realizing he made a foolish commitment without considering the consequences, leading to a difficult situation where he couldn't please anyone.", "lesson": "We must be discerning and wise before making commitments, ensuring our promises do not cause unnecessary harm to our relationships with others.", "themes": "integrity, keeping promises, wisdom, relationships, consequences", "bible": "Matthew 5:37, Proverbs 12:22, James 1:5", "good": "sermon, Bible study, youth", "kids": true}, {"t": "A Solitary Position", "u": "https://www.guidemagazine.org/stories/a-solitary-position/", "gist": "The story follows a man whose original sports team was eliminated on the first day of a tournament. Despite his personal performance, he was forced to watch from the sidelines until the Croatian team reached out to him. Because they were desperate for a goalkeeper and he spoke their language, he agreed to join them. However, once the game began, he realized he was being set up for failure. While he worked tirelessly to block shots, his new teammates were nowhere to be found, leaving him to face three attackers alone. He bore the brunt of the coach's anger and the team's frustration, even being accused of sabotage. After the team lost and reviewed the game footage, the coach finally noticed that the Croatian defenders were failing to provide any support, leaving the father completely isolated. The story ends with the team acknowledging his efforts and learning that they should not blame others for failures caused by a lack of teamwork.", "lesson": "We should not be quick to judge others for failures that result from a lack of mutual support and cooperation.", "themes": "teamwork, accountability, perseverance, fairness, unity", "bible": "Ecclesiastes 4:12, Galatians 6:2, Proverbs 27:17", "good": "sermon, Bible study, youth", "kids": true}, {"t": "Soccer for God: Friend of the Weak", "u": "https://www.guidemagazine.org/stories/soccer-for-god-friend-of-the-weak/", "gist": "Kenni, a girl who used to be a talented soccer goalkeeper, finds herself at a Pathfinder camporee. While watching a group of boys play, she feels a deep sense of nostalgia and longing to join in. However, she is paralyzed by insecurity and a fear of rejection, worrying that she is no longer good enough to play. She watches from the sidelines, feeling dejected and sad about her lost skill. After receiving words of encouragement from her father via text, she finds the courage to face her fears. The next day, she approaches the boys and asks to join the game. To her amazement, the best player in the group immediately invites her onto his team. This unexpected kindness overcomes her anxiety, leading her to realize that God often works in small moments to provide encouragement to those who feel like underdogs.", "lesson": "God provides unexpected encouragement and opportunities for us to step out of our comfort zones, even when we feel inadequate.", "themes": "overcoming fear, encouragement, self-confidence, God's grace, perseverance", "bible": "2 Timothy 1:7, Philippians 4:13, Isaiah 41:10", "good": "sermon, Bible study, youth, children's story", "kids": true}, {"t": "Human & Divine", "u": "https://www.guidemagazine.org/stories/human-divine/", "gist": "The narrator describes a profound internal struggle with the heavy burden of human existence. They feel overwhelmed by the weight of worldly wickedness, greed, and the moral failures of humanity, which feel like a crushing mountain on their shoulders. The narrator expresses a deep sense of exhaustion, feeling as though they are falling into a bottomless abyss of despair. However, a significant turning point occurs when the narrator begins to question their own role in this struggle. They realize that trying to solve the world's problems or fix human nature is a task beyond human capability. Instead of trying to carry the weight alone, the narrator decides to surrender their burdens to God. They recognize that while humans are flawed and limited, God is divine, righteous, and compassionate. The story concludes with a beautiful act of surrender: the narrator chooses to be the instrument—the sword—while allowing God to be the one who wields the power and provides the strength to fix what is broken.", "lesson": "True strength is found not in trying to carry the world's burdens alone, but in surrendering our struggles to God's divine power.", "themes": "surrender, God's power, human limitation, trusting God, spiritual strength", "bible": "Matthew 11:28, Isaiah 40:31, 2 Corinthians 12:9", "good": "sermon, Bible study, youth", "kids": false}], "iiw": [{"t": "The Runner Who Celebrated Too Soon", "u": "https://www.itiswritten.com/wp-content/uploads/2021/03/Sermon-illustrations-book-PDF-edition-v1-20210301.pdf#page=5", "gist": "During a track meet in Switzerland, an Ethiopian runner was sprinting toward the finish line with a massive lead over his competitors. Overjoyed by his perceived victory, he broke into a celebratory gesture before reaching the tape. However, he had made a critical mistake: he hadn't realized there were still 400 meters remaining in the 5,000-meter race. Because he stopped his effort too early, he plummeted from a potential first-place finish down to tenth place. The story serves as a vivid metaphor for spiritual complacency.", "lesson": "We must remain vigilant and persistent in our faith until the very end, rather than assuming we have reached our goal before God's work is complete.", "themes": "perseverance, spiritual vigilance, endurance, faithfulness, the final goal", "bible": "Matthew 24:13, Hebrews 12:1, 2 Timothy 4:7", "good": "sermon, Bible study, youth", "kids": true}, {"t": "The Prime Minister's Cat", "u": "https://www.itiswritten.com/wp-content/uploads/2021/03/Sermon-illustrations-book-PDF-edition-v1-20210301.pdf#page=5", "gist": "A man in New Zealand accidentally struck and killed a neighbor's cat while backing out of his driveway. The tragedy was compounded by the fact that the cat belonged to the country's Prime Minister. In a desperate attempt to avoid legal consequences, the man's children wrote a note asking the leader not to imprison their father. However, the situation reached a turning point when the man finally faced the Prime Minister in person. Instead of hiding behind his children's words, he took personal responsibility and offered a sincere, face-to-face apology for his actions.", "lesson": "True repentance requires moving beyond excuses to take personal responsibility for our mistakes before God and others.", "themes": "repentance, accountability, honesty, forgiveness, humility", "bible": "Psalm 86, Proverbs 28:13, James 5:16", "good": "sermon, Bible study, youth", "kids": false}, {"t": "The Moana Birthday Cake Mix-Up", "u": "https://www.itiswritten.com/wp-content/uploads/2021/03/Sermon-illustrations-book-PDF-edition-v1-20210301.pdf#page=5", "gist": "A woman contacted a bakery to order a birthday cake for her daughter inspired by the movie Moana. However, due to a misunderstanding of the name, the bakery decorated the cake with marijuana leaves and drug-related symbols instead. When the family received the incorrect order, they realized the shop had misheard the request. Despite the bizarre mistake, the family chose to find the humor in the situation rather than getting angry, making it a memorable birthday moment.", "lesson": "Clear communication is essential to avoid misunderstandings, but a spirit of grace allows us to handle mistakes with humor and kindness.", "themes": "clear communication, grace, forgiveness, humor, patience", "bible": "Proverbs 15:1, Ephesians 4:32", "good": "sermon, children's story, youth", "kids": true}, {"t": "The Stuffed Dolphin on the Freeway", "u": "https://www.itiswritten.com/wp-content/uploads/2021/03/Sermon-illustrations-book-PDF-edition-v1-20210301.pdf#page=6", "gist": "A family was traveling on a crowded highway when their four-year-old daughter accidentally tossed her beloved stuffed dolphin out of the moving car. The child was devastated and couldn't be comforted by any other toy. To help her, the mother contacted the police, who organized a rescue mission to retrieve the toy from the dangerous roadside. The operation was successful, and the little girl was overjoyed to have her favorite companion back.", "lesson": "God is willing to go to great lengths to rescue what we value and provide comfort in our times of loss.", "themes": "God's care, rescue, comfort, protection, faithfulness", "bible": "1 Peter 5:7, Psalm 34:17, Matthew 18:14", "good": "sermon, children's story, youth", "kids": true}, {"t": "The Armored Truck Money in Syracuse", "u": "https://www.itiswritten.com/wp-content/uploads/2021/03/Sermon-illustrations-book-PDF-edition-v1-20210301.pdf#page=6", "gist": "In Syracuse, New York, an armored truck accidentally spilled over $300,000 onto a public street. Two honest men discovered the cash and immediately began collecting it to ensure it reached its rightful owners. As news of the windfall spread, a large crowd gathered. While many people joined in to help return the money, others were tempted by the sight of the wealth and wanted to keep it for themselves. The situation served as a public test of character, showing how easily people can be swayed by greed when faced with unearned riches.", "lesson": "True integrity is choosing to do what is right even when no one is watching and the temptation to take a shortcut is great.", "themes": "integrity, honesty, temptation, stewardship, character", "bible": "Proverbs 13:11, Luke 12:15, Matthew 6:21", "good": "sermon, Bible study, youth", "kids": true}, {"t": "My Daddy Knows How Much I Can Carry", "u": "https://www.itiswritten.com/wp-content/uploads/2021/03/Sermon-illustrations-book-PDF-edition-v1-20210301.pdf#page=6", "gist": "A father was placing items into his young son's arms one by one. A bystander noticed the pile growing and asked the boy if the load was becoming too heavy. The child smiled confidently and replied that it wasn't too much because his father knew exactly how much he was capable of carrying. The story serves as a metaphor for our relationship with God. Just as the father understands his son's strength, God knows our limits and will never burden us with more than we can handle.", "lesson": "God provides us with the strength and grace necessary to endure every trial we face.", "themes": "God's sovereignty, strength in trials, trusting God, divine protection, perseverance", "bible": "1 Corinthians 10, Isaiah 41:10, Psalm 34:18", "good": "sermon, Bible study, children's story, youth", "kids": true}, {"t": "Ireland's Celtic Tiger Boom and Bust", "u": "https://www.itiswritten.com/wp-content/uploads/2021/03/Sermon-illustrations-book-PDF-edition-v1-20210301.pdf#page=7", "gist": "The story describes Ireland's rapid economic boom in the late 1990s, known as the 'Celtic Tiger.' While the country experienced incredible growth, the economy eventually crashed, leading to a need for a bailout. The author uses this economic cycle as a metaphor for the spiritual lives of believers. Just as a nation can rise and fall, a person's faith can reach a peak and then suddenly lose momentum. The turning point is the realization that spiritual life can become stagnant or 'flat.' The story concludes by emphasizing that the goal for Christians is not just to experience a temporary spiritual high, but to remain constantly revived in their relationship with God.", "lesson": "True faith is not a temporary emotional peak but a continuous, sustained state of spiritual renewal.", "themes": "spiritual growth, perseverance, constant renewal, faithfulness, spiritual vitality", "bible": "1 John 1:7, Isaiah 40:31, Psalm 119:105", "good": "sermon, Bible study, youth", "kids": false}, {"t": "The Welsh Revival Changes a Nation", "u": "https://www.itiswritten.com/wp-content/uploads/2021/03/Sermon-illustrations-book-PDF-edition-v1-20210301.pdf#page=7", "gist": "During the early 1900s, Wales experienced a massive religious awakening known as the Welsh revival. Hundreds of thousands of people converted to Christianity, and the movement gained global attention through media and famous preachers. However, the story notes a tragic aftermath: because the movement relied heavily on the emotional experience of the event rather than a deep, permanent root in the Word of God, the faith in Wales has significantly declined today. The turning point is the realization that a temporary spiritual high cannot replace a lifelong commitment to abiding in Christ.", "lesson": "True spiritual transformation comes from a permanent connection to the Word of God rather than a temporary emotional experience.", "themes": "spiritual growth, abiding in Christ, the Word of God, true conversion, consistency", "bible": "John 15, Galatians 2, Philippians 1", "good": "sermon, Bible study, youth", "kids": false}, {"t": "The Boots Sold at the Thrift Store", "u": "https://www.itiswritten.com/wp-content/uploads/2021/03/Sermon-illustrations-book-PDF-edition-v1-20210301.pdf#page=7", "gist": "A woman entered a second-hand shop during a cold winter day and left her muddy boots by the entrance. While she was browsing, another customer purchased the boots for only two dollars. The cashier mistakenly assumed they were a clearance item because he didn't realize their true worth. The woman was devastated to find her expensive footwear gone. This story highlights how people often overlook the true value of things—or people—simply because they appear worn or dirty on the outside.", "lesson": "Human beings often fail to recognize the inherent value of others because they judge based on outward appearances rather than internal worth.", "themes": "inner value, judgment, perspective, worth, spiritual sight", "bible": "John 6, 1 Samuel 16:7, 1 Samuel 16:18", "good": "sermon, Bible study, youth", "kids": true}, {"t": "The Missile Launcher in the Luggage", "u": "https://www.itiswritten.com/wp-content/uploads/2021/03/Sermon-illustrations-book-PDF-edition-v1-20210301.pdf#page=8", "gist": "A man traveling from the Middle East to the United States was stopped by airport security in Baltimore. During a routine check, officers discovered a missile launcher hidden inside his luggage. The man explained that he had kept the weapon as a souvenir from his military service and had no intention of using it. The story highlights how something dangerous and unexpected can be hidden in plain sight, much like the hidden nature of sin.", "lesson": "Just as a hidden weapon can cause unexpected harm, sin remains a dangerous presence in our lives until we surrender it to God.", "themes": "sin, repentance, spiritual warfare, hidden dangers, salvation", "bible": "Romans 6, John 8:7, Psalm 51", "good": "sermon, Bible study, youth", "kids": false}], "moment": [{"t": "What Drives You?", "u": "https://www.youtube.com/watch?v=SCMQejBIvKQ&t=117s", "gist": "The story begins with a reflection on human motivation, using the examples of a friend who ran a marathon in a heavy weighted vest and the late mountaineer Sir George Mallory, who climbed Everest simply because it was there. The narrator uses these extreme physical feats to pose a deeper spiritual question: what motivates a Christian to endure the hardships of faith? The narrative shifts from physical endurance to spiritual endurance, acknowledging that the Bible warns of coming tribulations, persecution, and a time of great difficulty for believers. The turning point occurs when the narrator moves from the 'why' of human effort to the 'why' of Christian hope. The story concludes by pointing to the promise in 1 Thessalonians 4, explaining that the ultimate motivation for enduring life's struggles is the certain return of Jesus Christ. It emphasizes that believers are not meant to sorrow like those without hope because the dead in Christ will rise and the living will be caught up to meet the Lord in the air.", "lesson": "The ultimate motivation for enduring earthly trials is the certain hope of Christ's return and our eternal life with Him.", "themes": "Hope, The Second Coming, Perseverance, Eternal Life, Faith", "bible": "1 Thessalonians 4:13-18, Revelation 12:9, Matthew 24:36", "good": "sermon, Bible study, youth", "kids": false}, {"t": "How to Stop Letting Fear Control Your Life", "u": "https://www.youtube.com/watch?v=Ab7RsbkPT6I&t=2170s", "gist": "The story explores the concept of Christian courage by highlighting several biblical figures who faced intense persecution for their faith. It begins with Eric Liddell, an athlete who refused to compete on the Sabbath, choosing to honor God over national pride. The narrative then shifts to the apostles, contrasting Peter’s initial cowardice—where he denied knowing Jesus when questioned by a girl—with his later boldness before the Sanhedrin. It also highlights Stephen, a deacon who remained peaceful and fearless even as he was being condemned to death, looking toward heaven and praying for his executioners. Finally, it describes the apostle Paul, who endured whipping, stoning, and imprisonment, yet remained joyful and persistent in preaching the Gospel. The turning point in all these lives was their intimate relationship with Jesus, which replaced their natural fear with a supernatural peace. The story concludes by illustrating that true courage is not just enduring death, but maintaining faith and offering forgiveness to those who persecute you.", "lesson": "True courage is found not in our own strength, but in a deep relationship with Jesus that replaces fear with divine peace and forgiveness.", "themes": "courage, overcoming fear, perseverance, forgiveness, faithfulness, peace of God", "bible": "Deuteronomy 31:6, Acts 4:13, Acts 20:24", "good": "sermon, Bible study, youth", "kids": false}, {"t": "The Glory of Gratitude", "u": "https://www.youtube.com/watch?v=2DcCi2kAzBA&t=486s", "gist": "The speaker reflects on how modern technology has made life significantly more convenient than it was in the past, noting that despite these advancements, humans often find reasons to grumble. To illustrate the lack of gratitude, the speaker shares a humorous anecdote about a pastor in Nantucket who reported that nine members were 'lost at sea' because they never sent 'thank you' notes after being rescued. The story highlights a common human tendency to take blessings for granted, much like how children rarely write thank-you notes to Santa Claus. The narrative then shifts to a real-life example from World War II, where a soldier sent a letter of appreciation to General Patton. The General was moved because it was the first time in 35 years he had received such a gesture. The speaker concludes that while we should thank God simply because He commanded it, practicing gratitude is also practical, as it opens the door for continued blessings and strengthens our relationship with the Giver.", "lesson": "Gratitude is a spiritual command that transforms our perspective from complaining about what we lack to appreciating the constant provision of God.", "themes": "gratitude, thankfulness, obedience, perspective, God's provision", "bible": "1 Thessalonians 5:18, Psalm 107:1, Colossians 3:17", "good": "sermon, Bible study, youth", "kids": true}, {"t": "Noah and the Coming Storm", "u": "https://www.youtube.com/watch?v=lHX9JozK-1c&t=87s", "gist": "The story focuses on the biblical figure Noah, who is highlighted as a hero of faith in the book of Hebrews. The narrative sets the scene during a time when the world was living normally—people were eating, drinking, and marrying—completely unaware of the impending judgment. The turning point occurs when God warned Noah of a coming flood, prompting him to begin a long period of preparation. Unlike the rest of the population who ignored the warnings and continued with their daily lives, Noah spent years building an ark. The story concludes with the arrival of the catastrophic storm, which destroyed everyone who refused to prepare but spared those who followed God's instructions. The preacher uses this historical account to illustrate that just as a storm is inevitable, spiritual preparation must happen now rather than at the last minute.", "lesson": "True faith involves proactive obedience and long-term preparation for God's coming judgment rather than waiting until a crisis arrives.", "themes": "faith, preparation, obedience, judgment, perseverance", "bible": "Hebrews 11:7, Matthew 24:37, Matthew 7:24", "good": "sermon, Bible study, youth", "kids": true}, {"t": "Under Constant Surveillance", "u": "https://www.youtube.com/watch?v=fghD2OKIGmk&t=2562s", "gist": "The narrator recounts a personal conversation with a rabbi regarding how God can simultaneously hear every person's prayer. The rabbi's simple answer—that God is simply God—serves as the foundation for the narrator's reflection on God's omnipresence. The story explores the profound truth that God sees everything, including our secret deeds, our suffering, and the injustices we face. The narrator highlights biblical examples, such as David refusing to take personal revenge on Saul and Joseph forgiving his brothers, to show that God is a just judge who eventually sets things right. Furthermore, the narrator describes God's gaze as a 'refiner's fire' that cleanses and purifies the believer. The narrative concludes with a poignant scene of Peter's denial of Jesus, where Peter sees Jesus in the judgment hall being mocked and beaten, illustrating that God's gaze is not just about judgment, but is deeply rooted in a look of love and compassion.", "lesson": "God's omnipresence ensures that He sees our hidden struggles, rewards our secret acts of kindness, and provides a purifying love that ultimately brings justice to all.", "themes": "God's omniscience, Divine justice, God's love, Forgiveness, Purification", "bible": "Proverbs 15:3, Matthew 6:3, Luke 22:61", "good": "sermon, Bible study, youth", "kids": false}, {"t": "Seven Keys for Spiritual Growth", "u": "https://www.youtube.com/watch?v=y7FpkpF4HX4&t=1190s", "gist": "The narrator recounts a personal experience during a Christian convention held at a large center. During the lunch break, a massive crowd created a bottleneck as everyone rushed toward the upward-moving escalator to reach the food line. While most people were struggling to push forward in the crowd, the narrator noticed that the downward-moving escalator was completely empty. He and his companion, Karen, decided to run up the downward escalator instead. This required significant physical effort, as they had to hop and fight against the mechanical motion of the stairs. By taking this unconventional path, they were able to bypass the crowd and reach the front of the line quickly. The narrator uses this moment to illustrate the spiritual struggle against human selfishness. He explains that while our natural inclination is to be self-centered, the Christian life requires a deliberate, sometimes strenuous effort to choose selflessness and love, much like the effort required to move against the downward escalator.", "lesson": "Spiritual growth requires a deliberate, strenuous effort to overcome our natural inclination toward selfishness and choose the path of self-love.", "themes": "Selflessness, Spiritual growth, Overcoming sin, Perseverance, Love", "bible": "1 Corinthians 4:16, Galatians 5:22, John 13:34", "good": "sermon, Bible study, youth", "kids": false}, {"t": "Who Will Be Left Standing?", "u": "https://www.youtube.com/watch?v=Pdjhwlz0z_I&t=2079s", "gist": "The story focuses on a woman named Mary from Magdala who ran a cottage business in Jerusalem. While she was working, a group of religious leaders and locals set a trap for her by sending an accomplice to enter her home. They caught her in the act of adultery and dragged her through the city streets in a state of shock and shame. Instead of casting her out of the city gates as was common practice, the accusers took her to the temple where Jesus was present. They intended to use her as a pawn to trap Jesus into either violating the Mosaic Law or executing her, both of which would have severe consequences for him. As the crowd held stones ready to strike, they demanded that Jesus judge her. However, Jesus did not give them the simple yes-or-no answer they expected. Instead, he stooped down to write in the dirt and then famously told the crowd that anyone without sin should cast the first stone, leaving the accusers bewildered and silenced.", "lesson": "Jesus redirects our focus from the sins of others to our own need for divine mercy and personal repentance.", "themes": "mercy, judgment, forgiveness, hypocrisy, grace", "bible": "John 8:7, Matthew 5:16, Luke 7:47", "good": "sermon, Bible study, youth", "kids": false}, {"t": "The True Power of Words", "u": "https://www.youtube.com/watch?v=BIKzHHinubM&t=1634s", "gist": "The story takes place on a crowded commuter train in New York City on a Monday morning. A man is traveling with his three young children, who are behaving very poorly. They are running through the aisles, jumping on seats, and being extremely loud, which causes the other passengers to become visibly annoyed. One woman eventually loses her patience and confronts the man, harshly criticizing his lack of discipline and demanding that he control his children. The man, who has his head in his hands in distress, finally looks up and whispers a heartbreaking explanation. He reveals that his wife passed away from cancer just the night before and he hasn't had the chance to tell the children yet. He explains that he was so overwhelmed by grief that he was struggling to find the words to break the news to them. Upon hearing this tragic backstory, the woman's attitude shifts instantly as she realizes the depth of his pain.", "lesson": "We should practice empathy and patience because we often judge others based on their outward actions without knowing the hidden burdens they are carrying.", "themes": "empathy, judgment, patience, hidden burdens, compassion", "bible": "Proverbs 18:13, James 4:12", "good": "sermon, Bible study, youth", "kids": false}, {"t": "How to Know God's Will for Your Life", "u": "https://www.youtube.com/watch?v=pwmkTK2aN9c&t=630s", "gist": "The story follows a young man named Mark who grew up in a household where his parents were not active in Bible study. As a high school senior in Connecticut, he began exploring the scriptures and felt a growing conviction regarding the importance of the Sabbath. At the same time, he was selected for a prestigious YMCA basketball all-star team traveling to Massachusetts. This trip represented a rare opportunity for him to experience luxury, such as staying in hotels and traveling, which he was eager to enjoy. Mark initially tried to rationalize his participation by planning to only play on Thursday and Friday, hoping to avoid Sabbath commitments. However, he feared that the excitement of the tournament would lead him to compromise his faith. Seeking guidance, he called a mentor, Sister Francis. Instead of giving him a simple 'yes' or 'no,' she asked him to consider what Jesus would do on the Sabbath. This question sparked a deep conviction in Mark, leading him to choose obedience over the tournament and inform his team that he could not play.", "lesson": "True obedience comes from seeking to align our actions with the character and example of Jesus Christ.", "themes": "Sabbath obedience, spiritual conviction, overcoming peer pressure, seeking guidance, integrity", "bible": "Psalm 119:105, Psalm 119:24, Matthew 5:16", "good": "sermon, Bible study, youth", "kids": false}, {"t": "Hope for a Troubled World", "u": "https://www.youtube.com/watch?v=E3rAjJlY0aY&t=146s", "gist": "The narrator shares several accounts of God's power in modern missions, focusing on the reach of the gospel in China, Iran, and Iraq. He describes how satellite technology and mobile downloads are allowing millions of people in China to access the Word of God. He then highlights the presence of the Adventist church in oppressed regions like Iran and the reopening of a church in Baghdad after years of war. The climax of the story focuses on the island of Mindanao in the Philippines, where a violent rebellion had persisted for twenty years. Despite the government's inability to stop the fighting, a pastor began broadcasting evangelistic sermons to the rebel forces via radio. The turning point occurred when the rebels began to hear the message of Christ, leading them to trade their weapons for baptism. Ultimately, 500 rebels surrendered to God, signed a peace treaty with the government, and were trained to preach to their former comrades. The story concludes with the Philippine government officially honoring the church for achieving what military force could not.", "lesson": "The power of the Gospel can achieve peace and transformation in hearts where human strength and government authority have failed.", "themes": "God's power, peace, evangelism, transformation, missions", "bible": "Matthew 11:35, Ephesians 6:12, Psalm 33:12", "good": "sermon, Bible study, youth", "kids": false}]};
+let V2=true;
+const T=m=>V2?m+" min":"≈"+m+" min to tell";
+const SRC={
+  mission:{name:"Mission stories",one:"Mission story",from:"Inside Story · Sabbath School Net",ic:"◎",min:[4,6]},
+  guide:{name:"Guide stories",one:"Guide story",from:"Guide magazine · reader true stories",ic:"✎",min:[5,8]},
+  iiw:{name:"It Is Written illustrations",one:"It Is Written",from:"104 Useful Sermon Illustrations",ic:"❝",min:[1,2]},
+  moment:{name:"Sermon moments",one:"Sermon moment",from:"A sermon on YouTube, opened at the story",ic:"▶",min:[2,4]}
+};
+const ORDER=["iiw","mission","guide","moment"];
+const ITEMS=[];ORDER.forEach(k=>DATA[k].forEach((x,i)=>ITEMS.push({...x,k,i,id:k+"-"+i,mins:SRC[k].min[0]+(x.t.length+i)%(SRC[k].min[1]-SRC[k].min[0]+1)})));
+const byId=id=>ITEMS.find(x=>x.id===id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const len=m=>m<2?"short":m<=5?"medium":"long";
+let saved=["iiw-0","mission-2","guide-0","moment-3"];
+try{const s=JSON.parse(localStorage.getItem("ill-saved")||"null");if(Array.isArray(s))saved=s}catch(e){}
+const keep=()=>{try{localStorage.setItem("ill-saved",JSON.stringify(saved))}catch(e){}};
+const I={back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 12H5M11 5l-7 7 7 7"/></svg>',
+ chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m9 5 7 7-7 7"/></svg>',
+ search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>',
+ mark:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12v18l-6-4-6 4z"/></svg>',
+ marked:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M6 3h12v18l-6-4-6 4z"/></svg>'};
+
+function splitTitle(t){const w=t.split(" ");if(w.length<3)return `<b>${esc(t)}</b>`;const h=Math.ceil(w.length/2);return esc(w.slice(0,h).join(" "))+`<b>${esc(w.slice(h).join(" "))}</b>`}
+function lenKey(){return `<p class="lenkey"><i class="lenb short"></i>Short, under 2 min <i class="lenb medium"></i>Medium, 2–5 min <i class="lenb long"></i>Long, over 5 min</p>`}
+function cover(x){if(V2){const w=x.t.split(" ").length;return `<div class="cover c2 s-${x.k} t${x.i%3} ${w<=3&&Math.max(...x.t.split(" ").map(z=>z.length))<=8?"big":x.t.length>34||Math.max(...x.t.split(" ").map(z=>z.length))>=9?"long":""}" aria-hidden="true"><div class="src">${esc(SRC[x.k].one)}</div><div class="ttl"><span>${esc(x.t)}</span></div><div class="foot">${x.mins} min</div></div>`}return `<div class="cover k-${x.k} v${x.i%3}" data-ic="${SRC[x.k].ic}" aria-hidden="true"><div class="mark"></div><div class="src"><i>${SRC[x.k].ic}</i>${esc(SRC[x.k].one)}</div><div class="ttl">${splitTitle(x.t)}</div><div class="foot"><span><span class="dot"></span>≈${x.mins} min to tell</span></div></div>`}
+function item(x){return `<button class="item" data-open="${x.id}" aria-label="${esc(x.t)}, ${esc(SRC[x.k].one)}${V2?`, ${x.mins} minutes`:""}">${cover(x)}<span class="nm">${esc(x.t)}</span>${V2?`<span class="mins">${x.mins} min</span>`:""}</button>`}
+function shelf(title,list,more,note){list=fl(list);if(!list.length)return "";return `<section class="shelf"><div class="rb-rowh"><h2>${esc(title)}</h2>${more?`<div class="rb-rr"><button class="rb-seeall" data-go="${more}">See all ${list.length} ›</button></div>`:""}</div>${note?`<p class="shelf-note">${note}</p>`:""}<div class="dwrap"><div class="rowwrap"><button class="rarr prev" type="button" aria-label="Scroll back">‹</button><div class="row">${list.map(item).join("")}</div><button class="rarr next" type="button" aria-label="Scroll forward">›</button></div><aside class="info" aria-live="polite"></aside></div></section>`}
+function listShelf(title,list,more,note){return `<section class="shelf"><div class="rb-rowh"><h2>${esc(title)}</h2>${more?`<div class="rb-rr"><button class="rb-seeall" data-go="${more}">See all ${list.length} ›</button></div>`:""}</div>${note?`<p class="shelf-note">${note}</p>`:""}<div class="list">${list.slice(0,3).map(row).join("")}</div></section>`}
+const CATS=[["mine","My study"],["iiw","It Is Written"],["mission","Mission stories"],["guide","Guide stories"],["moment","Sermon moments"]];
+let cat="iiw";
+let LEN="all";const fl=l=>V2&&LEN!=="all"?l.filter(x=>len(x.mins)===LEN):l;
+function lenChips(){return V2?`<div class="lenf" role="group" aria-label="Story length">${[["all","All"],["short","Under 2 min"],["medium","2–5 min"],["long","Over 5 min"]].map(([k,l])=>`<button data-len="${k}" aria-pressed="${LEN===k}">${l}</button>`).join("")}</div>`:""}
+function catBar(){return `<div class="catbar"><button class="cstep" data-step="-1" aria-label="Previous category">‹</button><div class="cats" role="tablist">${CATS.map(([k,l])=>`<button role="tab" data-cat="${k}" aria-selected="${cat===k}">${l}</button>`).join("")}</div><button class="cstep" data-step="1" aria-label="Next category">›</button></div>`}
+let view="shelves";try{if(localStorage.getItem("ill-view")==="list")view="list"}catch(e){}
+function topBar(title,backTo){return `<div class="ill-head">${backTo?`<button class="back" data-go="${backTo}" aria-label="Back">${I.back}</button>`:""}<h1>${esc(title)}</h1></div>`}
+
+const state={tab:"home",q:""};
+const app=document.getElementById("app");
+function render(){
+  const h=(location.hash||"#home").slice(1);
+  let html="";
+  if(h==="home"||h===""){state.tab="home";
+    const mine=saved.map(byId).filter(Boolean);
+    if(view==="list"){
+      const list=fl(cat==="mine"?mine:DATA[cat].map((_,i)=>byId(cat+"-"+i)));
+      html=topBar("Illustrations")+`<main class="wrap view rb-view">${optsBar()}${catBar()}`
+       +(list.length?`<div class="list">${list.map(row).join("")}</div>`:`<p class="empty">Nothing saved yet. Open a story and tap the bookmark to keep it here.</p>`)+`</main>`;
+    } else html=topBar("Illustrations")+`<main class="wrap view rb-view">${optsBar()}`
+     +(mine.length?shelf("My study",mine,"library","Stories you saved"):"")
+     +ORDER.map(k=>shelf(SRC[k].name,DATA[k].map((_,i)=>byId(k+"-"+i)),"shelf-"+k)).join("")+`</main>`;
+  } else if(h.startsWith("shelf-")){const k=h.slice(6);state.tab="home";
+    html=topBar(SRC[k].name,"home")+`<main class="wrap view rb-view"><p class="shelf-note">${esc(SRC[k].from)} · ${DATA[k].length} in this sample</p><div class="list">${DATA[k].map((_,i)=>row(byId(k+"-"+i))).join("")}</div></main>`;
+  } else if(h==="library"){state.tab="library";
+    const mine=saved.map(byId).filter(Boolean);
+    html=topBar("My study",null,false)+`<main class="wrap view rb-view">${mine.length?`<div class="list">${mine.map(row).join("")}</div>`:`<p class="empty">Nothing saved yet. Open a story and tap the bookmark to keep it here.</p>`}</main>`;
+  } else if(h==="search"||h==="more"){state.tab=h;
+    html=topBar(h==="search"?"Search":"More",null)+`<main class="wrap view rb-view">${h==="search"?results():`<p class="empty">In the real site this holds Resources, Serve, Map room and settings.</p>`}</main>`;
+  } else if(h.startsWith("s-")){const x=byId(h.slice(2));if(x){state.tab="home";html=story(x)}}
+  if(!html){location.hash="home";return}
+  app.innerHTML=html;
+  document.querySelectorAll("#rbRail [data-go]").forEach(b=>b.setAttribute("aria-current",String(b.dataset.go===state.tab)));
+  setupPeek(h);
+  const q=document.getElementById("q");if(q){q.oninput=()=>{state.q=q.value;if(location.hash!=="#search"){location.hash="search"}else{document.querySelector("main").innerHTML=results()}};if(h==="search"){q.focus();const v=q.value;q.value="";q.value=v}}
+}
+// shortcut: brief = first sentence cut to ~24 words; the real build gets a written 1–2 sentence "is it for my sermon?" summary per story
+function brief(x){const s=(x.gist.match(/^.*?[.!?](\s|$)/)||[x.gist])[0].trim(),w=s.split(/\s+/);return w.length>24?w.slice(0,24).join(" ")+"…":s}
+function row(x){return `<button class="lrow" data-open="${x.id}">${cover(x)}<span class="tx"><span class="nm">${esc(x.t)}</span><span class="meta">${esc(SRC[x.k].one)} · ${T(x.mins)}</span><span class="sum">${esc(brief(x))}</span><span class="point"><b>Point:</b> ${esc(x.lesson)}</span></span></button>`}
+// site view switch (List / Shelves, same markup and icons as Find resources' List / Carousel) beside v29's length chips
+const VIC={list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>',
+ shelves:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="5" width="12" height="14" rx="2"/><path d="M2 7v10M22 7v10" stroke-linecap="round"/></svg>'};
+function viewSwitch(){return `<div class="rb-views" role="group" aria-label="View">${[["list","List"],["shelves","Shelves"]].map(([v,l])=>`<button data-view="${v}" aria-pressed="${view===v}" aria-label="${l}" title="${l}">${VIC[v]}<span>${l}</span></button>`).join("")}</div>`}
+function optsBar(){return `<div class="rb-opts ill-opts">${lenChips()}${viewSwitch()}</div>`}
+// bar sizes for the page padding (same idea as rb.js fit())
+function fitBars(){const s=document.documentElement.style,t=document.getElementById("rbTop"),b=document.getElementById("resTabs"),r=document.getElementById("rbRail"),ph=matchMedia("(max-width:820px)").matches;
+  s.setProperty("--toph",t.offsetHeight+"px");s.setProperty("--subh",b.offsetHeight+"px");s.setProperty("--railh",r.offsetHeight+"px");s.setProperty("--railw",ph?"0px":r.offsetWidth+"px")}
+fitBars();addEventListener("resize",fitBars);document.fonts?.ready.then(fitBars);
+// the site's search bar: typing already searches (v29 behavior); the Search button does the same
+document.getElementById("qform").addEventListener("submit",e=>{e.preventDefault();state.q=document.getElementById("q").value;if(location.hash!=="#search")location.hash="search";else render()});
+// PC shelves start full from the left like the Start here row (Daniel 16 Nov): open each row centered on its 3rd book instead of the 1st
+function startRows(){if(!pcCar())return;document.querySelectorAll(".rowwrap .row").forEach(r=>{if(r.dataset.st)return;const its=[...r.querySelectorAll(".item")];if(!its.length)return;r.dataset.st=1;
+  const it=its[Math.min(2,its.length-1)];r.scrollLeft=it.offsetLeft-r.offsetLeft+it.offsetWidth/2-r.clientWidth/2;setHot(r)})}
+{const _render=render;render=function(){const o=_render.apply(this,arguments);requestAnimationFrame(startRows);return o}}
+requestAnimationFrame(startRows);
+function results(){const q=(state.q||"").trim().toLowerCase();if(!q)return `<p class="empty">Type a word like forgiveness, courage or prayer.</p>`;
+  const r=ITEMS.filter(x=>(x.t+" "+x.gist+" "+x.themes+" "+x.lesson).toLowerCase().includes(q));
+  return r.length?`<p class="shelf-note">${r.length} found for “${esc(state.q)}”</p><div class="list">${r.map(row).join("")}</div>`:`<p class="empty">Nothing found for “${esc(state.q)}”. Try another word.</p>`}
+function story(x){const on=saved.includes(x.id),s=SRC[x.k];
+  const short=x.gist.length>230?x.gist.slice(0,230).replace(/\s\S*$/,"")+"…":x.gist;
+  return `<div class="view"><section class="hero k-${x.k} v${x.i%3}"><div class="wrap">
+   <div class="bar"><button class="circ" data-go="back" aria-label="Back">${I.back}</button><button class="circ" id="save" aria-pressed="${on}" aria-label="${on?"Remove from my library":"Save to my library"}">${on?I.marked:I.mark}</button></div>
+   ${cover(x)}
+   <div class="txt"><h1>${esc(x.t)}</h1><div class="sub">${esc(s.one)} · ${V2?`About ${x.mins} min to tell`:`≈${x.mins} min to tell (${len(x.mins)})`}</div>
+   <a class="readbtn" href="${esc(x.u)}" target="_blank" rel="noopener">${V2?(x.k==="moment"?"Watch video ↗":"Read original story ↗"):(x.k==="moment"?"Watch the story":"Open the story")}</a>
+   </div>
+  </div></section>
+  <section class="facts"><div class="wrap">
+   <details class="full"><summary>See full summary</summary><p>${esc(x.gist)}</p></details>
+   <div class="fact"><div class="lab">Lesson</div><div class="val">${esc(x.lesson)}</div></div>
+   <div class="fact"><div class="lab">Themes</div><div class="val tags">${x.themes.split(/,\s*/).map(t=>`<span>${esc(t)}</span>`).join("")}</div></div>
+   <div class="fact"><div class="lab">Bible</div><div class="val">${esc(x.bible).replace(/(\d) (?=[A-Z])/g,"$1\u00a0")}</div></div>
+   ${x.good?`<div class="fact"><div class="lab">Good for</div><div class="val">${esc(x.good)}${x.kids?" · gentle enough for children":""}</div></div>`:""}
+   <div class="fact"><div class="lab">Source</div><div class="val">${esc(s.from)}</div></div>
+   <p class="note">Summary written by a computer to help you choose. Open the story for the real text. Times to tell are estimates.</p>
+  </div></section></div>`}
+document.addEventListener("click",e=>{
+  const cb=e.target.closest("[data-cat],[data-step]");if(cb){const n=CATS.findIndex(c=>c[0]===cat);cat=cb.dataset.cat||CATS[(n+ +cb.dataset.step+CATS.length)%CATS.length][0];render();document.querySelector(".cats [aria-selected=true]")?.scrollIntoView({inline:"center",block:"nearest"});return}
+  const bb=e.target.closest("[data-bar]");if(bb){bar=bb.dataset.bar;try{localStorage.setItem("ill-bar",bar)}catch(err){}const y=scrollY;render();scrollTo(0,y);return}
+  const vb=e.target.closest("[data-view]");if(vb){view=vb.dataset.view;try{localStorage.setItem("ill-view",view)}catch(err){}render();return}
+  const o=e.target.closest("[data-open]");if(o){location.hash="s-"+o.dataset.open;return}
+  const g=e.target.closest("[data-go]");if(g){const v=g.dataset.go;if(v==="back"){history.length>1?history.back():location.hash="home"}else location.hash=v;return}
+  if(e.target.closest("#more")){const x=byId(location.hash.slice(3));document.getElementById("gist").textContent=x.gist;return}
+  if(e.target.closest("#save")){const id=location.hash.slice(3);const on=saved.includes(id);saved=on?saved.filter(s=>s!==id):[id,...saved];keep();render();toast(on?"Removed from My study":"Saved to My study")}
+});
+// phone shelves: the book at the start of the shelf you're looking at lifts, and its short summary shows in the bar
+const peek=document.getElementById("peek");
+function setCur(row,pick){if(!row)return;if(!pick&&row._lock>Date.now())return;const rb=row.getBoundingClientRect(),C=(rb.left+rb.right)/2;
+  let best,bd=1e9;row.querySelectorAll(".item").forEach(it=>{const b=it.getBoundingClientRect(),d=Math.abs((b.left+b.right)/2-C);if(d<bd){bd=d;best=it}});if(pick)best=pick;
+  if(!best||best.classList.contains("cur"))return;document.querySelectorAll(".item.cur").forEach(i=>i.classList.remove("cur"));best.classList.add("cur");
+  const x=byId(best.dataset.open);peek.innerHTML=`<button data-open="${x.id}"><span class="pk-t">${esc(x.t)}<small>${V2?"":"≈"}${x.mins} min · ›</small></span><span class="pk-s">${esc(brief(x))}</span><span class="pk-p"><b>Point:</b> ${esc(x.lesson)}</span></button>`;
+  peek.classList.add("on");clearTimeout(ft);if(bar==="fade")ft=setTimeout(()=>peek.classList.remove("on"),4000)}
+let ft;const bar="fade"; // Daniel picked "fades away", 14 Nov
+function barSwitch(){return `<div class="vsw phoneonly" role="group" aria-label="Summary bar (mockup choice)"><span class="vlab">Bar:</span>${[["fade","Fades away"],["small","Small"]].map(([v,l])=>`<button data-bar="${v}" aria-pressed="${bar===v}">${l}</button>`).join("")}</div>`}
+function rowInView(){let best,bd=1e9;const mid=innerHeight*.42;document.querySelectorAll("main .row").forEach(r=>{const b=r.getBoundingClientRect(),d=Math.abs((b.top+b.bottom)/2-mid);if(d<bd){bd=d;best=r}});return best}
+let raf=0;const later=f=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(f)};
+function setupPeek(h){const on=(h==="home"||h==="")&&view==="shelves"&&matchMedia("(max-width:899px)").matches;
+  peek.hidden=!on;document.body.classList.toggle("peeking",on);document.body.classList.toggle("bar-fade",bar==="fade");document.body.classList.toggle("bar-small",bar==="small");peek.classList.remove("on");if(!on)return;
+  peek.style.bottom=document.getElementById("rbRail").getBoundingClientRect().height+"px";
+  document.querySelectorAll("main .row").forEach(r=>r.addEventListener("scroll",()=>later(()=>setCur(r)),{passive:true}));
+  setCur(rowInView())}
+addEventListener("scroll",()=>{if(!peek.hidden)later(()=>setCur(rowInView()))},{passive:true});
+// phone shelves: tapping a side book slides it to the middle; tapping the middle book opens it
+document.addEventListener("click",e=>{if(peek.hidden)return;const it=e.target.closest("main .row .item[data-open]");if(!it||it.classList.contains("cur"))return;e.preventDefault();e.stopPropagation();
+  const r=it.closest(".row");r._lock=Date.now()+700;setCur(r,it);r.scrollTo({left:it.offsetLeft-r.offsetLeft+it.offsetWidth/2-r.clientWidth/2,behavior:"smooth"})},true);
+addEventListener("resize",()=>later(()=>setupPeek((location.hash||"#home").slice(1))));
+// mockup control: switch between our version and the ChatGPT/Gemini changes
+function applyV2(){document.documentElement.classList.toggle("v2",V2);SRC.iiw.name=V2?"It Is Written":"It Is Written illustrations";document.getElementById("v2btn").textContent=V2?"See ours":"See changes"}
+// PC carousel (v2): the book nearest the middle is "hot"; arrows step one book
+const pcCar=()=>V2&&matchMedia("(min-width:900px)").matches;
+function hotOf(r){const c=r.getBoundingClientRect(),mid=c.left+c.width/2;let best=null,bd=1e9;r.querySelectorAll(".item").forEach(it=>{const b=it.getBoundingClientRect(),d=Math.abs(b.left+b.width/2-mid);if(d<bd){bd=d;best=it}});return best}
+function setHot(r){if(!pcCar())return;const h=hotOf(r);r.querySelectorAll(".item").forEach(it=>it.classList.toggle("hot",it===h));fillInfo(r,h);const w=r.parentNode,its=[...r.querySelectorAll(".item")],i=its.indexOf(h);w.querySelector(".prev").disabled=i<=0;w.querySelector(".next").disabled=i>=its.length-1}
+function centerOn(r,it){r.scrollTo({left:it.offsetLeft-r.offsetLeft+it.offsetWidth/2-r.clientWidth/2,behavior:"smooth"})}
+function fillInfo(r,it){const box=r.closest(".dwrap")?.querySelector(".info");if(!box||!it)return;const x=byId(it.dataset.open);if(!x||box.dataset.id===x.id)return;box.dataset.id=x.id;const on=saved.includes(x.id);
+  box.innerHTML=`<span class="k">${esc(SRC[x.k].one)} · ${x.mins} min</span><h3>${esc(x.t)}</h3><p>${esc(brief(x))}</p><p class="pt"><b>Point:</b> ${esc(x.lesson)}</p><div class="acts"><button class="gold" data-isave="${x.id}">${on?"✓ In My study":"+ Save to My study"}</button><button data-open="${x.id}">Open story</button></div>`}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-isave]");if(!b)return;e.stopPropagation();const id=b.dataset.isave,on=saved.includes(id);saved=on?saved.filter(s=>s!==id):[id,...saved];keep();b.textContent=on?"+ Save to My study":"✓ In My study";toast(on?"Removed from My study":"Saved to My study")},true);
+if(0)document.addEventListener("mouseover",e=>{if(!pcCar())return;const it=e.target.closest(".rowwrap .item[data-open]");if(it)fillInfo(it.closest(".row"),it)});
+if(0)document.addEventListener("mouseout",e=>{if(!pcCar())return;const r=e.target.closest(".rowwrap .row");if(r&&!r.contains(e.relatedTarget))fillInfo(r,r.querySelector(".item.hot"))});
+// PC carousel: clicking a side book slides it to the middle (like Resources); clicking the middle book opens it
+document.addEventListener("click",e=>{if(!pcCar())return;const it=e.target.closest(".rowwrap .item[data-open]");if(!it||it.classList.contains("hot"))return;e.preventDefault();e.stopPropagation();
+  const r=it.closest(".row"),its=[...r.querySelectorAll(".item")],i=its.indexOf(it);its.forEach(x=>x.classList.toggle("hot",x===it));fillInfo(r,it);const w=r.parentNode;w.querySelector(".prev").disabled=i<=0;w.querySelector(".next").disabled=i>=its.length-1;centerOn(r,it)},true);
+// PC shelf arrows: flip about one screen of books; hide an arrow at the end
+function updArr(r){const w=r.parentNode;if(!w.classList.contains("rowwrap"))return;if(pcCar()){setHot(r);return}w.querySelector(".prev").disabled=r.scrollLeft<4;w.querySelector(".next").disabled=r.scrollLeft+r.clientWidth>=r.scrollWidth-4}
+document.addEventListener("scroll",e=>{if(e.target.classList?.contains("row"))updArr(e.target)},true);
+new MutationObserver(()=>document.querySelectorAll(".rowwrap .row").forEach(updArr)).observe(document.body,{childList:true,subtree:true});
+addEventListener("resize",()=>document.querySelectorAll(".rowwrap .row").forEach(updArr));
+document.addEventListener("click",e=>{const b=e.target.closest(".rarr");if(!b)return;if(pcCar()){const r=b.parentNode.querySelector(".row"),its=[...r.querySelectorAll(".item")],i=its.indexOf(r.querySelector(".item.hot")||hotOf(r)),n=its[Math.max(0,Math.min(its.length-1,i+(b.classList.contains("next")?1:-1)))];its.forEach(it=>it.classList.toggle("hot",it===n));fillInfo(r,n);b.parentNode.querySelector(".prev").disabled=its.indexOf(n)<=0;b.parentNode.querySelector(".next").disabled=its.indexOf(n)>=its.length-1;centerOn(r,n);return}const r=b.parentNode.querySelector(".row"),max=r.scrollWidth-r.clientWidth,to=Math.max(0,Math.min(max,r.scrollLeft+(b.classList.contains("next")?1:-1)*r.clientWidth*.85));
+  // set arrow states from the target position, not scroll events (those can be skipped)
+  b.parentNode.querySelector(".prev").disabled=to<4;b.parentNode.querySelector(".next").disabled=to>=max-4;r.scrollTo({left:to,behavior:"smooth"})});
+document.addEventListener("click",e=>{const b=e.target.closest("[data-len]");if(!b)return;LEN=b.dataset.len;const y=scrollY;render();scrollTo(0,y)});
+// PC hover card: summary beside the book you point at
+const hov=document.createElement("div");hov.className="hov";hov.setAttribute("aria-hidden","true");document.body.appendChild(hov);let hovT;
+const pcPoint=matchMedia("(hover:hover) and (pointer:fine) and (min-width:900px)");
+document.addEventListener("mouseover",e=>{if(!pcPoint.matches||pcCar())return;const it=e.target.closest(".item[data-open]");if(!it||it.contains(e.relatedTarget))return;clearTimeout(hovT);
+  hovT=setTimeout(()=>{const x=byId(it.dataset.open);if(!x)return;hov.innerHTML=`<b class="t">${esc(x.t)}</b><span class="m">${esc(SRC[x.k].one)} · ${x.mins} min</span>${esc(brief(x))}<span class="p"><b>Point:</b> ${esc(x.lesson)}</span>`;
+    const c=it.querySelector(".cover").getBoundingClientRect(),w=300,right=c.right+14+w<innerWidth;hov.style.left=(right?c.right+14:c.left-14-w)+"px";hov.style.top=Math.max(8,Math.min(innerHeight-hov.offsetHeight-8,c.top))+"px";hov.classList.add("on")},250)});
+document.addEventListener("mouseout",e=>{const it=e.target.closest(".item[data-open]");if(it&&!it.contains(e.relatedTarget)){clearTimeout(hovT);hov.classList.remove("on")}});
+addEventListener("scroll",()=>hov.classList.remove("on"),true);addEventListener("hashchange",()=>hov.classList.remove("on"));
+document.getElementById("v2btn").onclick=()=>{V2=!V2;try{localStorage.setItem("ill-v2",V2?"1":"0")}catch(e){}applyV2();const y=scrollY;render();scrollTo(0,y);toast(V2?"Showing the changes":"Showing ours")};
+applyV2();
+let tt;function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),1600)}
+addEventListener("hashchange",()=>{render();scrollTo(0,0)});
+render();
+</script>
+<script>(()=>{let from=null,kbd=false;addEventListener("keydown",()=>kbd=true,true);addEventListener("pointerdown",()=>kbd=false,true);
+addEventListener("click",e=>{const o=e.target.closest&&e.target.closest("[data-open]");if(o){const all=[...document.querySelectorAll(`[data-open="${o.dataset.open}"]`)];from=[o.dataset.open,all.indexOf(o)]}},true);
+addEventListener("hashchange",()=>setTimeout(()=>{const bk=document.querySelector('.hero [data-go="back"]');
+  if(bk&&/^#s-/.test(location.hash))bk.focus({preventScroll:true});
+  else if(from&&kbd){const b=document.querySelectorAll(`[data-open="${from[0]}"]`)[from[1]];if(b)b.focus();from=null}},60));
+addEventListener("keydown",e=>{const bk=e.key==="Escape"&&/^#s-/.test(location.hash)&&document.querySelector('.hero [data-go="back"]');if(bk){e.preventDefault();bk.click()}})})()</script>
