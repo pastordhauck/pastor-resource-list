@@ -325,6 +325,13 @@ html.v2 .hero.k-moment.awr{--c1:#24557e;--c2:#1b4366}
 .s-moment.afm .ttl,.hero .cover.s-moment.afm .ttl{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:#1d3a63;filter:none;text-shadow:none;text-align:left;left:9%;right:8%;top:24%;line-height:1.02}
 .s-moment.afm .foot{font-family:var(--f-body);font-style:normal;font-weight:700;text-align:left;left:9%;color:#f4ecdc}
 html.v2 .hero.k-moment.afm{--c1:#1d3a63;--c2:#152b4a}
+/* Daniel 17 Nov 2026: testimonies 15 min and longer use cover 3 "The Personal Story": crimson, cream italic serif title, dark wedge low, speaker's name at the bottom */
+.s-moment.tst{--b:linear-gradient(165deg,transparent 76%,#6e0f1c 76.3%),linear-gradient(180deg,#a8102a,#8c0c22);--ink2:#f6ead6}
+.s-moment.tst .src{font-family:var(--f-body);font-weight:700;letter-spacing:.02em;text-transform:none;text-align:left;color:#f6ead6;left:9%;right:8%}
+.s-moment.tst .ttl,.hero .cover.s-moment.tst .ttl{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:#f6ead6;filter:none;text-transform:none;font-family:"Lora",Georgia,serif;font-style:italic;font-weight:600;text-align:left;left:9%;right:6%;top:20%;line-height:1.05}
+.s-moment.tst .ttl,.s-moment.tst.long .ttl,.hero .cover.s-moment.tst .ttl,.hero .cover.s-moment.tst.long .ttl{font-size:16cqw;top:20%}
+.s-moment.tst .who{position:absolute;left:9%;right:8%;bottom:7%;font:700 max(7px,7cqw)/1.1 var(--f-body);color:#f6ead6}
+html.v2 .hero.k-moment.tst{--c1:#a8102a;--c2:#6e0f1c}
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap">
 <style id="rbCss">
@@ -1272,8 +1279,8 @@ const SRC={
 const ORDER=["iiw","mission","moment"];   // 17 Nov: YouTube stories, 5-20 min, real speakers, timed   // 17 Nov 2026: sermon moments out until YouTube stories run 5+ min and name the speaker   // Daniel 17 Nov 2026: Guide stories removed ("they are not good")
 const ITEMS=[];ORDER.forEach(k=>DATA[k].forEach((x,i)=>ITEMS.push({...x,k,i,id:k+"-"+i,mins:Math.max(1,Math.round(x.m?x.m/60:x.w/144))})));
 // Daniel 17 Nov: channel covers. AWR = "Farther Reach", AFM = "Forest & Ember"
-const CH=x=>/Adventist World Radio/.test(x.src||"")?"awr":/Adventist Frontier Missions/.test(x.src||"")?"afm":"";
-const CHL={awr:"AWR story",afm:"AFM story"};
+const CH=x=>/Adventist World Radio/.test(x.src||"")?"awr":/Adventist Frontier Missions/.test(x.src||"")?"afm":x.k==="moment"&&x.mins>=15?"tst":"";   // Daniel 17 Nov: testimonies 15+ min = cover 3 "The Personal Story"
+const CHL={awr:"AWR story",afm:"AFM story",tst:"Testimony"};
 const AWR=x=>CH(x);
 const byId=id=>ITEMS.find(x=>x.id===id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -1289,7 +1296,7 @@ const I={back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
 
 function splitTitle(t){const w=t.split(" ");if(w.length<3)return `<b>${esc(t)}</b>`;const h=Math.ceil(w.length/2);return esc(w.slice(0,h).join(" "))+`<b>${esc(w.slice(h).join(" "))}</b>`}
 function lenKey(){return `<p class="lenkey"><i class="lenb short"></i>Short, under 2 min <i class="lenb medium"></i>Medium, 2–5 min <i class="lenb long"></i>Long, over 5 min</p>`}
-function cover(x){if(V2){const w=x.t.split(" ").length;return `<div class="cover c2 s-${x.k}${CH(x)?" "+CH(x):""} t${x.i%3} ${w<=3&&Math.max(...x.t.split(" ").map(z=>z.length))<=8?"big":x.t.length>34||Math.max(...x.t.split(" ").map(z=>z.length))>=9?"long":""}" aria-hidden="true"><div class="src">${CH(x)?CHL[CH(x)]:esc(SRC[x.k].one)}</div><div class="ttl"><span>${esc(x.t)}</span></div><div class="foot">${x.mins} min</div></div>`}return `<div class="cover k-${x.k} v${x.i%3}" data-ic="${SRC[x.k].ic}" aria-hidden="true"><div class="mark"></div><div class="src"><i>${SRC[x.k].ic}</i>${esc(SRC[x.k].one)}</div><div class="ttl">${splitTitle(x.t)}</div><div class="foot"><span><span class="dot"></span>≈${x.mins} min to tell</span></div></div>`}
+function cover(x){if(V2){const w=x.t.split(" ").length;return `<div class="cover c2 s-${x.k}${CH(x)?" "+CH(x):""} t${x.i%3} ${w<=3&&Math.max(...x.t.split(" ").map(z=>z.length))<=8?"big":x.t.length>34||Math.max(...x.t.split(" ").map(z=>z.length))>=9?"long":""}" aria-hidden="true"><div class="src">${CH(x)?CHL[CH(x)]:esc(SRC[x.k].one)}</div><div class="ttl"><span>${esc(x.t)}</span></div>${CH(x)==="tst"&&x.by?`<div class="who">${esc(x.by)}</div>`:""}<div class="foot">${x.mins} min</div></div>`}return `<div class="cover k-${x.k} v${x.i%3}" data-ic="${SRC[x.k].ic}" aria-hidden="true"><div class="mark"></div><div class="src"><i>${SRC[x.k].ic}</i>${esc(SRC[x.k].one)}</div><div class="ttl">${splitTitle(x.t)}</div><div class="foot"><span><span class="dot"></span>≈${x.mins} min to tell</span></div></div>`}
 function item(x){return `<button class="item" data-open="${x.id}" aria-label="${esc(x.t)}, ${esc(SRC[x.k].one)}${V2?`, ${x.mins} minutes`:""}">${cover(x)}<span class="nm">${esc(x.t)}</span>${V2?`<span class="mins">${x.mins} min</span>`:""}</button>`}
 function shelf(title,list,more,note){list=fl(list);if(!list.length)return "";return `<section class="shelf"><div class="rb-rowh"><h2>${esc(title)}</h2>${more?`<div class="rb-rr"><button class="rb-seeall" data-go="${more}">See all ${list.length} ›</button></div>`:""}</div>${note?`<p class="shelf-note">${note}</p>`:""}<div class="dwrap"><div class="rowwrap"><button class="rarr prev" type="button" aria-label="Scroll back">‹</button><div class="row">${list.map(item).join("")}</div><button class="rarr next" type="button" aria-label="Scroll forward">›</button></div><aside class="info" aria-live="polite"></aside></div></section>`}
 function listShelf(title,list,more,note){return `<section class="shelf"><div class="rb-rowh"><h2>${esc(title)}</h2>${more?`<div class="rb-rr"><button class="rb-seeall" data-go="${more}">See all ${list.length} ›</button></div>`:""}</div>${note?`<p class="shelf-note">${note}</p>`:""}<div class="list">${list.slice(0,3).map(row).join("")}</div></section>`}
