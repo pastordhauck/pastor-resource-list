@@ -319,6 +319,13 @@ html.v2 .hero.k-iiw{--c1:#7a5532;--c2:#4a3019}html.v2 .hero.k-guide{--c1:#145553
 .s-moment.awr .ttl,.hero .cover.s-moment.awr .ttl{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:#f6ecd9;filter:none;text-align:left;left:10%;right:8%;line-height:1.02}
 .s-moment.awr .foot{font-family:var(--f-body);font-style:normal;font-weight:700;text-align:left;left:10%;right:8%;color:#f6ecd9}
 html.v2 .hero.k-moment.awr{--c1:#24557e;--c2:#1b4366}
+/* Daniel 17 Nov 2026: Adventist Frontier Missions stories use cover 1 "Forest & Ember", made blue (Daniel: "but make it blue"): deep navy, centered white title between two ember-orange bars */
+.s-moment.afm{--b:linear-gradient(180deg,#1d3a63,#152b4a);--ink2:#fff}
+.s-moment.afm .src{font-family:var(--f-body);font-weight:700;letter-spacing:.02em;text-transform:none;text-align:center;color:#efdcae;left:8%;right:8%}
+.s-moment.afm .ttl,.hero .cover.s-moment.afm .ttl{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:#fff;filter:none;text-align:center;left:8%;right:8%;line-height:1.02}
+.s-moment.afm .ttl,.hero .cover.s-moment.afm .ttl{border-top:max(2px,1.8cqw) solid #e8732c;border-bottom:max(2px,1.8cqw) solid #e8732c;padding:8% 0;top:22%}
+.s-moment.afm .foot{font-family:var(--f-body);font-style:normal;font-weight:700;color:#efdcae}
+html.v2 .hero.k-moment.afm{--c1:#1d3a63;--c2:#152b4a}
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap">
 <style id="rbCss">
@@ -1265,7 +1272,10 @@ const SRC={
 };
 const ORDER=["iiw","mission","moment"];   // 17 Nov: YouTube stories, 5-20 min, real speakers, timed   // 17 Nov 2026: sermon moments out until YouTube stories run 5+ min and name the speaker   // Daniel 17 Nov 2026: Guide stories removed ("they are not good")
 const ITEMS=[];ORDER.forEach(k=>DATA[k].forEach((x,i)=>ITEMS.push({...x,k,i,id:k+"-"+i,mins:Math.max(1,Math.round(x.m?x.m/60:x.w/144))})));
-const AWR=x=>/Adventist World Radio/.test(x.src||"");   // Daniel 17 Nov: AWR stories get the "Farther Reach" cover
+// Daniel 17 Nov: channel covers. AWR = "Farther Reach", AFM = "Forest & Ember"
+const CH=x=>/Adventist World Radio/.test(x.src||"")?"awr":/Adventist Frontier Missions/.test(x.src||"")?"afm":"";
+const CHL={awr:"AWR story",afm:"AFM story"};
+const AWR=x=>CH(x);
 const byId=id=>ITEMS.find(x=>x.id===id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const len=m=>m<2?"short":m<=5?"medium":"long";
@@ -1280,7 +1290,7 @@ const I={back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
 
 function splitTitle(t){const w=t.split(" ");if(w.length<3)return `<b>${esc(t)}</b>`;const h=Math.ceil(w.length/2);return esc(w.slice(0,h).join(" "))+`<b>${esc(w.slice(h).join(" "))}</b>`}
 function lenKey(){return `<p class="lenkey"><i class="lenb short"></i>Short, under 2 min <i class="lenb medium"></i>Medium, 2–5 min <i class="lenb long"></i>Long, over 5 min</p>`}
-function cover(x){if(V2){const w=x.t.split(" ").length;return `<div class="cover c2 s-${x.k}${AWR(x)?" awr":""} t${x.i%3} ${w<=3&&Math.max(...x.t.split(" ").map(z=>z.length))<=8?"big":x.t.length>34||Math.max(...x.t.split(" ").map(z=>z.length))>=9?"long":""}" aria-hidden="true"><div class="src">${AWR(x)?"AWR story":esc(SRC[x.k].one)}</div><div class="ttl"><span>${esc(x.t)}</span></div><div class="foot">${x.mins} min</div></div>`}return `<div class="cover k-${x.k} v${x.i%3}" data-ic="${SRC[x.k].ic}" aria-hidden="true"><div class="mark"></div><div class="src"><i>${SRC[x.k].ic}</i>${esc(SRC[x.k].one)}</div><div class="ttl">${splitTitle(x.t)}</div><div class="foot"><span><span class="dot"></span>≈${x.mins} min to tell</span></div></div>`}
+function cover(x){if(V2){const w=x.t.split(" ").length;return `<div class="cover c2 s-${x.k}${CH(x)?" "+CH(x):""} t${x.i%3} ${w<=3&&Math.max(...x.t.split(" ").map(z=>z.length))<=8?"big":x.t.length>34||Math.max(...x.t.split(" ").map(z=>z.length))>=9?"long":""}" aria-hidden="true"><div class="src">${CH(x)?CHL[CH(x)]:esc(SRC[x.k].one)}</div><div class="ttl"><span>${esc(x.t)}</span></div><div class="foot">${x.mins} min</div></div>`}return `<div class="cover k-${x.k} v${x.i%3}" data-ic="${SRC[x.k].ic}" aria-hidden="true"><div class="mark"></div><div class="src"><i>${SRC[x.k].ic}</i>${esc(SRC[x.k].one)}</div><div class="ttl">${splitTitle(x.t)}</div><div class="foot"><span><span class="dot"></span>≈${x.mins} min to tell</span></div></div>`}
 function item(x){return `<button class="item" data-open="${x.id}" aria-label="${esc(x.t)}, ${esc(SRC[x.k].one)}${V2?`, ${x.mins} minutes`:""}">${cover(x)}<span class="nm">${esc(x.t)}</span>${V2?`<span class="mins">${x.mins} min</span>`:""}</button>`}
 function shelf(title,list,more,note){list=fl(list);if(!list.length)return "";return `<section class="shelf"><div class="rb-rowh"><h2>${esc(title)}</h2>${more?`<div class="rb-rr"><button class="rb-seeall" data-go="${more}">See all ${list.length} ›</button></div>`:""}</div>${note?`<p class="shelf-note">${note}</p>`:""}<div class="dwrap"><div class="rowwrap"><button class="rarr prev" type="button" aria-label="Scroll back">‹</button><div class="row">${list.map(item).join("")}</div><button class="rarr next" type="button" aria-label="Scroll forward">›</button></div><aside class="info" aria-live="polite"></aside></div></section>`}
 function listShelf(title,list,more,note){return `<section class="shelf"><div class="rb-rowh"><h2>${esc(title)}</h2>${more?`<div class="rb-rr"><button class="rb-seeall" data-go="${more}">See all ${list.length} ›</button></div>`:""}</div>${note?`<p class="shelf-note">${note}</p>`:""}<div class="list">${list.slice(0,3).map(row).join("")}</div></section>`}
@@ -1346,7 +1356,7 @@ function results(){const q=(state.q||"").trim().toLowerCase();if(!q)return `<p c
   return back+(r.length?`<p class="shelf-note">${r.length} found for “${esc(state.q)}”</p><div class="list">${r.map(row).join("")}</div>`:`<p class="empty">Nothing found for “${esc(state.q)}”. Try another word.</p>`)}
 function story(x){const on=saved.includes(x.id),s=SRC[x.k];
   const short=x.gist.length>230?x.gist.slice(0,230).replace(/\s\S*$/,"")+"…":x.gist;
-  return `<div class="view"><section class="hero k-${x.k}${AWR(x)?" awr":""} v${x.i%3}"><div class="wrap">
+  return `<div class="view"><section class="hero k-${x.k}${CH(x)?" "+CH(x):""} v${x.i%3}"><div class="wrap">
    <div class="bar"><button class="circ" data-go="back" aria-label="Back">${I.back}</button><button class="circ" id="save" aria-pressed="${on}" aria-label="${on?"Remove from my library":"Save to my library"}">${on?I.marked:I.mark}</button></div>
    ${cover(x)}
    <div class="txt"><h1>${esc(x.t)}</h1><div class="sub">${esc(s.one)}${x.by?` · by ${esc(x.by)}`:""} · ${V2?`About ${x.mins} min to tell`:`≈${x.mins} min to tell (${len(x.mins)})`}</div>
