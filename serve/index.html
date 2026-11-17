@@ -2156,7 +2156,12 @@ html body [data-crumb=res],html body [data-crumb=res] + span{display:none!import
 @media (max-width:820px){html body .rqdtop .rqdtrail{display:none!important}html body .rqdtop .rqback{white-space:nowrap}}
 /* check 5 round 2: view switches in the same order as Find resources and Speakers (List, Carousel, Grid); Find and My study had Grid first */
 html body :is([data-v6=list],[data-kv=list]){order:1}html body :is([data-v6=car],[data-kv=car]){order:2}html body :is([data-v6=grid],[data-kv=grid]){order:3}
+/* Daniel 17 Nov: the paper showed the Print window on top of the sheet; only the sheets print */
+@media print{html body dialog,html body dialog::backdrop,html body .toast{display:none!important}html body #printRoot{display:block!important}}
 </style>
+<script>/* Daniel 17 Nov: open windows (top layer) printed over the sheet; close them while printing, reopen after */
+(()=>{let shut=[];addEventListener('beforeprint',()=>{shut=[...document.querySelectorAll('dialog[open]')];shut.forEach(d=>d.close())});
+addEventListener('afterprint',()=>{shut.forEach(d=>{try{d.showModal()}catch(e){}});shut=[]})})();</script>
 <script>/* check 5 round 4: the What? and Where? boxes show the longest wording that fits their width (cut at 360 px and at 412 px before) */
 (()=>{const c=document.createElement("canvas").getContext("2d");const fit=(i,list)=>{if(!i)return;const f=()=>{const cs=getComputedStyle(i),room=i.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);if(room<=0)return;
 c.font=cs.font;i.placeholder=list.find(t=>c.measureText(t).width<=room)||list[list.length-1]};f();new ResizeObserver(f).observe(i)};
