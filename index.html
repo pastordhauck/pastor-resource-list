@@ -4323,9 +4323,17 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
 
   const words = x => `${x.n} ${x.line || ""} ${x.c || ""} ${x.p || ""}`.toLowerCase();
   const letter = x => { const m = (x.n || "").toUpperCase().match(/[A-Z]/); return m ? m[0] : "#"; };
+  // 17 Nov 2026 (Daniel: "it takes me to A through Z ... best match or by state, nothing happens"): the rows follow the sort.
+  // A to Z: letter rows. By state: one row per state. Best match and Nearest first: the list in that order, 15 to a row.
+  const chunks = (list, first) => { const rows = []; for (let i = 0; i < list.length; i += 15) rows.push({title: i ? `${i + 1}–${Math.min(i + 15, list.length)}` : first, count: Math.min(15, list.length - i), items: list.slice(i, i + 15)}); return rows; };
   function rowsFor(list){
+    const sort = LIST && LIST.sort || "best";
+    if (sort === "state") { const m = new Map(); list.forEach(x => { const k = stOf(x) ? NAME[stOf(x)] || stOf(x) : "Nationwide or online"; if (!m.has(k)) m.set(k, []); m.get(k).push(x); });
+      return [...m].map(([t, items]) => ({title: t, count: items.length, items})); }
+    if (sort === "near") return chunks(list, "Nearest first");
     const byTp = new Map(); list.forEach(x => { const k = tpOf(x); if (!byTp.has(k)) byTp.set(k, []); byTp.get(k).push(x); });
-    if (byTp.size > 1) return [...byTp].sort((a, b) => b[1].length - a[1].length).map(([t, items]) => ({title: t, count: items.length, items}));
+    if (sort === "best" && byTp.size > 1) return [...byTp].sort((a, b) => b[1].length - a[1].length).map(([t, items]) => ({title: t, count: items.length, items}));
+    if (sort !== "az") return chunks(list, "Best matches");
     const az = [...list].sort((a, b) => letter(a).localeCompare(letter(b)) || a.n.localeCompare(b.n)), rows = [];
     let cur = null;                                       // join letters until a row has at least 8, e.g. "A–C"
     az.forEach(x => { const L = letter(x);
@@ -4684,7 +4692,7 @@ if ("serviceWorker" in navigator) {
   // No reload when a new helper takes over (Daniel, 9 Nov 2026: the app "blinks" 1-2 s after opening).
   // sw.js is network-first, so the page that just opened is already the newest; the new helper only refreshes the offline copy.
 }
-document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 17 Nov 2026, 01:17"; document.body.appendChild(f); });
+document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 17 Nov 2026, 01:21"; document.body.appendChild(f); });
 (() => {
   const bar = document.getElementById("installBar"), btn = document.getElementById("installBtn");
   const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone;
