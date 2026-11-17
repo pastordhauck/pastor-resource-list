@@ -1815,7 +1815,7 @@ function wireWall(){
 /* ---------- the deepest layer ---------- */
 let cur = null, pg = 0;
 function openDetail(x, pt){
-  cur = x; pg = 0;
+  cur = x; pg = 0; x.pages ||= [];
   $("facts").innerHTML = `<span class="eyebrow" data-rise>${esc(x.c)}${x.adv ? " · ✓ Adventist" : ""}</span><h1 data-rise style="--k:1">${esc(x.n)}</h1>${x.u ? `<a class="url" href="${esc(x.u)}" target="_blank" rel="noopener" data-rise style="--k:2">${esc(host(x.u))} ↗</a>` : ""}
     <p data-rise style="--k:3">${esc(x.about)}</p><a class="go" ${x.u ? "" : "hidden"} href="${esc(x.u)}" target="_blank" rel="noopener" data-rise style="--k:4">Visit website ↗</a>
     <dl data-rise style="--k:5"><dt>Type</dt><dd>${esc(x.c)}</dd>${x.sets ? `<dt>Topics</dt><dd>${esc(x.sets.join(", "))}</dd>` : ""}${x.ph ? `<dt>Phone</dt><dd>${esc(x.ph)}</dd>` : ""}${x.pages.length ? `<dt>Pages</dt><dd>${x.pages.length} snapshot${x.pages.length > 1 ? "s" : ""} to look through</dd>` : ""}</dl>`;
@@ -1992,7 +1992,7 @@ const tile = x => { const p = picOf(x); return p ? `<img src="${esc(p)}" alt="" 
 const siteOf = x => host(x.u || "").split("/")[0];
 const kindOf = x => { const pl = plOf(x); return x.c || (pl && MAP.kinds[pl.k]) || ""; };
 const sumOf = x => x.line || x.about || "";
-const where = x => { try { return typeof whereText === "function" ? whereText(x) : ""; } catch (e) { return ""; } };
+const where = x => { try { return typeof whereText === "function" ? [...new Set(String(whereText(x) || "").split(", "))].join(", ") : ""; } catch (e) { return ""; } };   // visitor pass (16 Nov): "Online, Online" -> "Online"
 function openX(x, e){ if (!x) return; const pl = plOf(x); const pt = e && typeof at === "function" ? at(e) : null; return pl ? openPlace(pl, pt) : openDetail(x, pt); }
 
 /* ---- the mockup's pieces, fed with real entries ---- */
@@ -4652,7 +4652,7 @@ if ("serviceWorker" in navigator) {
   // No reload when a new helper takes over (Daniel, 9 Nov 2026: the app "blinks" 1-2 s after opening).
   // sw.js is network-first, so the page that just opened is already the newest; the new helper only refreshes the offline copy.
 }
-document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 16 Nov 2026, 22:28"; document.body.appendChild(f); });
+document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 16 Nov 2026, 23:07"; document.body.appendChild(f); });
 (() => {
   const bar = document.getElementById("installBar"), btn = document.getElementById("installBtn");
   const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone;
