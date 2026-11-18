@@ -1233,6 +1233,13 @@ html.rb .layer:focus{outline:none}
 /* 17 Nov 2026 (Daniel): an obvious Back after a search, a pill instead of a plain link */
 html.rb #rbTBack{display:inline-flex;align-items:center;padding:9px 18px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:700;margin-bottom:10px;cursor:pointer}
 html.rb #rbTBack[hidden]{display:none}
+
+/* 18 Nov: speaker name matches in the main search as cards, same look as result rows */
+.rbSpkCards{display:grid;gap:10px}
+.rbSpkCards button{display:flex;align-items:center;gap:14px;text-align:left;border-radius:14px;padding:12px 16px;width:100%}
+.rbSpkCards i{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-weight:800;background:var(--accent,#3b6fd4);color:#fff}
+.rbSpkCards b{display:flex;flex-direction:column;font-weight:800;font-size:1.05em}
+.rbSpkCards small{font-weight:600;color:var(--muted);font-size:.85em;margin-top:2px}
 </style>
 <script>(h=>{h.classList.add("rb");try{let s=localStorage.getItem("prl-style")||"parchment";s=["light","linen","gray","parchment","bank","d_merlot","d_mist","d_harvest","d_alabaster"].includes(s)?"parchment":"dark";h.dataset.style=s;if(!["light","linen","gray","parchment","bank","d_merlot","d_mist","d_harvest","d_alabaster"].includes(s))h.classList.add("rbdark")}catch(e){}})(document.documentElement)</script>
 
@@ -2475,7 +2482,7 @@ if ($("wsvg")) new MutationObserver(() => document.querySelectorAll("#wLabels te
   const fl = s => (s || "").normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
   const ed1 = (a, b) => { if (Math.abs(a.length - b.length) > 1) return false; let i = 0, j = 0, d = 0;
     while (i < a.length && j < b.length) { if (a[i] === b[j]) { i++; j++; continue; } if (++d > 1) return false;
-      if (a.length > b.length) i++; else if (b.length > a.length) j++; else { i++; j++; } } return d + (a.length - i) + (b.length - j) <= 1; };
+      if (a.length > b.length) i++; else if (b.length > a.length) j++; else if (a[i + 1] === b[j] && a[i] === b[j + 1]) { i += 2; j += 2; } else { i++; j++; } } return d + (a.length - i) + (b.length - j) <= 1; };
   // audit 18 Nov: one typed word must be a whole word or the start of one ("hymn" is not Sung Hyun Um, "Hmong" not Huong); one wrong letter only in a two-word name ("Pavle Goya")
   const hit = (n, ws) => { const t = fl(n).split(" "); return ws.every(w => t.some(k => k === w || (w.length >= 3 && k.startsWith(w)) || (ws.length > 1 && w.length >= 4 && ed1(w, k)))); };
   const openAt = n => { const b = document.querySelector("#resTabs [data-rt=spk]"); if (b) b.click(); else if (typeof openSpeakers === "function") openSpeakers();
@@ -2495,9 +2502,15 @@ if ($("wsvg")) new MutationObserver(() => document.querySelectorAll("#wLabels te
     const sp = spk && spk.rest === q ? spk.rest : "";
     const m = names && ws.length && ws.length <= 4 ? names.filter(n => hit(n, ws)) : []; if (!sp && (!m.length || m.length > 8)) return;
     const box = document.createElement("div"); box.id = "rbSpkHits"; box.className = "rbSpkHits";
-    box.innerHTML = `<span>Speakers</span>` + (sp ? `<button type="button" data-q="${esc(sp)}">Find speakers: ${esc(sp)} ›</button>` : "") + (m.length <= 8 ? m : []).map(n => `<button type="button">${esc(n)}</button>`).join("");
+    // 18 Nov (Daniel: "still cant find pavel goia", main search bar): 1-3 name matches show as big speaker cards, not small pills, and count in the "found" line
+    const cards = !sp && m.length <= 3, ini = n => n.split(" ").filter(w => /^[A-Za-z]/.test(w)).map(w => w[0]).slice(0, 2).join("").toUpperCase();
+    if (cards) { box.className = "rbSpkHits rbSpkCards"; box.innerHTML = m.map(n => `<button type="button" data-q="${esc(n)}"><i>${esc(ini(n))}</i><b>${esc(n)}<small>Speaker · sermons and how to invite ›</small></b></button>`).join(""); }
+    else box.innerHTML = `<span>Speakers</span>` + (sp ? `<button type="button" data-q="${esc(sp)}">Find speakers: ${esc(sp)} ›</button>` : "") + (m.length <= 8 ? m : []).map(n => `<button type="button">${esc(n)}</button>`).join("");
     box.onclick = e => { const b = e.target.closest("button"); if (b) openAt(b.dataset.q !== undefined ? b.dataset.q : b.textContent); };
-    $("tRows").before(box); };
+    $("tRows").before(box);
+    if (m.length && !sp) setTimeout(() => { const ts = $("tSub"); if (!ts) return; const k = parseInt(ts.textContent) || 0, sw = m.length === 1 ? "1 speaker" : m.length + " speakers";
+      ts.textContent = /^Nothing found/.test(ts.textContent) ? sw + " found." : /^\d+ found\./.test(ts.textContent) ? `${sw} and ${k} resource${k === 1 ? "" : "s"} found.` : ts.textContent;
+      if (!k) { if ($("tChips")) $("tChips").innerHTML = ""; const tc = $("tCards"); if (tc && /Nothing matches/.test(tc.textContent)) tc.innerHTML = ""; } }, 0); };   // speakers only: drop the "try these searches" chips and the empty-filters note
   try { const s0 = search; search = function (q) { const r = s0.apply(this, arguments); try { show(String(q || "")); } catch (e) { console.error(e); } return r; }; } catch (e) { console.error(e); }
 })();
 
