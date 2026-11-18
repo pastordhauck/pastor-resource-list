@@ -3679,9 +3679,9 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
   }
   const HELPSET = x => (x.sets || []).some(s => /Help for People in Need/i.test(s));
   const NEEDS = [
-    {k: "danger", re: /\b(suicid\w*|kill (him|her|my|them)sel\w*|overdos\w*|in danger)\b/i, title: "In danger right now: call 911, or 988 for a crisis", sets: /Crisis and Mental Health/i},
+    {k: "danger", re: /\b(suicid\w*|kill (him|her|my|them)sel\w*|overdos\w*|in danger|wants? to die|want(s|ed)? to end (it|it all|(my|his|her|their) life)|(do ?n[’']?t|does ?n[’']?t|no longer) want to (live|be alive|be here)|hurt(ing)? (my|him|her|them)sel\w*|self[- ]?harm\w*|cutting (my|him|her)sel\w*|end my life)\b/i, title: "In danger right now: call 911, or 988 for a crisis", sets: /Crisis and Mental Health/i},
     {k: "mind", re: /\b(depress\w*|anxi\w*|panic|mental\w*|hopeless|stuck|struggling|lonely)\b/i, title: "Crisis and mental health", sets: /Crisis and Mental Health/i},
-    {k: "abuse", re: /\b(abus\w*|domestic|violen\w*|unsafe at home|beat(s|en|ing)?)\b/i, title: "Safety from abuse", words: "domestic violence abuse"},
+    {k: "abuse", re: /\b(abus\w*|domestic|violen\w*|unsafe at home|beat(s|en|ing)?|hits? (me|us|my|her|him|them)|hurts? me|sexual(ly)? assault\w*|assaulted|rap(e|ed)|molest\w*|(do ?n[’']?t|does ?n[’']?t|not) feel safe|not safe at home)\b/i, title: "Safety from abuse", words: "domestic violence abuse"},
     // audit 18 Nov: fire, flood, storm: disaster relief (Adventist Community Services, ADRA, Red Cross) and a place to stay
     {k: "disaster", re: /\b(fires?|house fire|burn(ed|t) down|floods?|flooded|flooding|tornado(e?s)?|hurricanes?|wildfires?|earthquakes?|disasters?|storm damage|lost (their|his|her|my|our) (house|home)s?)\b/i, title: "Disaster relief", find: /disaster|red cross|rubicon|community services/i},
     {k: "shelter", re: /\b(lost (their|his|her|my|our) (house|home)s?|homeless\w*|shelter\w*|evict\w*|nowhere to (sleep|stay|go)|place to (sleep|stay)|living in (his|her|their|a) car|stranded)\b/i, title: "A safe place to stay", hk: 1, pick: /shelter|rescue|salvation|211|findhelp/i},
@@ -3689,7 +3689,7 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     {k: "clothes", re: /\b(clothes|clothing|coats?)\b/i, title: "Clothing", hk: 3, pick: /cloth|salvation|211|vincent/i},   // search test, 16 Nov 2026: these went by name only, with no distance limit
     {k: "clinic", re: /\b(clinics?|dental|dentists?|medical care|health care)\b/i, title: "Health and clinics", hk: 4, pick: /clinic|health|211|findhelp/i},
     {k: "money", re: /\b(money|financial\w*|finances?|rent|bills?|utilit\w*|electric\w*|broke|cash|afford|gas money|car payment|loan)\b/i, title: "Money, rent and bills", hk: 2, pick: /211|findhelp|vincent|catholic|salvation/i},
-    {k: "addiction", re: /\b(addict\w*|drugs?|alcohol\w*|drinking|sober\w*|recovery)\b/i, title: "Addiction and recovery", words: "recovery addiction"},
+    {k: "addiction", re: /\b(addict\w*|drugs?|alcohol\w*|drinking|sober\w*|recovery|fentanyl|opioids?|meth|rehab)\b/i, title: "Addiction and recovery", words: "recovery addiction"},
     {k: "grief", re: /\b(grie\w*|died|death|funeral|passed away|widow\w*)\b/i, title: "Grief and loss", words: "grief"},
     {k: "job", re: /\b(jobs?|work|unemploy\w*|laid off)\b/i, title: "Work and jobs", words: "job employment"}];
   // search v2 (17 Nov 2026 audit): the help plan takes over only for "someone in need" wording ("no food", "can't pay rent", "need a shelter",
@@ -3703,7 +3703,7 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     box.querySelector("button").onclick = () => situation(raw, true); S("tRows").before(box); };
   function situation(raw, force) {
     const hits = needTopic(raw); if (!hits.length) return false;
-    if (!force && !hits.some(n => n.k === "danger") && !(NEEDW.test(raw) || NEARME.test(raw) || placeIn(raw))) return false;
+    if (!force && !hits.some(n => n.k === "danger" || (n.k === "abuse" && !/\b(training|seminars?|curriculum|course|polic(y|ies)|pastors?|sermons?|prevention|awareness)\b/i.test(raw))) && !(NEEDW.test(raw) || NEARME.test(raw) || placeIn(raw))) return false;
     ["lpHelpHint", "rbSpkHits"].forEach(id => document.getElementById(id)?.remove());   // no pills left from the last search
     if (hits.some(n => n.k === "danger")) hits.splice(0, hits.length, ...hits.filter(n => n.k !== "mind"));
     const pi = placeIn(raw), c = pi ? pi.pl : centerNow(), rows = [], seen = new Set();
