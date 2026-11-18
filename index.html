@@ -2476,7 +2476,8 @@ if ($("wsvg")) new MutationObserver(() => document.querySelectorAll("#wLabels te
   const ed1 = (a, b) => { if (Math.abs(a.length - b.length) > 1) return false; let i = 0, j = 0, d = 0;
     while (i < a.length && j < b.length) { if (a[i] === b[j]) { i++; j++; continue; } if (++d > 1) return false;
       if (a.length > b.length) i++; else if (b.length > a.length) j++; else { i++; j++; } } return d + (a.length - i) + (b.length - j) <= 1; };
-  const hit = (n, ws) => { const t = fl(n).split(" "); return ws.every(w => t.some(k => k === w || (w.length >= 3 && k.startsWith(w)) || (w.length >= 4 && ed1(w, k)))); };
+  // audit 18 Nov: one typed word must be a whole word or the start of one ("hymn" is not Sung Hyun Um, "Hmong" not Huong); one wrong letter only in a two-word name ("Pavle Goya")
+  const hit = (n, ws) => { const t = fl(n).split(" "); return ws.every(w => t.some(k => k === w || (w.length >= 3 && k.startsWith(w)) || (ws.length > 1 && w.length >= 4 && ed1(w, k)))); };
   const openAt = n => { const b = document.querySelector("#resTabs [data-rt=spk]"); if (b) b.click(); else if (typeof openSpeakers === "function") openSpeakers();
     let k = 0; const t = setInterval(() => { let q = null; try { q = $("spkFrame").contentDocument.getElementById("q"); } catch (e) {}
       if (q || ++k > 50) { clearInterval(t); if (q) { q.value = n; q.dispatchEvent(new Event("input")); } } }, 100); };
@@ -3251,6 +3252,43 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
   /* ---- 16 Bible games from Serve (Daniel 17 Nov: "Yes, move them") ---- */
   ([{"n": "Bible Jeopardy night", "c": "Bible game", "u": "", "ph": "", "sets": ["Bible games"], "about": "A Bible game for a group at church, 1 hour. Good for kids and youth. You need: a board or slides, 5 categories, a timer. 1. Pick 5 categories (people, places, miracles, parables, verses) with 5 questions each, easy to hard. 2. Split into teams; a team picks a square and has 20 seconds to answer. 3. End with one big final question and let the winners pick the closing song.", "line": "A Bible game for a group at church, 1 hour.", "adv": false, "p": "", "s": "Online", "pages": [], "lang": "English"}, {"n": "Sword drill", "c": "Bible game", "u": "", "ph": "", "sets": ["Bible games"], "about": "A Bible game for a group at church, 5 minutes. Good for kids and youth. You need: a Bible for each person. 1. Everyone holds a closed Bible at their side. 2. Call out a reference (say, John 3:16); first to find it reads it aloud. 3. Mix easy and hard books so new readers learn where things are.", "line": "A Bible game for a group at church, 5 minutes.", "adv": false, "p": "", "s": "Online", "pages": [], "lang": "English"}, {"n": "Who am I? Bible character game", "c": "Bible game", "u": "", "ph": "", "sets": ["Bible games"], "about": "A Bible game for a family at home, 5 minutes. Good for kids and youth. You need: nothing; or name cards. 1. One person thinks of a Bible character. 2. Others ask yes-or-no questions, up to 20. 3. The winner reads that character's story together later in the week.", "line": "A Bible game for a family at home, 5 minutes.", "adv": false, "p": "", "s": "Online", "pages": [], "lang": "English"}, {"n": "Bible story charades", "c": "Bible game", "u": "", "ph": "", "sets": ["Bible games"], "about": "A Bible game for a group at church, 1 hour. Good for kids and youth. You need: slips with Bible stories written on them. 1. Write well-known stories on slips (Jonah, David and Goliath, the Red Sea). 2. A team acts one out without words while the others guess. 3. After each round, read the reference so everyone finds it.", "line": "A Bible game for a group at church, 1 hour.", "adv": false, "p": "", "s": "Online", "pages": [], "lang": "English"}, {"n": "Verse scramble", "c": "Bible game", "u": "", "ph": "", "sets": ["Bible games"], "about": "A Bible game for a family at home, 5 minutes. Good for kids and youth. You need: a memory verse cut into word cards. 1. Write this week's memory verse on cards, one word each, and mix them up. 2. Race to put the words in order. 3. Say it together three times, then remove a card each round until you know it by heart.", "line": "A Bible game for a family at home, 5 minutes.", "adv": false, "p": "", "s": "Online", "pages": [], "lang": "English"}, {"n": "Bible timeline line-up", "c": "Bible game", "u": "", "ph": "", "sets": ["Bible games"], "about": "A Bible game for a group at church, 1 hour. Good for kids and youth. You need: cards with Bible events, tape or string. 1. Give each person a card with an event (Creation, the Flood, the Exodus, the cross...). 2. Without talking, they line up in the order the events happened. 3. Check the order together and talk about one surprise.", "line": "A Bible game for a group at church, 1 hour.", "adv": false, "p": "", "s": "Online", "pages": [], "lang": "English"}, {"n": "Bible scavenger hunt", "c": "Bible game", "u": "", "ph": "", "sets": ["Bible games"], "about": "A Bible game for a group at church, afternoon. Good for kids and youth. You need: clue cards with Bible references, small hidden items. 1. Hide items around the church grounds (a stone, a loaf, a lamp, a fish). 2. Each clue is a Bible reference that points to the next item. 3. Finish together and tell how each item connects to its story.", "line": "A Bible game for a group at church, afternoon.", "adv": false, "p": "", "s": "Online", "pages": [], "lang": "English"}, {"n": "Bible Pictionary", "c": "Bible game", "u": "", "ph": "", "sets": ["Bible games"], "about": "A Bible game for a family at home, 1 hour. Good for kids and youth. You need: paper or a whiteboard, a list of Bible words. 1. Make a list of Bible people, places and objects. 2. One person draws while their team guesses within a minute. 3. Look up the story behind the hardest one.", "line": "A Bible game for a family at home, 1 hour.", "adv": false, "p": "", "s": "Online", "pages": [], "lang": "English"}, {"n": "Story in a bag", "c": "Bible game", "u": "", "ph": "", "sets": ["Bible games"], "about": "A Bible game for a me at church, 5 minutes. Good for kids and youth. You need: a bag with 3-5 small objects. 1. Put objects from one story in a bag (five stones and a sling for David and Goliath). 2. Pull them out one at a time while the children guess the story. 3. Tell the story with the objects, then let a child retell it.", "line": "A Bible game for a me at church, 5 minutes.", "adv": false, "p": "", "s": "Online", "pages": [], "lang": "English"}, {"n": "Memory verse ball toss", "c": "Bible game", "u": "", "ph": "", "sets": ["Bible games"], "about": "A Bible game for a group at church, 5 minutes. Good for kids and youth. You need: a soft ball, a memory verse. 1. Stand in a circle with the verse shown where everyone can see it. 2. Whoever catches the ball says the next word, then throws it on. 3. Hide the verse for the last round and see if the group can finish it.", "line": "A Bible game for a group at church, 5 minutes.", "adv": false, "p": "", "s": "Online", "pages": [], "lang": "English"}, {"n": "Bible news report", "c": "Bible game", "u": "", "ph": "", "sets": ["Bible games"], "about": "A Bible game for a group at church, 1 hour. Good for kids and youth. You need: a pretend microphone, a phone to record (optional). 1. Teams pick a Bible event and report it like a TV news story. 2. Include an \"eyewitness interview\" with someone who was there. 3. Share the reports and talk about what the story shows about God.", "line": "A Bible game for a group at church, 1 hour.", "adv": false, "p": "", "s": "Online", "pages": [], "lang": "English"}, {"n": "Parable in today's world", "c": "Bible game", "u": "", "ph": "", "sets": ["Bible games"], "about": "A Bible game for a group at church, 1 hour. Good for kids and youth. You need: a list of parables, paper. 1. Give each group a parable (the lost sheep, the good Samaritan, the talents). 2. They retell it set in today's town, keeping the same lesson. 3. Read the original afterwards and compare.", "line": "A Bible game for a group at church, 1 hour.", "adv": false, "p": "", "s": "Online", "pages": [], "lang": "English"}, {"n": "Bible bingo", "c": "Bible game", "u": "", "ph": "", "sets": ["Bible games"], "about": "A Bible game for a family at church, 1 hour. Good for kids and youth. You need: bingo cards with Bible names and places, markers. 1. Fill bingo squares with people and places from the stories you are studying. 2. Read a clue (\"He built an ark\"); players mark the answer. 3. The winner reads the next story aloud.", "line": "A Bible game for a family at church, 1 hour.", "adv": false, "p": "", "s": "Online", "pages": [], "lang": "English"}, {"n": "Map the journey", "c": "Bible game", "u": "", "ph": "", "sets": ["Bible games"], "about": "A Bible game for a family at home, 1 hour. Good for kids and youth. You need: a printed Bible map, string or a marker. 1. Pick a journey: Abraham, the Exodus, or Paul's travels. 2. Read it a stop at a time and trace the path on the map. 3. Ask: what happened at each stop, and how did God lead?", "line": "A Bible game for a family at home, 1 hour.", "adv": false, "p": "", "s": "Online", "pages": [], "lang": "English"}, {"n": "Bible escape room", "c": "Bible game", "u": "", "ph": "", "sets": ["Bible games"], "about": "A Bible game for a church at church, weekend. Good for kids and youth. You need: a room, locks or codes, puzzles built on Bible stories. 1. Plan 4-5 puzzles where each answer comes from a Bible passage. 2. Teams of 4-6 get 30 minutes to solve them and \"escape\". 3. Close with the story the puzzles were built on and a short prayer.", "line": "A Bible game for a church at church, weekend.", "adv": false, "p": "", "s": "Online", "pages": [], "lang": "English"}, {"n": "Two truths and a tale", "c": "Bible game", "u": "", "ph": "", "sets": ["Bible games"], "about": "A Bible game for a family at home, 5 minutes. Good for kids and youth. You need: nothing. 1. Say three statements about a Bible story: two true, one made up. 2. Others guess the made-up one. 3. Open the Bible together to check the answer.", "line": "A Bible game for a family at home, 5 minutes.", "adv": false, "p": "", "s": "Online", "pages": [], "lang": "English"}]).forEach(x => { if (!ITEMS.some(y => y.n === x.n)) { ITEMS.push(x); (SETS["Bible games"] || (SETS["Bible games"] = [])).push(x); } });
   { const g = GROUPS.find(g => g.sets.some(s => s[0] === "Kids Programs")); if (g && !g.sets.some(s => s[0] === "Bible games")) g.sets.splice(g.sets.findIndex(s => s[0] === "Kids Programs") + 1, 0, ["Bible games", 0]); }
+
+  // ---- audit 18 Nov 2026 (work/design/audit_2026-11-18/REPORT.md items 6, 8, 9, 11, 15) ----
+  const byName = n => ITEMS.find(x => x.n === n);   // this block runs in its own scope, after the Bible games
+  const kill = x => { if (!x) return; const i = ITEMS.indexOf(x); if (i >= 0) ITEMS.splice(i, 1); for (const k in SETS) { const j = SETS[k].indexOf(x); if (j >= 0) SETS[k].splice(j, 1); } };
+  // 6. It Is Written illustrations were titled with the book's index keywords ("1. Presumption; Faith (It Is Written, Vol. 1, page 5,
+  // by John Bradshaw)"), some cut mid-word. Title = the keywords in words ("Presumption and faith"), source and author kept; no invented names.
+  { const RE = /^\d+\.\s+(.+?)\s+(\(It Is Written, Vol\. \d+, page \d+, by John Bradshaw\))$/;
+    const CUT = {"Faith-": "Faithfulness", "Perse-": "Perseverance", "Suc-": "Success", "Vegeta-": "Vegetarianism", "Prepa-": "Preparation", "Thomas Jeffer-": "Thomas Jefferson", "Trail of": "Trail of Tears"};
+    const PH = /New York|New Mexico|North Korea|North Dakota|South Carolina|San Diego|United (Kingdom|States)|World War|Vietnam War|Super Bowl|Nobel Prize|Olympic Games|Air Force|Holy Spirit|Second Coming|Native Americans|Virgin Galactic|Alice Neel|Van Gogh|Declaration of Independence|Thomas Jefferson|April Fools|Trail of Tears/;
+    const W = new Set("God God’s Jesus Jesus’ Bible Satan Sabbath Christian Christianity Raphael Michelangelo Hawaii Florida Japan Africa China Britain India France Canada Australia Michelin Wisconsin Facebook Switzerland Germany Hungary Jews London England Vietnam Aristotle Greece Titanic Daniel Alabama Boston Virginia Wordle Ireland MIT NASA McDonalds Nebraska Stonehenge Monterey Rockefeller Yosemite Challenger Reagan Goodyear Rembrandt Pepsi-Cola Islam Massachusetts Dürer Russia Edinburgh".split(" "));
+    const low = k => PH.test(k) ? k : k.split(" ").map(w => W.has(w) ? w : w.toLowerCase()).join(" ");
+    ITEMS.forEach(x => { const m = (x.n || "").normalize("NFKC").match(RE); if (!m) return;
+      const ks = m[1].split(/[;,]\s*/).map(k => CUT[k] || k).filter(k => k && !/-$/.test(k)).slice(0, 5).map((k, i) => i ? low(k) : (k => k[0].toUpperCase() + k.slice(1))(low(k)));
+      const t = ks.length > 1 ? ks.slice(0, -1).join(", ") + " and " + ks[ks.length - 1] : ks[0];
+      x.n = `${t} ${m[2]}`; x.c = "Sermon illustration"; });   // the card's small line no longer repeats "It Is Written" above the title
+  }
+  // 8. internal notes in public names; a news story is not a congregation; a placeholder text is not a story
+  { const r = (a, b) => { const x = byName(a); if (x) x.n = b; };
+    r("Kinh Thanh H'mong Xanh app (iOS, dialect unclear)", "Kinh Thanh H'mong Xanh app (iOS)");
+    const laos = byName("Hmong Adventist work in Laos (not a confirmed congregation)");
+    if (laos) { laos.n = "Hmong Adventist mission in Laos (Adventist Review news)"; laos.c = "Adventist news"; }
+    const un = byName("Unison Restaurant and Banquet Hall"); if (un) ["line", "about"].forEach(f => { un[f] = (un[f] || "").replace(/ \(not confirmed on its site\)/, ""); });
+    kill(byName("Mission Spotlight for September 10 (Inside Story, Adventist Mission)"));   // its text says it is a placeholder, no story
+    // 15. past events (before 18 Nov 2026)
+    [/^Pentecost 2025 \(North American Division initiative\)$/, /^NAD Ministerial: Pentecost 2025 BootCamp$/].forEach(re => ITEMS.filter(x => re.test(x.n)).forEach(kill));
+  }
+  // 15. the same place listed twice under the same name (neighbor towns, one copy links only to a search page): keep the one with more info
+  { const info = x => (x.about || "").length + 200 * (x.pages || []).length + (x.ph ? 50 : 0) + (x.u && !/eadventist\.net\/search/.test(x.u) ? 300 : 0);
+    ["Jesus for Asia", "Westbank Spanish SDA Church", "Lynnwood Spanish SDA Church", "Cocoa Spanish SDA Company", "Live Oak Spanish SDA Company", "Frazer Hispanic SDA Church"].forEach(n => {
+      const L = ITEMS.filter(x => x.n === n).sort((a, b) => info(b) - info(a)); const a = L.shift();
+      L.forEach(b => { b.sets.forEach(s => { if (!a.sets.includes(s) && SETS[s]) { a.sets.push(s); SETS[s].push(a); } }); kill(b); }); });
+  }
+  // 9. about texts that start lowercase (the name was cut off in the source): start with a capital ("Free Bible studies ...")
+  ITEMS.forEach(x => ["about", "line"].forEach(f => { const v = x[f]; if (v && /^[a-z]/.test(v) && !/^[a-z]+[A-Z]/.test(v) && !v.startsWith((x.n || "").split(" ")[0])) x[f] = v[0].toUpperCase() + v.slice(1); }));
+  // 11. row counts follow the rows' real lists (Bible games was added with 0; moved items left old counts)
+  GROUPS.forEach(g => g.sets.forEach(s => { if (SETS[s[0]]) s[1] = SETS[s[0]].length; }));
+
 })();
 
 /* DRAFT (7 Nov 2026): local places near a church. Home church, Near my church, Search near another place, Share, national finders. Saved only on this device. */
@@ -3318,7 +3356,8 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     if (loc.length) rows.push({title: "Local help places", count: loc.length, items: loc.map(({p, d}) => ({n: p.n, c: p.h + " · " + milesTxt(d), u: p.u || "", ph: p.ph || "", sets: [], p: p.t, s: p.s, xy: p.xy, local: true, v: p.v, line: `${milesTxt(d)} · ${p.t}, ${p.s}. ${p.v === "yes" ? "Volunteers wanted." : "Call to ask about volunteering."}${p.ph ? " Phone " + p.ph + "." : ""}${p.note ? " " + p.note : ""}`, about: `${p.n} in ${p.t}, ${p.s} (${p.h}). ${p.v === "yes" ? "Volunteers wanted." : "Call to ask about volunteering."} Call before you go.`}))});
     const byKind = new Map();
     P.filter(y => y.xy && y.sda !== false && !y.local).forEach(y => { const d = mi(center.xy, y.xy); if (d <= (y.k === "church" ? 30 : 60)) (byKind.get(y.k) || byKind.set(y.k, []).get(y.k)).push([d, y]); });
-    for (const [k, arr] of byKind) { arr.sort((a, b) => a[0] - b[0]); rows.push({title: (k === "church" ? "Adventist churches" : KIND(arr[0][1])) + " near here", count: arr.length, items: arr.slice(0, 40).map(([d, y]) => ({n: y.n, c: KIND(y) + " · " + milesTxt(d), u: y.u || "", sets: [], place: y, line: `${milesTxt(d)} · ${[y.p, y.st].filter(Boolean).join(", ")}`}))}); }
+    // audit 18 Nov: churches right after help places, before shops and schools
+    for (const [k, arr] of [...byKind].sort((a, b) => (b[0] === "church") - (a[0] === "church"))) { arr.sort((a, b) => a[0] - b[0]); rows.push({title: (k === "church" ? "Adventist churches" : KIND(arr[0][1])) + " near here", count: arr.length, items: arr.slice(0, 40).map(([d, y]) => ({n: y.n, c: KIND(y) + " · " + milesTxt(d), u: y.u || "", sets: [], place: y, line: `${milesTxt(d)} · ${[y.p, y.st].filter(Boolean).join(", ")}`}))}); }
     return rows;
   }
   const $$ = id => document.getElementById(id);
@@ -3328,14 +3367,14 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     $$("tEye").textContent = c ? "Help near" : "Search";
     $$("tTitle").textContent = c ? c.label : `“${qv || "your search"}”`;
     $$("tSub").textContent = `${total} found${qv && c ? ` for “${qv}”` : ""}. Distances are straight-line miles from the town center, so driving is longer. ${any ? "" : "We haven't listed local places here yet. Try the finders below. "}National and online-only links are not in this view.`;
-    $$("tChips").innerHTML = (c ? `<button class="pill" id="rpMap" type="button">Show on map<\/button><button class="pill" id="rpShare" type="button">Copy link to share<\/button>` : "") + `<button class="pill" id="rpBack" type="button">← Back to home<\/button><span class="mut" id="rpMsg"><\/span>`;
+    $$("tChips").innerHTML = (c ? `<button class="pill" id="rpMap" type="button">Show on map<\/button><button class="pill" id="rpShare" type="button">Copy link to share<\/button>` : "") + (document.getElementById("rbTBack") ? "" : `<button class="pill" id="rpBack" type="button">← Back to home<\/button>`) + `<span class="mut" id="rpMsg"><\/span>`;   // audit 18 Nov: the rebrand's own Back button is the one Back
     $$("tFilt").hidden = true; $$("tCarNav").hidden = true; $$("tCards").innerHTML = ""; $$("tRows").hidden = false;
     rowsBlock($$("tRows"), "g", rows);
     const old = $$("rpFind"); if (old) old.remove();
     $$("tRows").insertAdjacentHTML("afterend", `<div id="rpFind" style="padding:8px 18px 40px"><h3>${any ? "Also works anywhere" : "Try these"}<\/h3>` + FIND.map(f => `<div class="card" style="margin:8px 0"><a href="${f[1]}" target="_blank" rel="noopener"><b>${e(f[0])} ↗<\/b><\/a><div class="mut">${e(f[2])}<\/div><\/div>`).join("") + `<\/div>`);
     go("L-topic", c ? "Help near " + c.label : "Search results", [innerWidth / 2, 300]);
     if (!pushed) { try { history.pushState({lpres: 1}, ""); pushed = true; } catch (x) {} }
-    $$("rpBack").onclick = () => { if (pushed) history.back(); else back(0); };
+    if ($$("rpBack")) $$("rpBack").onclick = () => { if (pushed) history.back(); else back(0); };
     if ($$("rpMap")) $$("rpMap").onclick = () => { section("L-room"); setTimeout(() => { goLevel({level: "state", st: c.st}, NAME[c.st]); setTimeout(() => { anchor = {xy: c.xy, n: c.label, p: c.label}; const mm = window.lpMiles || 30; $("miles").value = mm; setMiles(mm); }, 700); }, 600); };
     if ($$("rpShare")) $$("rpShare").onclick = () => {
       const url = location.href.split("#")[0] + "#near=" + encodeURIComponent(c.spec);
@@ -3628,6 +3667,18 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     S("tSub").textContent = `${c && c.fuzzy ? `Showing ${c.label}, the closest match to “${c.fuzzy}”. ` : ""}Most urgent first. ${c ? "Distances are straight-line miles." : "Add a town, like “in Arlington, TX”, to see churches and places close by."} Call ahead: hours and help change.`;
     return true;
   }
+  // audit 18 Nov: a bare ZIP or town ("55101", "St Paul MN", "Windom, Minnesota") shows churches and help places near it, nearest first
+  const WORDST = /^(me|in|or|ok|hi|oh|pa|la|de|id|ma|mo|al|co)$/;   // codes that are also words count only in capitals or after a comma
+  function barePlace(q) {
+    q = (q || "").trim(); if (/^\d{5}$/.test(q)) return findPlace(q);
+    const m = q.match(new RegExp(`^([a-z][a-z .'-]*?)(,\\s*|\\s+)(${STRE}|[a-z]{2})\\.?$`, "i")); if (!m) return null;
+    const c2 = m[3].toUpperCase(), st = STN[m[3].toLowerCase()] || (Object.values(STN).includes(c2) && (m[2].includes(",") || m[3] === c2 || !WORDST.test(m[3])) ? c2 : null);
+    const pl = st && findPlace(`${m[1].trim()}, ${st}`); return pl && !pl.fuzzy ? pl : null;
+  }
+  qf.addEventListener("submit", ev => {
+    const pl = barePlace(S("q").value); if (!pl) return;
+    ev.preventDefault(); ev.stopImmediatePropagation(); ["rbSpkHits", "lpHelpHint"].forEach(id => document.getElementById(id)?.remove()); setCenter(pl);   // no pills left from the last search
+  }, true);
   qf.addEventListener("submit", ev => {   // a situation gets a help plan
     if (situation(S("q").value || "")) { ev.preventDefault(); ev.stopImmediatePropagation(); }
   }, true);
@@ -4089,7 +4140,9 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     } }
   // home: redraw the topic list and the Explore rows with the new topics (same code as the page's own)
   rowsBlock($("lineups"), "h", GROUPS.filter(g => g.title !== "Adventist churches").map(g => { const seen = new Set(), items = g.sets.flatMap(([n]) => SETS[n] || []).filter(x => !seen.has(x) && seen.add(x));
-    items.sort((a, b) => (b.pages && b.pages.length ? 1 : 0) - (a.pages && a.pages.length ? 1 : 0)); return {title: g.title, count: items.length, items}; }));
+    items.sort((a, b) => (b.pages && b.pages.length ? 1 : 0) - (a.pages && a.pages.length ? 1 : 0));
+    // audit 18 Nov: the state help lists fill only when a state opens, so "See all" also counts the places they hold (was "See all 9")
+    const later = g.title === "Help for people in need" ? Object.values(window.LPIDX || {}).reduce((a, s) => a + (s.n || 0), 0) : 0; return {title: g.title, count: items.length + later, items}; }));
   $("groups").innerHTML = GROUPS.map((g, i) => `<button class="grp" data-g="${i}"><b>${esc(g.title)}<\/b><small>${g.sets.map(s => esc(s[0])).join(" · ")}<\/small><em>${fmt(g.sets.reduce((a, s) => a + s[1], 0))} on the list · Go deeper →<\/em><\/button>`).join("");
   // top tabs: Resources · Serve · Adventist professionals · Map room (Daniel, 8 Nov 2026)
   const TABS = [["serve", "Serve", {title: "Serve", sets: serveSets, url: SERVE_URL}], ["pro", "Adventist professionals", {title: "Adventist professionals", sets: proSets}]].filter(t => (t[2].url || t[2].sets.length) && (t[0] !== "pro" || PRO_TAB));
@@ -4283,9 +4336,9 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     };
     window.openSpeakers = openSpeakers;
     // a "Speakers" card under Pick a topic, right after Watch and listen
-    // shortcut: the count is fixed at the 11 Nov build (1,831 speakers); update it when the speaker list grows a lot
+    // shortcut: the count is fixed at the 18 Nov build (1088 speakers); update it when the speaker list grows a lot
     const wl = GROUPS.findIndex(g => g.title === "Watch and listen");
-    GROUPS.splice(wl + 1, 0, {title: "Speakers", sets: [["Preachers, teachers and evangelists", 1831], ["Invite a speaker", 0], ["My speakers", 0]], spk: true});
+    GROUPS.splice(wl + 1, 0, {title: "Speakers", sets: [["Preachers, teachers and evangelists", 1088], ["Invite a speaker", 0], ["My speakers", 0]], spk: true});
     $("groups").innerHTML = GROUPS.map((g, i) => `<button class="grp" data-g="${i}"><b>${esc(g.title)}<\/b><small>${g.sets.map(s => esc(s[0])).join(" · ")}<\/small><em>${fmt(g.sets.reduce((a, s) => a + s[1], 0))} ${g.spk ? "speakers" : "on the list"} · Go deeper →<\/em><\/button>`).join("");
     document.addEventListener("click", e => {
       const g = e.target.closest("#groups [data-g]"), a = e.target.closest("[data-all]");
@@ -4611,6 +4664,17 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
   p.style.cssText = "max-width:640px;margin:28px auto 8px;text-align:center;font-size:12.5px;opacity:.75;line-height:1.5";
   p.textContent = "Free for personal and church use. Please don't bulk-copy this list or collect it with automated tools or AI crawlers.";
   home.append(p);
+
+  // audit 18 Nov 2026 (item 14): phone tap areas reach about 44px without changing the look (Daniel locked the phone look):
+  // an invisible hit area around small buttons; rows that scroll sideways get room for it. "More filters" scrolls into view
+  // behind a right-edge fade, like the site's other pill rows.
+  { const st = document.createElement("style"); st.id = "tapAreas";
+    st.textContent = `@media (max-width:899px){.rb-tabs button,#qsl,.rset,.rb-opt,.rb-seeall{position:relative}
+.rb-tabs button::after,#qsl::after,.rset::after,.rb-opt::after,.rb-seeall::after{content:"";position:absolute;left:50%;top:50%;width:max(100%,40px);height:44px;transform:translate(-50%,-50%)}
+.rb-tabs,.rb-ofil{padding-block:11px;margin-block:-11px}
+.rb-ofil{scrollbar-width:none;padding-right:36px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent)}
+.rb-ofil::-webkit-scrollbar{display:none}}`;
+    document.head.append(st); }
 })();
 
 /* ---- speakers' own links (main chat, 8 Nov 2026) ----
@@ -4835,16 +4899,23 @@ function searchAdj(x, q) {
   window.searchV2Rank = rank;   // for the audit test (work/design/search_audit_2026-11-17)
   search = function (q, pt) {
     const raw = (q || "").trim(); let hits = null; try { hits = raw ? rank(raw) : null; } catch (e) { console.error("search v2", e); }
-    if (!hits || !hits.length) { const r = _s.apply(this, arguments); if (!pt.peek && typeof window.lpHelpHint === "function") window.lpHelpHint(raw); return r; }   // nothing (or only stop words): the older search and its backup
+    // audit 18 Nov: help places loaded for an earlier ZIP or town stay out of a plain search ("sabath school" found Sabathani Food Distribution); searches near a place (peek) keep them
+    if (hits && !pt.peek) hits = hits.filter(h => !h[1].local);
+    if (!hits || !hits.length) { const r = _s.apply(this, arguments);
+      // audit 18 Nov: the older search's "Churches open on their own map page" only when churches are in the list
+      if (!pt.peek && typeof LIST !== "undefined" && LIST && !(LIST.items || []).some(x => x.place)) { const sb = document.getElementById("tSub"); if (sb) sb.textContent = sb.textContent.replace(" Churches open on their own map page.", ""); }
+      if (!pt.peek && typeof window.lpHelpHint === "function") window.lpHelpHint(raw); return r; }   // nothing (or only stop words): the older search and its backup
     const list = hits.slice(0, pt.all ? hits.length : 400).map(h => h[1]);
     const side = () => { try { _s.call(this, raw, Object.assign([], pt, {peek: () => null})); } catch (e) { console.error(e); } };   // speaker pills (rb.js) as before
     if (pt.peek) { side(); return pt.peek(list, hits.length); }
     const $ = id => document.getElementById(id); if ($("tq")) $("tq").value = raw;
     const grp = new Map(); list.forEach(x => { const g = x.place ? "Adventist churches" : (x.sets && x.sets[0]) || x.c || "Other"; (grp.get(g) || grp.set(g, []).get(g)).push(x); });
     if (grp.size > 1) { const rows = [...grp].map(([title, items]) => ({title, count: items.length, items}));
+      // audit 18 Nov: for a topic word ("prayer", "baptism") real resources come first; stories lead only when asked for ("story about prayer")
+      if (rows[0].title === "Sermon Illustrations" && !/\b(illustrat\w*|stor(y|ies)|anecdotes?)\b/i.test(raw)) rows.splice(1, 0, rows.shift());
       $("tEye").textContent = "Search"; $("tTitle").textContent = `“${raw}”`; $("tSub").textContent = `${fmt(hits.length)} found in ${rows.length} topics${hits.length > 400 ? "; showing the best 400" : ""}. Tap “See all” on a topic for its full list.`;
       $("tChips").innerHTML = ""; $("tCards").innerHTML = ""; $("tFilt").hidden = true; $("tCarNav").hidden = true; $("tRows").hidden = false; rowsBlock($("tRows"), "g", rows); go("L-topic", `“${raw}”`, pt); }
-    else openList("Search", `“${raw}”`, `${fmt(hits.length)} found${hits.length > 400 ? "; showing the best 400" : ""}. Churches open on their own map page.`, [], list, pt);
+    else openList("Search", `“${raw}”`, `${fmt(hits.length)} found${hits.length > 400 ? "; showing the best 400" : ""}.${list.some(x => x.place) ? " Churches open on their own map page." : ""}`, [], list, pt);
     side(); if (typeof window.lpHelpHint === "function") window.lpHelpHint(raw);
   };
 })();
