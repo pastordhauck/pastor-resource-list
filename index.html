@@ -3290,6 +3290,18 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
   GROUPS.forEach(g => g.sets.forEach(s => { if (SETS[s[0]]) s[1] = SETS[s[0]].length; }));
 
 })();
+/* ---- Daniel 18 Nov 2026 "Sort mixed groups": local businesses leave Church help and Family and health and get their own
+   group, so Church help is ministry tools and Family and health has no restaurants. ---- */
+(() => {
+  if (typeof GROUPS === "undefined") return;
+  const BIZ = ["Local Print and Copy Shops", "Custom Apparel and Merch", "Mailing and Shipping", "Event Rentals", "Audio and Video Equipment", "Vegan Restaurants", "Chambers of Commerce", "Minnesota chambers of commerce"];
+  const moved = [];
+  GROUPS.forEach(g => { g.sets = g.sets.filter(s => BIZ.includes(s[0]) ? (moved.push(s), false) : true); });
+  if (!moved.length || GROUPS.some(g => g.title === "Local businesses")) return;
+  moved.sort((a, b) => BIZ.indexOf(a[0]) - BIZ.indexOf(b[0]));
+  const i = GROUPS.findIndex(g => g.title === "Church help");
+  GROUPS.splice(i < 0 ? GROUPS.length : i + 1, 0, {title: "Local businesses", sets: moved});
+})();
 
 /* DRAFT (7 Nov 2026): local places near a church. Home church, Near my church, Search near another place, Share, national finders. Saved only on this device. */
 (() => {
@@ -4173,14 +4185,18 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     "Family and health": [
       ["Kids and youth", ["Kids Programs", "Bible games", "Youth and Pathfinders", "Pathfinder clubs", "Adventist summer camps"]],
       ["Marriage, family and money", ["Marriage and Family", "Abuse and safety", "Conflict and Reconciliation", "Money and Giving"]],
-      ["Health and food", "Health, SDA Recipes, Vegan Restaurants"],
+      ["Health and food", "Health, SDA Recipes"],
       ["Mental health, grief and stress", ["Mental health, stress and depression", "Stress, depression and anxiety", "Grief and loss", "Mental and emotional health", "Crisis and Mental Health"]],
       ["Adventist professionals", ["Adventist Professionals"]]],
     "Church help": [
-      ["Design, media and tech", "Graphics and Design, Video, Audio and Website Tools, Audio and Video Equipment"],
-      ["Printing and merch", "Printing and Event Supplies, Local Print and Copy Shops, Custom Apparel and Merch"],
-      ["Events and shipping", "Event Rentals, Mailing and Shipping"],
-      ["Nonprofit and community", ["Nonprofit Help", "Chambers of Commerce", "Minnesota chambers of commerce"]]],
+      ["Design, media and tech", "Graphics and Design, Video, Audio and Website Tools"],
+      ["Printing and event supplies", ["Printing and Event Supplies"]],
+      ["Nonprofit help", ["Nonprofit Help"]]],
+    "Local businesses": [   // 18 Nov 2026, Daniel "Sort mixed groups"
+      ["Print, apparel and mailing", "Local Print and Copy Shops, Custom Apparel and Merch, Mailing and Shipping"],
+      ["Event rentals and sound", "Event Rentals, Audio and Video Equipment"],
+      ["Vegan restaurants", ["Vegan Restaurants"]],
+      ["Chambers of commerce", ["Chambers of Commerce", "Minnesota chambers of commerce"]]],
     "Church office and tools": [
       ["Office and admin", ["Clerk, treasurer and legal", "Church software", "Discounts, licenses and equipment", "Books and Bibles in Bulk",
         "Nonprofit and Church Discounts", "Church Admin Templates", "Music and Video Licenses", "Translation and Listening Equipment"]],
