@@ -3286,12 +3286,23 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     {k: "addiction", re: /\b(addict\w*|drugs?|alcohol\w*|drinking|sober\w*|recovery)\b/i, title: "Addiction and recovery", words: "recovery addiction"},
     {k: "grief", re: /\b(grie\w*|died|death|funeral|passed away|widow\w*)\b/i, title: "Grief and loss", words: "grief"},
     {k: "job", re: /\b(jobs?|work|unemploy\w*|laid off)\b/i, title: "Work and jobs", words: "job employment"}];
-  function situation(raw) {
-    const hits = NEEDS.filter(n => n.re.test(raw)); if (!hits.length) return false;
+  // search v2 (17 Nov 2026 audit): the help plan takes over only for "someone in need" wording ("no food", "can't pay rent", "need a shelter",
+  // "near me", a town) or danger; a bare topic (funeral, grief, depression, food pantry, money) runs the normal search with one help link on top
+  const NEEDW = /\b(no|not enough|out of|without|can[’']?t|cannot|couldn[’']?t|unable|needs?|needing|needed|struggling|behind on|evicted|kicked out|lost (my|his|her|their|our)|someone|somebody|(my|our|a) (son|daughter|wife|husband|friend|neighbor|kids?|child|children|family|mom|dad|mother|father|brother|sister|member)|is (homeless|hungry|suicidal|being)|being (abused|evicted|hit))\b/i;
+  const needTopic = raw => NEEDS.filter(n => n.re.test(raw));
+  window.lpHelpHint = raw => {   // one small "help plan" link above the results (same pill look as the speaker names)
+    document.getElementById("lpHelpHint")?.remove(); const hits = needTopic(raw || ""); if (!hits.length || !S("tRows")) return;
+    const box = document.createElement("div"); box.id = "lpHelpHint"; box.className = "rbSpkHits";
+    box.innerHTML = `<span>Someone in need?<\/span><button type="button">Help plan: ${esc(hits.map(n => n.title).join(", "))}<\/button>`;
+    box.querySelector("button").onclick = () => situation(raw, true); S("tRows").before(box); };
+  function situation(raw, force) {
+    const hits = needTopic(raw); if (!hits.length) return false;
+    if (!force && !hits.some(n => n.k === "danger") && !(NEEDW.test(raw) || NEARME.test(raw) || placeIn(raw))) return false;
+    document.getElementById("lpHelpHint")?.remove();
     if (hits.some(n => n.k === "danger")) hits.splice(0, hits.length, ...hits.filter(n => n.k !== "mind"));
     const pi = placeIn(raw), c = pi ? pi.pl : centerNow(), rows = [], seen = new Set();
     if (!c && NEARME.test(raw)) { S("q").value = raw.replace(NEARME, " ").replace(/\s+/g, " ").trim(); askPlace(); return true; }
-    if (!ready(c)) { ensure(c).then(() => situation(raw)); return true; }   // that area's help places first, then the plan
+    if (!ready(c)) { ensure(c).then(() => situation(raw, force)); return true; }   // that area's help places first, then the plan
     // a state-only helper (like "South Carolina 211") shows only for that state
     const stOk = x => { const m = (x.n || "").toLowerCase().match(new RegExp(`^(${STRE})\\b`)); return !m || (c && STN[m[1]] === c.st); };
     const add = (title, items, fresh) => { const one = new Set(); items = items.filter(x => x && stOk(x) && !one.has(x.n) && one.add(x.n) && (!fresh || !seen.has(x.n))); items.forEach(x => seen.add(x.n)); if (items.length) rows.push({title, count: items.length, items}); };
@@ -3328,7 +3339,7 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     if ((SS.near === "me" || SS.near === "church") && !centerNow()) { ev.preventDefault(); ev.stopImmediatePropagation(); askPlace(); return; }   // never "everywhere" for a near-me search
     const c = centerNow(); if (!(SS.near === "auto" || SS.near === "me" || SS.near === "church" || SS.near === "other") || !c) return;
     ev.preventDefault(); ev.stopImmediatePropagation();
-    const run = () => { const r = compute(); window.lpMiles = SS.miles || 30; center = c; resultsPage(r.rows, c); };
+    const raw = S("q").value || "", run = () => { const r = compute(); window.lpMiles = SS.miles || 30; center = c; resultsPage(r.rows, c); window.lpHelpHint(raw); };
     if (ready(c)) run(); else ensure(c).then(run);
   }, true);
   // Map room: opening a state (or a town in it, or a region) loads that area's help places, then redraws the pins
@@ -4431,6 +4442,109 @@ function searchAdj(x, q) {
   st.textContent = ".tile:has(> .qdot) > small{padding-right:72px;box-sizing:border-box}";
   document.head.append(st);
   ITEMS.forEach(x => { if ((x.sets || []).includes("Vegan Restaurants") && !/\bfood\b/i.test(x.about || "")) x.about = (x.about || "") + " Vegan food."; });
+})();
+
+/* ---- search v2 (17 Nov 2026, from the search audit work/design/search_audit_2026-11-17) ----
+   Wraps search (like search_fix.js): names score on the name only (topic names count a little), stop words always drop,
+   a lighter stemmer, pastor synonyms, ranking by words matched with a side-by-side bonus and a Themes bonus, and shops
+   (print, apparel, rentals, mailing, AV ...) only when the query names a shop thing. The older search still runs after it
+   for its side effects (speaker name pills) and when v2 finds nothing. */
+(() => {
+  const _s = search;
+  const STOPW = new Set("a an the to of in on at by for with and or about how do does did i me my our we you your is are was were be am it its this that these those what where when who which can could should would start starting get find some any ideas idea good best use using want wants near please".split(" "));
+  // pastor words that mean the same thing (key: what is typed; value: other ways the list says it). One concept each.
+  const SYN = {
+    "vbs": ["vacation bible school"], "vacation bible school": ["vbs"],
+    "church planting": ["church plant", "church planter", "plant a church", "planting churches", "new church plant"],
+    "church plant": ["church planting", "church planter"], "plant a church": ["church planting", "church plant", "church planter"],
+    "funeral": ["memorial service", "funeral service"], "memorial service": ["funeral"],
+    "wedding": ["premarital", "marriage preparation", "marriage"],
+    "hospital visitation": ["chaplain", "chaplaincy", "visitation", "visiting the sick", "hospital ministry"],
+    "visiting the sick": ["chaplain", "chaplaincy", "visitation", "hospital visitation"],
+    "church board": ["board meeting", "business meeting", "church administration", "church manual"],
+    "board meeting": ["church board", "business meeting", "church administration", "church manual"], "board": ["church board", "board meeting", "business meeting"],
+    "budget": ["finance", "finances", "treasurer", "treasury"],
+    "youth": ["young people", "teens", "teen", "pathfinders"],
+    "depression": ["mental health"], "baptismal": ["baptism"],
+    "food pantry": ["food shelf", "food bank", "community services"], "food shelf": ["food pantry", "food bank", "community services"]};
+  const KEYN = {}; Object.keys(SYN).forEach(k => { KEYN[k.split(" ").filter(w => !STOPW.has(w)).join(" ")] = k; });   // "plant a church" is typed; stop words are gone by then
+  const SYNK = Object.keys(KEYN).sort((a, b) => b.split(" ").length - a.split(" ").length);
+  // local shops: shown for a topical query only when the query names what they sell
+  const SHOP = {"Local Print and Copy Shops": /print|copy|copies|banner|sign|flyer|poster|bulletin/, "Custom Apparel and Merch": /shirt|apparel|merch|embroid|screen|hat|hoodie|uniform|print/,
+    "Event Rentals": /rent|tent|chair|table|bounce|linen|decor|party|event/, "Mailing and Shipping": /ship|mail|postal|post office|ups|fedex|package|box/,
+    "Audio and Video Equipment": /projector|sound|audio|video|av\b|speaker|microphone|mic\b|light|camera|stream|screen|install/, "Spanish Translators": /translat|interpret|spanish|language/,
+    "Vegan Restaurants": /vegan|restaurant|vegetarian|plant.?based|food|eat|lunch|dinner/, "Chambers of Commerce": /chamber|commerce|business/};
+  const norm = s => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const toks = s => s.split(/[^a-z0-9]+/).filter(Boolean);
+  const stem = w => w.length > 4 && /ies$/.test(w) ? w.slice(0, -3) + "y" : w.length > 3 && /[^s]s$/.test(w) ? w.slice(0, -1) : w;   // plurals only: forgiveness stays, planting stays
+  const ed = (a, b, m) => { if (Math.abs(a.length - b.length) > m) return m + 1; let p = Array.from({length: b.length + 1}, (_, j) => j);
+    for (let i = 1; i <= a.length; i++) { const c = [i]; let lo = i; for (let j = 1; j <= b.length; j++) { c[j] = Math.min(p[j] + 1, c[j - 1] + 1, p[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); lo = Math.min(lo, c[j]); } if (lo > m) return m + 1; p = c; }
+    return p[b.length]; };
+  const wscore = (w, tk) => { let best = 0; const m = w.length >= 8 ? 2 : w.length >= 4 ? 1 : 0, typo = m && !(typeof realWord === "function" && realWord(w));
+    for (const k of tk) { if (k === w || stem(k) === w) return 10; if (w.length >= 3 && k.startsWith(w)) best = Math.max(best, 7); else if (w.length >= 5 && k.includes(w)) best = Math.max(best, 4);
+      else if (typo && best < 2 && k[0] === w[0] && ed(w, k.length > w.length + m ? k.slice(0, w.length) : k, m) <= m) best = 2; }
+    return best; };
+  const PRC = {}, phraseRe = ph => PRC[ph] || (PRC[ph] = new RegExp("\\b" + ph.split(" ").map(w => w.replace(/[^a-z0-9]/g, "")).join("(?:s|es|ing)?[^a-z0-9]+") + "(?:s|es|ing)?(?![a-z0-9-])"));   // "church plant" is not "church plant-based"
+  const PRE = new WeakMap();   // per item: lower-cased name, topic words, body text and Themes line, built once
+  const prep = (x, hay, cat) => { let r = PRE.get(x); if (r) return r; const nl = norm(x.n), hl = norm(hay), th = (hl.match(/themes?:([^.]*)/) || [])[1] || "";
+    r = {nl, nt: toks(nl), ct: toks(norm(cat)), hl, ht: toks(hl), tt: toks(th), th}; PRE.set(x, r); return r; };
+  function concepts(q) {   // the query as concepts: a synonym phrase or a single content word, each with its other wordings
+    let ws = toks(norm(q)).filter(w => w.length > 1 && !STOPW.has(w));
+    const out = []; let s = " " + ws.join(" ") + " ";
+    for (const k of SYNK) if (s.includes(" " + k + " ")) { s = s.replace(" " + k + " ", " "); out.push({alts: [KEYN[k], ...SYN[KEYN[k]]]}); }
+    toks(s).forEach(w => out.push({alts: [w, ...(SYN[w] || [])]}));
+    return {cs: out, ws}; }
+  function scoreOne(r, c) {   // best wording of one concept in one item: [name, body, themes, topic] points
+    let best = [0, 0, 0, 0, 0];
+    c.alts.forEach((a, i) => { const f = i ? 0.7 : 1; let v;   // the typed wording counts more than a synonym
+      if (a.includes(" ")) { const re = phraseRe(a); v = [re.test(r.nl) ? 12 : 0, re.test(r.hl) ? 10 : 0, re.test(r.th) ? 10 : 0, 0]; }
+      else { const w = stem(a); v = [wscore(w, r.nt), wscore(w, r.ht), r.tt.length ? wscore(w, r.tt) : 0, wscore(w, r.ct)]; }
+      v = v.map(n => n * f); const tot = v[0] * 3 + v[1] + v[2] + v[3] * 0.5;
+      if (tot > best[4]) best = [...v, tot]; });
+    return best; }
+  function rank(q) {
+    const {cs, ws} = concepts(q); if (!cs.length) return null;
+    const ql = norm(q), qf = flat(q), shopOk = s => SHOP[s] ? SHOP[s].test(ql) : true;
+    const pairs = ws.slice(1).map((w, i) => new RegExp("\\b" + ws[i] + "\\w*[^a-z0-9]+(?:[a-z]+[^a-z0-9]+)?" + w));   // side by side (one small word between is fine)
+    const cand = [], listed = new Set(ITEMS.map(x => flat(x.n) + "|" + flat(x.p)));
+    ITEMS.forEach(x => cand.push([x, prep(x, `${x.n} ${x.c} ${x.about} ${x.p} ${x.s} ${NAME[x.s] || ""}`, `${x.c} ${x.sets.join(" ")}`)]));
+    CH.forEach(y => { if (listed.has(flat(y.n) + "|" + flat(y.p))) return;
+      const x = {n: y.n, c: y.c || "Adventist church", line: `${[y.p, y.st].filter(Boolean).join(", ")}${y.svc ? " · " + y.svc : ""}`, about: "", pages: [], u: "", sets: ["Adventist churches"], place: y};
+      cand.push([x, prep(y, `${y.n} ${y.c} ${y.p} ${y.st} ${NAME[y.st] || ""} ${y.lang}`, "Adventist church")]); });
+    const hits = [], df = cs.map(() => 0);
+    for (const [x, r] of cand) {
+      const nf = flat(x.n), exact = nf === qf, inName = ws.length > 1 && qf.length > 3 && nf.includes(qf);   // a typed shop name ("budget party") still finds the shop
+      if (!exact && !inName && !shopOk(x.sets[0])) continue;
+      const bs = cs.map(c => { const b = scoreOne(r, c); return b[4] > 0 ? b[4] + (b[2] >= 7 ? 8 : 0) : 0; }), m = bs.filter(Boolean).length;   // +8: the word is one of its Themes
+      if (!m) continue; bs.forEach((b, i) => { if (b) df[i]++; });
+      let s = 0; pairs.forEach(re => { if (re.test(r.nl)) s += 25; else if (re.test(r.hl)) s += 12; });
+      if (x.place && x.place.p && q.toLowerCase().includes(x.place.p.toLowerCase())) s += 10;
+      s += exact ? 200 : inName ? 50 : 0; if (typeof searchAdj === "function") s += searchAdj(x, q);
+      hits.push([m, s, x, bs]); }
+    // a rare word counts more than a common one ("baptismal" over "class"); then rank by words matched, best score first
+    const idf = df.map(d => Math.min(4, Math.max(1, Math.log2(cand.length / (d + 1)) / 3)));
+    hits.forEach(h => { h[1] += h[3].reduce((a, b, i) => a + b * idf[i], 0); });
+    const full = hits.filter(h => h[0] === cs.length).length;
+    // with few full matches, the next-best (one word short) still show, below them
+    const need = cs.length < 2 || full >= 5 || (cs.length === 2 && full) ? cs.length : Math.max(1, cs.length - 1);   // two words: one-word matches only when nothing has both
+    const out = hits.filter(h => h[0] >= need || h[1] >= 200).sort((a, b) => b[0] - a[0] || b[1] - a[1]);
+    const nf = out.filter(h => h[0] >= cs.length || h[1] >= 200).length;   // one-word-short matches: the best 60 only, so "my youth are bored" is not 900 items
+    return out.slice(0, nf + 60).map(h => [h[1], h[2]]); }
+  window.searchV2Rank = rank;   // for the audit test (work/design/search_audit_2026-11-17)
+  search = function (q, pt) {
+    const raw = (q || "").trim(); let hits = null; try { hits = raw ? rank(raw) : null; } catch (e) { console.error("search v2", e); }
+    if (!hits || !hits.length) { const r = _s.apply(this, arguments); if (!pt.peek && typeof window.lpHelpHint === "function") window.lpHelpHint(raw); return r; }   // nothing (or only stop words): the older search and its backup
+    const list = hits.slice(0, pt.all ? hits.length : 400).map(h => h[1]);
+    const side = () => { try { _s.call(this, raw, Object.assign([], pt, {peek: () => null})); } catch (e) { console.error(e); } };   // speaker pills (rb.js) as before
+    if (pt.peek) { side(); return pt.peek(list, hits.length); }
+    const $ = id => document.getElementById(id); if ($("tq")) $("tq").value = raw;
+    const grp = new Map(); list.forEach(x => { const g = x.place ? "Adventist churches" : (x.sets && x.sets[0]) || x.c || "Other"; (grp.get(g) || grp.set(g, []).get(g)).push(x); });
+    if (grp.size > 1) { const rows = [...grp].map(([title, items]) => ({title, count: items.length, items}));
+      $("tEye").textContent = "Search"; $("tTitle").textContent = `“${raw}”`; $("tSub").textContent = `${fmt(hits.length)} found in ${rows.length} topics${hits.length > 400 ? "; showing the best 400" : ""}. Tap “See all” on a topic for its full list.`;
+      $("tChips").innerHTML = ""; $("tCards").innerHTML = ""; $("tFilt").hidden = true; $("tCarNav").hidden = true; $("tRows").hidden = false; rowsBlock($("tRows"), "g", rows); go("L-topic", `“${raw}”`, pt); }
+    else openList("Search", `“${raw}”`, `${fmt(hits.length)} found${hits.length > 400 ? "; showing the best 400" : ""}. Churches open on their own map page.`, [], list, pt);
+    side(); if (typeof window.lpHelpHint === "function") window.lpHelpHint(raw);
+  };
 })();
 
 /* Screenshot harness: only runs when the page is opened with #shot=NAME (used to take real pictures of the real app for the welcome tour). Never runs for visitors. */
