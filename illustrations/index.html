@@ -1372,8 +1372,26 @@ function startRows(){if(!pcCar())return;document.querySelectorAll(".rowwrap .row
   const it=its[Math.min(2,its.length-1)];r.scrollLeft=it.offsetLeft-r.offsetLeft+it.offsetWidth/2-r.clientWidth/2;setHot(r)})}
 {const _render=render;render=function(){const o=_render.apply(this,arguments);requestAnimationFrame(startRows);return o}}
 requestAnimationFrame(startRows);
+// search audit v3 (18 Nov 2026): words, not one string. Stop words out, plurals, a few synonyms, most words matched first;
+// one typo (5+ letters) only for a word nothing has as typed ("sabath", "forgivness"). Same core as Serve's search (serve_v18.html).
+function wsearch(items,q,fields,SYN,STOP){
+  const stem=w=>w.length<4?w:w.replace(/ies$/,"y").replace(/(ch|sh|x|ss)es$/,"$1").replace(/([^su])s$/,"$1");
+  const ws=q.toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g,"").replace(/'s\b|['’]/g,"").split(/[^a-z0-9]+/).filter(w=>w&&!STOP.has(w)).map(stem);if(!ws.length)return null;
+  const ed1=(a,b)=>{if(Math.abs(a.length-b.length)>1||a===b)return a===b;let i=0;while(a[i]===b[i])i++;
+    return a.length===b.length?a.slice(i+1)===b.slice(i+1)||(a[i]===b[i+1]&&a[i+1]===b[i]&&a.slice(i+2)===b.slice(i+2)):a.length>b.length?a.slice(i+1)===b.slice(i):a.slice(i)===b.slice(i+1)};
+  const F=x=>x._wf||(x._wf=fields(x).map(([s,w])=>{s=String(s||"").toLowerCase();return [s,new Set(s.split(/[^a-z0-9]+/).filter(Boolean).map(stem)),w]}));
+  const hit=(f,a,fz)=>a.includes(" ")?f[0].includes(a):f[1].has(a)||[...f[1]].some(t=>(a.length>=4&&t.startsWith(a))||(fz&&a.length>=5&&ed1(a,t)));
+  const gs=ws.map(w=>{const g=[w,...(SYN[w]||[])];return [g,!items.some(x=>F(x).some(f=>g.some(a=>hit(f,a,false))))]}),ql=q.toLowerCase().trim();
+  return items.map(x=>{let m=0,sc=0;for(const [g,fz] of gs){let b=0;for(const f of F(x)){const k=f[2]>b?g.findIndex(a=>hit(f,a,fz)):-1;if(k>=0)b=Math.max(b,f[2]*(k?.6:1))}if(b){m++;sc+=b}}
+    if(ws.length>1&&F(x).some(f=>f[0].includes(ql)))sc+=50;return [m*100+sc,m,x]}).filter(a=>a[1]).sort((a,b)=>b[0]-a[0]).map(a=>a[2])}
+const ILSTOP=new Set("a an the about for in on of near me my story stories with and or to is are your our you i we that this find show illustration illustrations".split(" "));
+const ILSYN={forgiveness:["forgiv","forgave","pardon"],forgive:["forgiv","forgave","pardon"],forgiving:["forgiv","forgave","pardon"],pardon:["forgiv","forgave"],
+  prayer:["pray"],pray:["prayer"],praying:["pray"],faith:["trust","believ"],trust:["faith"],kid:["child","children","boy","girl"],child:["kid","children","boy","girl"],children:["child","kid","boy","girl"],
+  china:["chinese"],tithe:["tithing","offering","stewardship"],tithing:["tithe","offering","stewardship"],giving:["tithe","offering","generos"],honesty:["honest","integrity","truth"],
+  temptation:["tempt"],tempted:["tempt"],healing:["heal"],death:["die","dead","died","funeral","grief"],hard:["hardship","trial","difficult","struggl","suffer"],
+  enemy:["persecut","forgiv"],coming:["return","advent"],missionary:["mission"],grief:["death","loss","mourn"]};
 function results(){const q=(state.q||"").trim().toLowerCase();if(!q)return `<p class="empty">Type a word like forgiveness, courage or prayer.</p>`;
-  const r=ITEMS.filter(x=>(x.t+" "+x.gist+" "+x.themes+" "+x.lesson).toLowerCase().includes(q));
+  const r=wsearch(ITEMS,q,x=>[[x.t,3],[x.themes,2.5],[x.lesson,1.5],[x.gist,1],[SRC[x.k].one+(x.kids?" children kids child":""),1],[x.by,1]],ILSYN,ILSTOP)||[];
   // 17 Nov 2026 (Daniel): an obvious way back to the whole page after a search
   const back=`<a class="backall" href="#home" onclick="state.q=''">‹ Back to all illustrations</a>`;
   return back+(r.length?`<p class="shelf-note">${r.length} found for “${esc(state.q)}”</p><div class="list">${r.map(row).join("")}</div>`:`<p class="empty">Nothing found for “${esc(state.q)}”. Try another word.</p>`)}

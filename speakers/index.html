@@ -1023,7 +1023,7 @@ const last = x => x.n.trim().split(/\s+/).pop();
 const richness = x => !!x.yt + !!x.av + !!x.web + !!x.acm + !!x.book + (x.c.length ? 1 : 0) + Math.min(x.rec || 0, 300) / 100 - (x.status === "historical" ? 1 : 0);
 // what a search can find: name, ministry, role, short bio and summary, topics, place (city, state, union)
 D.forEach((x, i) => { x.id = i; x.st = x.st || ""; const c = code(x), u = unionOf(c);
-  x.f = flat([x.n, x.min, x.role, x.bio, x.sum, x.c.map(k => CATS[k]).join(" "), x.st, c && NAMES[c], u && u + " union"].filter(Boolean).join(" ")); x.nf = flat(x.n);
+  x.f = flat([x.n, x.min, x.role, x.bio, x.sum, x.c.map(k => CATS[k]).join(" "), x.st, c && NAMES[c], c, u && u + " union"].filter(Boolean).join(" ")); x.nf = flat(x.n);
   // search test round 2 (16 Nov 2026): Spanish, joined names ("ThrashTrumbo"), and a speaker's own topic, state or union outranks a bio word
   const sp = x.c.includes("SP") ? " spanish speaking espanol en hispanic latino" : ""; x.f += sp + (x.n.includes("-") ? " " + flat(x.n.replace(/-/g, "")) : "");
   x.tg = " " + flat(x.c.map(k => CATS[k]).filter(Boolean).join(" ") + (c ? ` ${NAMES[c]} ${c} ${u} union` : "") + sp) + " ";
@@ -1032,9 +1032,21 @@ let saved = new Set(); try { saved = new Set(JSON.parse(lsGet("prl-kit-speakers"
 const st = {q: "", cat: "", state: "", o: {}, shown: 24, sort: "best"};
 const ed = (a, b) => { let p = Array.from({length: b.length + 1}, (_, j) => j); for (let i = 1; i <= a.length; i++) { const c = [i]; for (let j = 1; j <= b.length; j++) c[j] = Math.min(p[j] + 1, c[j - 1] + 1, p[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); p = c; } return p[b.length]; };
 // a word that matches the speaker's own name counts more than the same word in their summary (live had no summary in search)
-function score(x, words, qf) { let s = x.nf === qf ? 200 : x.nf.includes(qf) && qf.length > 3 ? 80 : 0; const nt = x.nf.split(" "), tk = [...nt, ...x.f.split(" ")];
-  for (const w of words) { let b = 0; for (const [i, k] of tk.entries()) { const nb = i < nt.length ? 5 : 0; if (k === w) { b = Math.max(b, 10 + nb); continue; } if (k.startsWith(w)) b = Math.max(b, 7 + nb); else if (w.length >= 4 && Math.abs(k.length - w.length) <= 2 && ed(w, k) <= (w.length >= 7 ? 2 : 1)) b = Math.max(b, 4 + nb); }
-    if (!b) return -1; s += b; } return s + (x.tq.includes(qf) ? 40 : 0) + 8 * words.filter(w => x.tg.includes(" " + w + " ")).length; }
+// search audit v3 (18 Nov 2026): a speaker no longer needs every word ("health speaker in Minnesota"); most words matched ranks first.
+// Each word is a group: the word plus its synonyms (SSYN). Language/people words never match by typo ("hmong" is not "Huong").
+const SSTOP = new Set("a an the for in on of near me my about who can could to and or with at from speaker speakers preacher preachers preach preaching talk talks someone somebody find need want is are that i we us our some good".split(" "));
+const NOFUZZ = new Set("hmong spanish english korean chinese french russian romanian filipino tagalog portuguese brazilian haitian creole german ukrainian samoan tongan karen lao laotian vietnamese japanese indian african arabic swahili".split(" "));
+const SSYN = {marriage: ["family", "married", "couple"], married: ["marriage", "family"], couple: ["marriage", "family"], women: ["woman"], woman: ["women"], ladies: ["women", "woman"],
+  kids: ["family", "children", "child", "youth"], kid: ["family", "children", "child", "youth"], children: ["family", "kids", "child", "youth"], child: ["family", "kids", "children", "youth"], childrens: ["children", "kids", "child"],
+  teen: ["youth"], teens: ["youth"], young: ["youth"], prophesy: ["prophecy", "prophetic"], prophecy: ["prophetic"], prophecies: ["prophecy", "prophetic"], end: ["prophecy", "revelation"],
+  evangelist: ["evangelism", "evangelistic"], evangelists: ["evangelism", "evangelistic", "evangelist"], evangelism: ["evangelist", "evangelistic"], egw: ["ellen", "heritage"],
+  money: ["stewardship", "finance"], tithe: ["stewardship"], tithing: ["stewardship"], finances: ["stewardship", "finance"], prayer: ["revival", "pray"], pray: ["prayer", "revival"],
+  spanish: ["espanol", "hispanic", "latino"], hispanic: ["spanish"], latino: ["spanish"], science: ["creation"], creation: ["science"], liberty: ["religious"], freedom: ["liberty"],
+  diet: ["health", "nutrition"], nutrition: ["health"], wellness: ["health"], healthy: ["health"], doctor: ["health", "physician", "medical"], medical: ["health"], bible: ["scripture"], history: ["heritage"], pioneers: ["heritage"]};
+function score(x, groups, qf) { let s = x.nf === qf ? 200 : x.nf.includes(qf) && qf.length > 3 ? 80 : 0, m = 0; const nt = x.nf.split(" "), tk = [...nt, ...x.f.split(" ")];
+  for (const g of groups) { let b = 0; if (g.st) { const c = code(x); b = c === g.st ? 12 : c && unionOf(c) === unionOf(g.st) ? 6 : (" " + x.f + " ").includes(" " + g.join(" ") + " ") ? 7 : 0; }   // a named state: its speakers, its union's, then a mention
+    else for (const w of g) for (const [i, k] of tk.entries()) { const nb = i < nt.length ? 5 : 0; if (k === w) { b = Math.max(b, 10 + nb); continue; } if (k.startsWith(w)) b = Math.max(b, 7 + nb); else if (w.length >= 4 && !NOFUZZ.has(w) && Math.abs(k.length - w.length) <= 2 && ed(w, k) <= (w.length >= 7 ? 2 : 1)) b = Math.max(b, 4 + nb); }
+    if (b) { m++; s += b; } } if (!m) return -1; return m * 1000 + s + (x.tq.includes(qf) ? 40 : 0) + 8 * groups.filter(g => g.some(w => x.tg.includes(" " + w + " "))).length; }
 const stMatch = x => { const v = st.state || "", c = code(x); return v.startsWith("U:") ? !!c && unionOf(c) === v.slice(2) : v.startsWith("S:") ? c === v.slice(2) : x.st === v; };
 const inSec = (x, k) => k === "NONE" ? !x.c.length : k === "YT" ? !!x.yt : x.c.includes(k);
 const SECNAME = k => ({NONE: "More speakers on AudioVerse", YT: "Speakers with video"})[k] || CATS[k];
@@ -1043,8 +1055,13 @@ const SECNAME = k => ({NONE: "More speakers on AudioVerse", YT: "Speakers with v
 const passes = (x, skip) => (skip === "cat" || !st.cat || inSec(x, st.cat)) && (skip === "state" || !st.state || stMatch(x))
   && (!st.o.yt || x.yt) && (!st.o.wo || x.c.includes("WO")) && (!st.o.sp || x.c.includes("SP")) && (!st.o.cur || x.status === "active" || x.status === "current") && (!st.o.adv || x.adv === "confirmed") && (!st.o.inv || (x.status !== "deceased" && !!(x.book || x.email || x.phone || x.church)));
 function ranked(pool) {
-  const words = flat(st.q).split(" ").filter(w => w.length > 1), qf = flat(st.q);
-  let r = words.length ? pool.map(x => [score(x, words, qf), x]).filter(a => a[0] >= 0).sort((a, b) => b[0] - a[0] || richness(b[1]) - richness(a[1])).map(a => a[1])
+  let words = flat(st.q).split(" ").filter(w => w.length > 1 && !SSTOP.has(w)); const qf = flat(st.q), places = [];
+  // a state by name, two-word name, code ("MN") or one slip ("Minnesta") becomes a place group: that state first, then its union
+  for (let i = 0; i < words.length; i++) for (const n of [2, 1]) { const g = words.slice(i, i + n).join(" "); if (n === 2 && i + 1 >= words.length) continue;
+    const c = byName[g] || (g.length === 2 && NAMES[g.toUpperCase()] ? g.toUpperCase() : "") || (g.length >= 5 && byName[Object.keys(byName).find(k => Math.abs(k.length - g.length) <= 1 && ed(g, k) <= (k.length >= 8 ? 2 : 1))]) || "";
+    if (c) { const grp = [...words.slice(i, i + n)]; grp.st = c; places.push(grp); words.splice(i, n); i--; break; } }
+  const groups = [...words.map(w => [w, ...(SSYN[w] || [])]), ...places]; words = [...words, ...places.flat()];
+  let r = words.length ? pool.map(x => [score(x, groups, qf), x]).filter(a => a[0] >= 0).sort((a, b) => b[0] - a[0] || richness(b[1]) - richness(a[1])).map(a => a[1])
     : st.sort === "az" ? pool.sort((a, b) => last(a).localeCompare(last(b))) : pool.sort((a, b) => richness(b) - richness(a) || last(a).localeCompare(last(b)));
   return r;
 }

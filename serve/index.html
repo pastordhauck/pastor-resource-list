@@ -1353,12 +1353,32 @@ renderTell();
   function rfRow(p){const vol=p.v==='yes',tel=(p.ph||'').replace(/[^0-9+]/g,'');
    return `<article class="rf-row"><div class="rf-pic" aria-hidden="true">${esc(ini(p.n))}</div><div class="rf-main"><div class="rf-k">${esc((p.k||[]).map(i=>KINDS[i]).join(' · '))} · ${p._d<1?'under 1 mi':Math.round(p._d)+' mi'}</div><h3>${esc(p.n)}</h3><p>${esc(p.h)}</p><p class="rf-where">${esc(p.t)}, ${esc(p.s)}${p.ph?' · <span class="rf-ph">'+esc(p.ph)+'</span>':''}</p><span class="rf-badge ${vol?'yes':''}">${vol?'Volunteers wanted':'Call to ask about volunteering'}</span></div>`+
     `<div class="rf-acts"><button type="button" class="save-btn" data-save="${p.id}">+ Add to kit</button>${p.u?`<a class="save-btn" href="${esc(p.u)}" target="_blank" rel="noopener">Website ↗</a>`:''}${tel?`<a class="save-btn" href="tel:${tel}">Call</a>`:''}</div></article>`}
+  // search audit v3: the same word-search core as the Illustrations tab (library_ssstyle/src.html)
+  function wsearch(items,q,fields,SYN,STOP){
+    const stem=w=>w.length<4?w:w.replace(/ies$/,"y").replace(/(ch|sh|x|ss)es$/,"$1").replace(/([^su])s$/,"$1");
+    const ws=q.toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g,"").replace(/'s\b|['’]/g,"").split(/[^a-z0-9]+/).filter(w=>w&&!STOP.has(w)).map(stem);if(!ws.length)return null;
+    const ed1=(a,b)=>{if(Math.abs(a.length-b.length)>1||a===b)return a===b;let i=0;while(a[i]===b[i])i++;
+      return a.length===b.length?a.slice(i+1)===b.slice(i+1)||(a[i]===b[i+1]&&a[i+1]===b[i]&&a.slice(i+2)===b.slice(i+2)):a.length>b.length?a.slice(i+1)===b.slice(i):a.slice(i)===b.slice(i+1)};
+    const F=x=>x._wf||(x._wf=fields(x).map(([s,w])=>{s=String(s||"").toLowerCase();return [s,new Set(s.split(/[^a-z0-9]+/).filter(Boolean).map(stem)),w]}));
+    const hit=(f,a,fz)=>a.includes(" ")?f[0].includes(a):f[1].has(a)||[...f[1]].some(t=>(a.length>=4&&t.startsWith(a))||(fz&&a.length>=5&&ed1(a,t)));
+    const gs=ws.map(w=>{const g=[w,...(SYN[w]||[])];return [g,!items.some(x=>F(x).some(f=>g.some(a=>hit(f,a,false))))]}),ql=q.toLowerCase().trim();
+    return items.map(x=>{let m=0,sc=0;for(const [g,fz] of gs){let b=0;for(const f of F(x)){const k=f[2]>b?g.findIndex(a=>hit(f,a,fz)):-1;if(k>=0)b=Math.max(b,f[2]*(k?.6:1))}if(b){m++;sc+=b}}
+      if(ws.length>1&&F(x).some(f=>f[0].includes(ql)))sc+=50;return [m*100+sc,m,x]}).filter(a=>a[1]).sort((a,b)=>b[0]-a[0]).map(a=>a[2])}
+  const SVSTOP=new Set("a an the for in on of near me my help helping place places to and or with find get need needs i we us around by close".split(" "));
+  const SVSYN={pantry:["shelf","food bank","cupboard","grocer"],bank:["pantry","shelf"],shelf:["pantry","food bank"],shelve:["shelf","pantry","food bank"],
+   soup:["meal","kitchen","dinner","supper","lunch"],kitchen:["meal","soup","dinner","supper"],meal:["dinner","soup","lunch","supper","kitchen"],
+   homeless:["shelter","housing"],shelter:["housing","homeless"],housing:["shelter","homeless"],clothe:["clothing","closet","thrift","coat"],clothing:["clothes","closet","thrift","coat"],
+   rent:["bill","utilit","energy","financial"],bill:["rent","utilit","energy","financial"],utility:["utilit","energy","bill"],
+   tutoring:["tutor","homework","kid","youth","after-school","school"],tutor:["tutoring","homework","kid","youth"],homework:["tutor","kid","youth"],kid:["child","youth","famil"],child:["kid","youth","famil"],children:["child","kid","youth","famil"],
+   nursing:["senior","elder","aging","assisted"],senior:["elder","aging"],elderly:["senior","aging"],doctor:["clinic","health","medical"],medical:["clinic","health"],dentist:["dental"],grocery:["food","grocer"],groceries:["food","grocer"]};
   function rfDraw(){rfX=0;const cross=!!($('#rfCross')&&$('#rfCross').checked),q=($('#keyword').value||'').toLowerCase().split(/\s+/).filter(Boolean),r=+$('#radius').value||25,vol=$('#rfVol').checked;
    if(!center){data.length=0;render();rfTexts(0,r);return}
-   lastRows=PL.map(p=>{p._d=mi(center.ll,[p.lat,p.lon]);return p}).filter(p=>p._d<=r&&(kindSel<0||(p.k||[]).includes(kindSel))&&(!vol||p.v==='yes')&&(!q.length||q.every(w=>(p.n+' '+p.h+' '+(p.k||[]).map(i=>KINDS[i]).join(' ')).toLowerCase().includes(w.replace(/s$/,''))))&&(cross||p.s===homeSt()||(rfX++,false))).sort((a,b)=>a._d-b._d).slice(0,400);
+   // search audit v3 (18 Nov 2026): words ranked by how many match (nearest first among equals), synonyms ("pantry" = food shelf), plurals, one typo
+   const near=PL.map(p=>{p._d=mi(center.ll,[p.lat,p.lon]);return p}).filter(p=>p._d<=r&&(kindSel<0||(p.k||[]).includes(kindSel))&&(!vol||p.v==='yes')).sort((a,b)=>a._d-b._d);
+   lastRows=(q.length&&wsearch(near,$('#keyword').value,p=>[[p.n,3],[p.h,2],[(p.k||[]).map(i=>KINDS[i]).join(' '),2]],SVSYN,SVSTOP)||near).filter(p=>cross||p.s===homeSt()||(rfX++,false)).slice(0,400);
    const cos=Math.cos(center.ll[0]*Math.PI/180);data.length=0;
    lastRows.forEach(p=>{const dx=(p.lon-center.ll[1])*69*cos,dy=(p.lat-center.ll[0])*69,kinds=(p.k||[]).map(i=>KINDS[i]),v=p.v==='yes';
-    data.push({id:p.id,title:p.n,tile:ini(p.n),day:null,time:p.ph?'Call '+p.ph:'Call before you go',distance:Math.max(1,Math.round(p._d)),by:kinds.join(' · '),place:p.t+', '+p.s,
+    data.push({id:p.id,rank:data.length,title:p.n,tile:ini(p.n),day:null,time:p.ph?'Call '+p.ph:'Call before you go',distance:Math.max(1,Math.round(p._d)),by:kinds.join(' · '),place:p.t+', '+p.s,
      summary:`${(p.h||'').charAt(0).toUpperCase()+(p.h||'').slice(1)}. ${v?'Volunteers wanted.':'Call to ask about volunteering.'}`,kinds:p.k||[],who:[],when:'ongoing',what:'',duration:'',tags:[...kinds.slice(0,2),v?'Volunteers wanted':'Call to ask'],
      x:Math.max(6,Math.min(94,50+dx/r*28.75)),y:Math.max(8,Math.min(92,50-dy/r*26.5)),url:p.u||'',remote:false})});
    state.radius=r;state.town=center.label;state.q='';state.sort='distance';state.showAll=false;
@@ -1366,7 +1386,7 @@ renderTell();
    render();if(window.rfPartners)rfPartners();if(typeof updateKitButtons==='function')updateKitButtons()}
   let rfX=0;const homeSt=()=>center?(center.label.match(/,\s*([A-Z]{2})\s*$/)||[])[1]||'':'';
   function rfTexts(n,r){const town=center?center.label:'';
-   st.innerHTML=center?(n?`${n} ${n===1?'place':'places'} within ${r} miles of ${town}${$('#rfVol').checked?', volunteers wanted':''}${$('#rfCross').checked?', any state':', in this state only'}. Nearest first.${!$('#rfCross').checked&&rfX?` <button type="button" class="tclear" data-cross>${rfX} more across the state line · Show them</button>`:''}`:`Nothing within ${r} miles of ${town} yet. Try a larger distance, fewer words, or a bigger town nearby.`):'';
+   st.innerHTML=center?(n?`${n} ${n===1?'place':'places'} within ${r} miles of ${town}${$('#rfVol').checked?', volunteers wanted':''}${$('#rfCross').checked?', any state':', in this state only'}. ${$('#keyword').value.trim()?'Best matches first, then nearest.':'Nearest first.'}${!$('#rfCross').checked&&rfX?` <button type="button" class="tclear" data-cross>${rfX} more across the state line · Show them</button>`:''}`:`Nothing within ${r} miles of ${town} yet. Try a larger distance, fewer words, or a bigger town nearby.`):'';
    const rc=$('#resultCount');if(rc)rc.textContent=center?`${n} ${n===1?'place':'places'} · within ${r} mi of ${town}`:'Type your town above to see real places near you.';
    const at=$('#agendaTitle');if(at)at.textContent='This week, near you.';const as=$('#agendaSubtitle');if(as)as.textContent='Places near you that welcome help this week. Call first for days and times.';
    const mt=$('#mapTown');if(mt)mt.textContent=center?`Around ${town}`:'Type your town above';const ms=$('#mapSvgTown');if(ms)ms.textContent=(center?town.split(',')[0]:'YOUR TOWN').toUpperCase();
@@ -1402,7 +1422,7 @@ renderTell();
   const WHAT={food:[0,3],practical:[1,2,5,6],visiting:[4]};
   const realOk=d=>(!state.q||[d.title,d.summary,d.by,...d.tags].join(' ').toLowerCase().includes(state.q))&&(d.remote||d.distance<=state.radius)&&(!state.what.length||state.what.some(w=>(d.kinds||[]).some(i=>(WHAT[w]||[]).includes(i))));
   const _ma=matchingAll,_m=matching;
-  matchingAll=function(){return center?data.filter(realOk).sort((a,b)=>state.sort==='title'?a.title.localeCompare(b.title):a.distance-b.distance):_ma()};
+  matchingAll=function(){return center?data.filter(realOk).sort((a,b)=>state.sort==='title'?a.title.localeCompare(b.title):a.rank-b.rank):_ma()};
   matching=function(){return center?matchingAll():_m()};
   const _ra=renderAgenda;renderAgenda=function(items){if(!center)return _ra(items);const v=state.view,dy=state.day;state.view='ongoing';state.day=null;_ra(items);state.view=v;state.day=dy;
    const at=$('#agendaTitle');if(at)at.textContent=dy!==null?`${days[dy]}, near you.`:v==='weekends'?'Make the weekend matter.':'This week, near you.';
