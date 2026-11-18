@@ -888,7 +888,7 @@ $('#refineToggle').onclick=()=>{const w=$('#filterWrap');w.hidden=!w.hidden;$('#
 function updateFollow(){const m=$('#mapShell').getBoundingClientRect();$('#followPanel').hidden=!(!$('#sub-find').hidden&&m.height>0&&m.top<40)}
 addEventListener('scroll',updateFollow,{passive:true});
 $('#followMapBtn').onclick=()=>$('#mapSection').scrollIntoView({block:'start'});
-$('#followSearch').oninput=()=>{state.q=$('#followSearch').value.trim().toLowerCase();$('#keyword').value=$('#followSearch').value;render()};
+$('#followSearch').oninput=()=>{$('#keyword').value=$('#followSearch').value;$('#keyword').dispatchEvent(new Event('input'))};$('#followSearch').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('#followSearch').blur()}};
 $('#keyword').addEventListener('input',()=>{$('#followSearch').value=$('#keyword').value});
 placePins();updateKitButtons();
 $$('[data-wk]').forEach(b=>b.onclick=()=>setWeek(+b.dataset.wk));$$('[data-wkstep]').forEach(b=>b.onclick=()=>setWeek(wk+ +b.dataset.wkstep));$('[data-wkstep="-1"]').disabled=true;
@@ -1015,16 +1015,17 @@ renderTell();
  const WHERE={home:'At home',neighborhood:'In your neighborhood',church:'At church',community:'In the community',online:'Online'};
  const row=x=>`<article class="listing rlist" data-rgo="${x.id}"><div class="listing-tile lpic" aria-hidden="true">${pic(x)}</div><div><h3>${esc(x.t)}</h3><div class="meta">${esc(cap(x.time))} · ${esc(WHO[x.who]||x.who)}<br><span class="gold">${esc(WHERE[x.where]||x.where)}</span></div><div class="byline">What you need: ${esc(x.need)}</div><div class="tags"><span>${esc(cap(x.kind))}</span><span>${esc(x.src)}</span></div></div><div class="listing-summary">${steps(x)}<div class="ractions">${acts(x)}</div></div></article>`;
  // search test round 2 (16 Nov 2026): every word must match, as a word, a plural, a typo (1 letter, 2 for long words) or a related word
- const RCSYN={homeless:'shelter unhoused housing',christmas:'holiday holidays advent',hospital:'nursing sick patients shut',prison:'jail inmate prisoners incarcerated',widows:'grief widow widowed alone',widow:'grief widowed alone',moms:'parent parents mothers single',mom:'parent parents mother single',single:'parent single',refugees:'newcomer newcomers immigrant immigrants cultures',refugee:'newcomer immigrant cultures',neighbours:'neighbor neighbors',neighbour:'neighbor',kids:'children child youth',elderly:'seniors senior shut-in',seniors:'senior elderly older',teens:'youth teen'};
+ const RCSYN={homeless:'shelter unhoused housing',christmas:'holiday holidays advent',hospital:'nursing sick patients shut',prison:'jail inmate prisoners incarcerated',widows:'grief widow widowed alone',widow:'grief widowed alone',moms:'parent parents mothers single',mom:'parent parents mother single',single:'parent single',refugees:'newcomer newcomers immigrant immigrants cultures',refugee:'newcomer immigrant cultures',neighbours:'neighbor neighbors',neighbour:'neighbor',kids:'children child youth',elderly:'seniors senior shut-in',seniors:'senior elderly older',teens:'youth teen',sick:'hospital nursing ill patients shut-in',clothes:'clothing coat coats closet',food:'meal meals soup pantry potluck groceries bread',disaster:'relief emergency flood storm',tutoring:'tutor homework'};
+ const RCSTOP=new Set('the a an and or for to of in on with my me near help helping ways way'.split(' '));
  const rcLev=(a,b)=>{let p=[...Array(b.length+1).keys()];for(let i=1;i<=a.length;i++){const q=[i];for(let j=1;j<=b.length;j++)q[j]=Math.min(p[j]+1,q[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=q}return p[b.length]};
  function rcMatch(x,q){const tk=(x._tk=x._tk||(x.t+' '+x.need+' '+x.steps.join(' ')+' '+x.kind+' '+x.who+' '+x.where).toLowerCase().split(/[^a-z0-9]+/).filter(Boolean));
   const st=w=>w.length>4?w.replace(/(ies)$/,'y').replace(/s$/,''):w;
   const hit=(w,e)=>{const s=st(w);return tk.some(k=>k===w||st(k)===s||(s.length>3&&k.startsWith(s))||(!e&&w.length>=5&&Math.abs(k.length-w.length)<=2&&rcLev(w,k)<=(w.length>=8?2:1)))};
   const syn=w=>{if(RCSYN[w])return RCSYN[w];const k=Object.keys(RCSYN).find(s=>s.length>=5&&rcLev(s,w)<=(w.length>=8?2:1));return k?RCSYN[k]:''};
-  return q.toLowerCase().split(/[^a-z0-9]+/).filter(w=>w.length>1).every(w=>hit(w)||syn(w).split(' ').some(v=>hit(v,1)))}
+  const ws=q.toLowerCase().split(/[^a-z0-9]+/).filter(w=>w.length>1);return (ws.some(w=>!RCSTOP.has(w))?ws.filter(w=>!RCSTOP.has(w)):ws).every(w=>hit(w)||syn(w).split(' ').some(v=>hit(v,1)))}
  function draw(){const q=$('#rcQ').value.toLowerCase().trim(),f=[['time','#rcTime'],['who','#rcWho'],['where','#rcWhere'],['kind','#rcKind']].map(([k,s])=>[k,$(s).value]);
   const L=RECIPES.filter(x=>(!window.rcExtra||window.rcExtra(x))&&f.every(([k,v])=>!v||x[k]===v)&&(!q||rcMatch(x,q)));
-  $('#rcCount').textContent=L.length?`${L.length} recipe${L.length===1?'':'s'}`:'No recipes match. Try fewer filters.';
+  $('#rcCount').textContent=L.length?`${L.length} recipe${L.length===1?'':'s'}`:(q?'No recipes match “'+q+'”. Try another word, like food, seniors or prayer, or fewer filters.':'No recipes match. Try fewer filters.');
   // sections by kind with big headings, the same in every view (like the Resources page)
   const g={};L.forEach(x=>(g[x.kind]=g[x.kind]||[]).push(x));
   $('#rcGrid').innerHTML=Object.keys(g).sort((a,b)=>g[b].length-g[a].length||a.localeCompare(b)).map(k=>`<section class="rsec"><div class="rsechw"><h3 class="rsech">${esc(cap(k))} <small>${g[k].length}</small></h3>${rv==='car'&&Object.keys(g).length>1?`<button type="button" class="rseeall" data-seeall="${esc(k)}">See all ${g[k].length} →</button>`:''}</div>`+
@@ -1371,6 +1372,9 @@ renderTell();
    rent:["bill","utilit","energy","financial"],bill:["rent","utilit","energy","financial"],utility:["utilit","energy","bill"],
    tutoring:["tutor","homework","kid","youth","after-school","school"],tutor:["tutoring","homework","kid","youth"],homework:["tutor","kid","youth"],kid:["child","youth","famil"],child:["kid","youth","famil"],children:["child","kid","youth","famil"],
    nursing:["senior","elder","aging","assisted"],senior:["elder","aging"],elderly:["senior","aging"],doctor:["clinic","health","medical"],medical:["clinic","health"],dentist:["dental"],grocery:["food","grocer"],groceries:["food","grocer"]};
+  // Daniel, 18 Nov 2026: "i type food and nothing is up". With no town, the What word shows ideas and national programs (time-rows block below)
+  const IDSYN={...SVSYN,food:['meal','soup','pantry','potluck','grocer','bread','hunger'],prayer:['pray'],pray:['prayer'],senior:['elder','aging','nursing','shut'],sick:['hospital','nursing','ill','patient','shut'],disaster:['relief','emergency','flood','storm'],clothe:['clothing','closet','coat','blanket'],homeless:['shelter','housing','hygiene','without home']};
+  window.svFind=(items,q,f)=>wsearch(items,q,f,IDSYN,SVSTOP)||[];
   function rfDraw(){rfX=0;const cross=!!($('#rfCross')&&$('#rfCross').checked),q=($('#keyword').value||'').toLowerCase().split(/\s+/).filter(Boolean),r=+$('#radius').value||25,vol=$('#rfVol').checked;
    if(!center){data.length=0;render();rfTexts(0,r);return}
    // search audit v3 (18 Nov 2026): words ranked by how many match (nearest first among equals), synonyms ("pantry" = food shelf), plurals, one typo
@@ -1398,7 +1402,8 @@ renderTell();
    // Daniel, 12 Nov 2026: he typed "Windom" in the first (What) box and nothing happened. If the town box is empty and the What box holds
    // a town name (exact, or a sound-alike in the user's own state), move it to the town box (a search needs a town anyway).
    if(!q){const kw=$('#keyword').value.trim();if(kw){try{await ready();const tk=rfFindTown(kw,1);if(tk){$('#keyword').value='';q=kw;$('#location').value=kw}}catch{}}}
-   if(!q){st.textContent='Type your town and state, like Windom, MN, or tap Near me.';return}
+   const sv=q?'':savedTown();if(sv&&!sv.startsWith('near ')){q=sv;$('#location').value=sv}
+   if(!q){rfDraw();st.textContent=$('#keyword').value.trim()?'':'Type your town and state, like Windom, MN, or tap Near me.';if(matchMedia('(min-width:761px)').matches)$('#location').focus({preventScroll:true});return}
    try{await ready()}catch{st.textContent='Real places load on the live site. This preview cannot reach them.';return}
    let t=ZIPRE.test(q)?await rfGeo(q):rfFindTown(q,0,1)||await rfGeo(q)||rfFindTown(q);if(!t){try{const tw=parent!==window&&parent.prlTownFor&&parent.prlTownFor(q);if(tw)t=rfFindTown(tw)}catch{}}if(!t){st.textContent=`We could not find “${q}”. Type the town and state, like Windom, MN, or try a bigger town nearby.`;return}
    $('#location').value=t.label;rfGo(t.ll,t.label)}
@@ -1430,7 +1435,7 @@ renderTell();
    document.querySelectorAll('#agenda .date-stamp').forEach(e=>{e.innerHTML=`${dy!==null?days[dy]:'Any day'}<strong>↻</strong>`})};
   const _rn=render;render=function(){_rn();if(center)rfTexts(matchingAll().length,state.radius)};
   data.length=0;rfDraw();
-  let last='';try{const H=JSON.parse(localStorage.getItem('prl-home')||'null'),C=JSON.parse(localStorage.getItem('prl-homechurch')||'null');const hq=H&&H.q&&/[a-z]/i.test(H.q)&&!/\d{5}/.test(H.q)?H.q.split(',').map(x=>x.trim()).filter(Boolean).slice(-2).join(', '):'';last=hq||(H&&localStorage.getItem('prl-home-town'))||(C&&C.p?C.p+', '+C.st:'')||localStorage.getItem('serve-town')||''}catch{}if(last&&!last.startsWith('near ')){$('#location').value=last;rfSearch()}
+  const savedTown=()=>{let last='';try{const H=JSON.parse(localStorage.getItem('prl-home')||'null'),C=JSON.parse(localStorage.getItem('prl-homechurch')||'null');const hq=H&&H.q&&/[a-z]/i.test(H.q)&&!/\d{5}/.test(H.q)?H.q.split(',').map(x=>x.trim()).filter(Boolean).slice(-2).join(', '):'';last=hq||(H&&localStorage.getItem('prl-home-town'))||(C&&C.p?C.p+', '+C.st:'')||localStorage.getItem('serve-town')||''}catch{}return last},last=savedTown();if(last&&!last.startsWith('near ')){$('#location').value=last;rfSearch()}
   // the sample partners and their datalist entries go away
   const PTN=[['food','Nearest food shelf',[0]],['health','Nearest clinic or health office',[4]]];
   window.rfPartners=()=>{PTN.forEach(([k,lab,kinds])=>{document.querySelectorAll(`.ptn [data-save="ptn-${k}"]`).forEach(btn=>{const row=btn.closest('.ptn'),b=row.querySelector('b'),sm=row.querySelector('small');if(!b)return;
@@ -1518,7 +1523,7 @@ renderTell();
   const CATS=['All','Short trips','Building and disaster','Medical','A year of service','In the U.S.'];let cat='All';
   const mid=m=>'ptn-ms-'+m.n.toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,40);
   const toItem=x=>x.steps?{rid:x.id,title:x.t,sub:[({'5 minutes':'5 minutes','1 hour':'1 hour',afternoon:'An afternoon',weekend:'A weekend',ongoing:'Ongoing'})[x.time]||x.time,x.who==='group'?'Group':x.who==='solo'?'On your own':x.who].filter(Boolean).join(' · '),text:x.need?('You need: '+x.need):'',open:x.id,act:`<button type="button" class="btn gold save-btn" data-save="recipe-${esc2(x.id)}">+ Add to kit</button>`}
-   :{title:x.n,sub:x.s||'Mission and volunteering',text:x.l,pic:x.pic,u:x.u,act:`<button type="button" class="btn gold save-btn" data-save="${mid(x)}">+ Add to kit</button><a class="btn" href="${esc2(x.u)}" target="_blank" rel="noopener">Website ↗</a>`};
+   :{title:x.n,sub:x.s||'Mission and volunteering',text:x.l,pic:x.pic,u:x.u,act:`<button type="button" class="btn gold save-btn" data-save="${esc2(x.pid||mid(x))}">+ Add to kit</button><a class="btn" href="${esc2(x.u)}" target="_blank" rel="noopener">Website ↗</a>`};
   // mission trips can go in My study (they stay after a reload)
   const KM='serve-kit-missions-v1';let msaved={};try{msaved=JSON.parse(localStorage.getItem(KM)||'{}')}catch(e){}
   const mItem=m=>({id:mid(m),title:m.n,summary:`${m.s}. ${m.l}`,by:'Mission and volunteering',url:m.u,kind:'partner',tags:m.c||[],time:'',distance:'',remote:true,tile:ini2(m.n)});
@@ -1531,11 +1536,15 @@ renderTell();
   const real=()=>data.some(d=>Array.isArray(d.kinds));
   function note(){const n=document.getElementById('timeNote');if(!n)return;const k=state.time;
    n.innerHTML=k?`<span class="tshow">Showing: <b>${LABEL[k]}</b> <button type="button" class="tclear" data-tclear>✕ Clear</button></span>${real()?`<span class="tmore">${MORE[k]}</span>`:''}`:''}
-  function draw(){const k=state.time,row=ROWS[k];document.body.classList.toggle('tr-nosearch',!real());note();
+  const PTNX=()=>{try{return PARTNERS.filter(p=>p.url&&!MISS.some(m=>m.u===p.url)).map(p=>({n:p.title,u:p.url,l:p.summary,s:p.where==='mission'?'Mission and volunteering':'National program',pid:p.id}))}catch(e){return []}};
+  const kwRow=q=>['Ways to serve · “'+q+'”','Ideas you can start with, plus national and online programs. Tap one to see how.',()=>[...svFind(recs(),q,x=>[[x.t,3],[x.kind,2],[x.need,1],[(x.steps||[]).join(' '),1]]),...svFind([...MISS,...PTNX()],q,m=>[[m.n,3],[m.l,2],[m.s,1],[(m.c||[]).join(' '),1]])]];
+  function draw(){const k=state.time,kq=((document.getElementById('keyword')||{}).value||'').trim(),kw=!ROWS[k]&&kq&&!real()&&window.svFind,row=ROWS[k]||(kw?kwRow(kq):null);document.body.classList.toggle('tr-nosearch',!real());note();
    if(!real()){const rc=document.getElementById('resultCount');if(rc)rc.textContent='Type your town above to see real places near you.'}if(!row){box.innerHTML='';return}const items=row[2]().map(toItem);
    const chips=k==='week'?`<div class="trchips" role="group" aria-label="Kind of service">${CATS.map(c=>`<button type="button" data-trcat="${c}" aria-pressed="${c===cat}">${c}${c==='All'?'':' · '+MISS.filter(m=>(m.c||[]).includes(c)).length}</button>`).join('')}</div>`:'';
+   const town=kw&&(document.getElementById("location")||{}).value.trim()?"":kw?`<p class="trtown">Add a town to see ${kq.includes(" ")?`places near you for “${esc2(kq)}”`:esc2(kq)+" places near you"}.</p>`:'<p class="trtown">Type your town above to see places near you too.</p>';
+   if(!items.length&&kw){box.innerHTML=`<section class="dband"><h3>${esc2(row[0])}</h3><p class="trnote">No ideas match “${esc2(kq)}” yet. Try another word, like food, seniors or prayer.</p>${town}</section>`;return}
    if(!items.length){box.innerHTML=chips?`<section class="dband"><h3>${esc2(row[0])}</h3>${chips}<p class="trnote">Nothing of this kind yet.</p></section>`:'';return}
-   box.innerHTML=`<section class="dband"><h3>${esc2(row[0])} <small>${items.length}</small></h3><p class="trnote">${esc2(row[1])}</p>${chips}<div class="rqwrap rqwrap-s"><div class="rqcar"><button type="button" class="rqbtn l" aria-label="Previous">‹</button><div class="rqtrack">${items.map((x,i)=>`<button type="button" class="rqtile${i?'':' hot'}" data-tri="${i}">${tilePic(x)}<b>${esc2(x.title)}</b><small>${esc2(x.sub)}</small></button>`).join('')}</div><button type="button" class="rqbtn r" aria-label="Next">›</button></div><aside class="rqinfo"></aside></div>${real()?'':'<p class="trtown">Type your town above to see places near you too.</p>'}</section>`;
+   box.innerHTML=`<section class="dband"><h3>${esc2(row[0])} <small>${items.length}</small></h3><p class="trnote">${esc2(row[1])}</p>${chips}<div class="rqwrap rqwrap-s"><div class="rqcar"><button type="button" class="rqbtn l" aria-label="Previous">‹</button><div class="rqtrack">${items.map((x,i)=>`<button type="button" class="rqtile${i?'':' hot'}" data-tri="${i}">${tilePic(x)}<b>${esc2(x.title)}</b><small>${esc2(x.sub)}</small></button>`).join('')}</div><button type="button" class="rqbtn r" aria-label="Next">›</button></div><aside class="rqinfo"></aside></div>${real()?'':town}</section>`;
    const tr=box.querySelector('.rqtrack'),info=box.querySelector('.rqinfo'),tiles=[...tr.children];let raf=0;
    const show=i=>{const x=items[i];info.innerHTML=`<span class="k">${esc2(x.sub)}</span><h3>${esc2(x.title)}</h3><p>${esc2(x.text)}</p><div class="acts">${x.act}</div>`};
    const pick=()=>{const r=tr.getBoundingClientRect(),mid=r.left+r.width/2;let best=0,bd=1e9;tiles.forEach((el,i)=>{const b=el.getBoundingClientRect(),d=Math.abs(b.left+b.width/2-mid);if(d<bd){bd=d;best=i}});
