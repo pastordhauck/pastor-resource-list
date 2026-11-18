@@ -3666,7 +3666,8 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
   { const SAME = {"Money and Giving": "Money and giving", "Kids Programs": "Children's programs", "Marriage and Family": "Marriage and family",
       "Evangelistic Series": "Evangelistic series", "Adventist company (a smaller congregation)": "Adventist company", "Mission stories": "Mission story collection"};
     const VAGUE = /^(Website|Article|Article for (pastors|leaders|elders)|Other|Book|Guide for leaders|Study guide|Workbook|Training outline|Online course|Training program|Leadership training|Free book on preaching|Bible study|History|Audio stories|Children's stories|Sermons|Sermon library|Youth program|Office tool|Church tool|Media tool)$/;
-    const topic = x => (x.sets || []).find(s => s !== "Start Here") || x.c;
+    // the item's most specific topic (the smallest heading it is in), so a card in Sermon Preparation doesn't say "Church Organizations"
+    const topic = x => (x.sets || []).filter(s => s !== "Start Here").sort((a, b) => (SETS[a] || []).length - (SETS[b] || []).length)[0] || x.c;
     ITEMS.forEach(x => { if (SAME[x.c]) x.c = SAME[x.c]; else if (VAGUE.test(x.c || "")) x.c = topic(x); }); }
   // Daniel, 17 Nov 2026: "church office and tools has it is written illustrations and mission stories" / "free illustration book is a
   // category". Headings that landed in the office row by build order go to the topic they belong to. The single stories live on the
