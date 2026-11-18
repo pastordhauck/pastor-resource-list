@@ -3661,6 +3661,26 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
   const takeOut = (title, test) => { const g = GROUPS.find(x => x.title === title); if (!g) return []; const out = g.sets.filter(([n]) => test(n)); g.sets = g.sets.filter(([n]) => !test(n)); return out; };
   const serveSets = takeOut("Church office and tools", n => /^Serve:/.test(n));
   const helpSets = takeOut("Church office and tools", n => n === "Help for People in Need");
+  // Daniel, 17 Nov 2026: "website in resources ... category". Labels like "Website", "Article" or "Other" said nothing, and some
+  // kinds were spelled two ways; a vague label now shows the item's topic, and the doubles use one spelling.
+  { const SAME = {"Money and Giving": "Money and giving", "Kids Programs": "Children's programs", "Marriage and Family": "Marriage and family",
+      "Evangelistic Series": "Evangelistic series", "Adventist company (a smaller congregation)": "Adventist company", "Mission stories": "Mission story collection"};
+    const VAGUE = /^(Website|Article|Article for (pastors|leaders|elders)|Other|Book|Guide for leaders|Study guide|Workbook|Training outline|Online course|Training program|Leadership training|Free book on preaching|Bible study|History|Audio stories|Children's stories|Sermons|Sermon library|Youth program|Office tool|Church tool|Media tool)$/;
+    const topic = x => (x.sets || []).find(s => s !== "Start Here") || x.c;
+    ITEMS.forEach(x => { if (SAME[x.c]) x.c = SAME[x.c]; else if (VAGUE.test(x.c || "")) x.c = topic(x); }); }
+  // Daniel, 17 Nov 2026: "church office and tools has it is written illustrations and mission stories" / "free illustration book is a
+  // category". Headings that landed in the office row by build order go to the topic they belong to. The single stories live on the
+  // Illustrations tab, so the Ministry row keeps only the illustration books, libraries and indexes, as one heading.
+  { const move = (names, to) => { const g = GROUPS.find(x => x.title === to); const got = takeOut("Church office and tools", n => names.includes(n)); if (g) g.sets.push(...got); };
+    // the 14 small kinds ("Free illustration book", "Illustration collection", ...) showed as their own rows; two plain kinds instead
+    // Guide magazine stays out (Daniel, 17 Nov: "they are not good")
+    const books = (SETS["Sermon Illustrations"] || []).filter(x => !/^(Mission story|It Is Written illustration|YouTube story)$/i.test(x.c || "") && !/^Guide magazine/i.test(x.n))
+      .map(x => ({...x, c: /\(Ministry, \d{4}/.test(x.n) ? "Articles on illustrating sermons" : /book/i.test(x.c || "") || /Spurgeon|Moody/.test(x.n) ? "Illustration books" : "Illustration websites and collections"}));
+    SETS["Illustration books and libraries"] = books;
+    takeOut("Church office and tools", n => n === "Sermon Illustrations");
+    const min = GROUPS.find(x => x.title === "Ministry"); if (min && books.length) min.sets.push(["Illustration books and libraries", books.length]);
+    move(["Sermon Preparation", "Community Outreach", "Bible, history and worldview teaching"], "Ministry");
+    move(["Adventist summer camps", "Pathfinder clubs", "Mental and emotional health"], "Family and health"); }
   // Daniel, 8 Nov 2026: "Take off the Adventist Professionals tab until we can figure everything out" - the tab is off and the
   // directory links stay under Family and health as before. Turn PRO_TAB back on only when he says so.
   const PRO_TAB = false;
@@ -3783,10 +3803,11 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
     "Help for people in need": HELP_SUB,
     "Adventist professionals": PRO_SUB,
     "Ministry": [
-      ["Outreach and Bible study", "Evangelistic Series, Canvassing and Literature Evangelism, Bible Studies, Bible Tools"],
+      ["Preaching", ["Sermon Preparation", "Illustration books and libraries"]],
+      ["Outreach and Bible study", ["Evangelistic Series", "Canvassing and Literature Evangelism", "Bible Studies", "Bible Tools", "Community Outreach", "Bible, history and worldview teaching"]],
       ["Training", "Pastor and Leader Training, Discipleship and Church Training"]],
     "Family and health": [
-      ["Kids and youth", "Kids Programs, Youth and Pathfinders"],
+      ["Kids and youth", ["Kids Programs", "Youth and Pathfinders", "Pathfinder clubs", "Adventist summer camps"]],
       ["Marriage, family and money", "Marriage and Family, Conflict and Reconciliation, Money and Giving"],
       ["Health and food", "Health, SDA Recipes, Vegan Restaurants"],
       ["Mental health, grief and stress", ["Stress, depression and anxiety", "Grief and loss", "Mental and emotional health", "Crisis and Mental Health"]],
@@ -3798,9 +3819,7 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
       ["Nonprofit and community", "Nonprofit Help, Chambers of Commerce"]],
     "Church office and tools": [
       ["Office and admin", "Nonprofit and Church Discounts, Church Admin Templates, Music and Video Licenses, Translation and Listening Equipment, Books and Bibles in Bulk"],
-      ["Preaching and outreach", "Sermon Preparation, Sermon Illustrations, Community Outreach"],
-      ["Serve and help others", "Help for People in Need, Serve:"],
-      ["Camps, clubs and events", "Conference event calendars, Adventist summer camps, Pathfinder clubs"]],
+      ["Calendars", ["Conference event calendars"]]],
     "Hmong": [
       ["Church, Bible and news", "Hmong SDA Churches and Ministries, Hmong Bibles and Studies, Hmong Radio, TV and News"],
       ["Food, health and shops", "Hmong Food, Hmong Health, Hmong Shops and Services"],
