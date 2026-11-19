@@ -1105,7 +1105,7 @@ function ranked(pool) {
   for (let i = 0; i < words.length; i++) for (const n of [3, 2, 1]) { if (i + n > words.length) continue; const g = words.slice(i, i + n).join(" ");
     let sts = PLACEW[g], sure = true;
     if (!sts && n < 3) { const c = byName[g] || (g.length === 2 && NAMES[g.toUpperCase()] ? g.toUpperCase() : "") || (g.length >= 5 && byName[Object.keys(byName).find(k => Math.abs(k.length - g.length) <= 1 && ed(g, k) <= (k.length >= 8 ? 2 : 1))]) || "";
-      if (c) { sts = [c]; sure = g.length > 2 || new RegExp("\b" + c + "\b").test(st.q); } }
+      if (c) { sts = [c]; sure = g.length > 2 || new RegExp("\\b" + c + "\\b").test(st.q); } }
     if (sts) { const grp = words.slice(i, i + n); grp.sts = sts; grp.sure = sure; places.push(grp); words.splice(i, n); i--; break; } }
   const qw = [...words], nameHit = x => qw.length && qw.every(w => x.nw.some(t => t.startsWith(w)));
   const done = (r, miss) => { MISS = miss || null; RC = {k: ck, r, miss: MISS}; return r; };
