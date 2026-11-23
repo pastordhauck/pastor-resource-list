@@ -1032,6 +1032,8 @@ html.rb #setp{position:fixed!important;top:calc(var(--toph) + 4px)!important;rig
 html.rb div:has(> #setHome){flex-wrap:wrap}
 html.rb #setHome{flex:1 1 100%!important}
 /* check 5 round 2: "Show search results as" in the same order as the view switch on the page (List, Carousel, Grid) */
+/* fix22 (21 Nov): Settings' small words (11-12.5 px: the uppercase titles, hints, Tip, None saved yet) at 13 px, the site's smallest text; the titles' wide letter spacing eases so they keep one line */
+html.rb #setp :is(.hint,.wtitle){font-size:13px!important}html.rb #setp .wtitle{letter-spacing:.1em}
 html.rb #setView{display:flex}html.rb #setView [data-v=list]{order:1}html.rb #setView [data-v=carousel]{order:2}html.rb #setView [data-v=grid]{order:3}
 
 /* tab bar under the top bar = the live #resTabs, in the mockup's look */
@@ -1101,6 +1103,10 @@ html.rb .rb-report .rb-btn{margin-top:12px;text-decoration:none}
   html.rb .rb-rail,html.rb.rt .rb-rail{top:auto;bottom:0;left:0;right:0;width:auto}
   html.rb #resTabs{justify-content:flex-start;gap:24px;height:44px;overflow-x:auto;scrollbar-width:none}
   html.rb.hidebars #resTabs{transform:translateY(-100%)}
+  /* fix22 (21 Nov): at Larger and Largest text (rb-bigtext, body zoom 1.25+) three zoomed sub-tabs did not fit a 360-412 px phone (Illustrations cut off).
+     They stay a fixed real size there: 17 px words, 14 px apart (--iz undoes the zoom), still bigger than Normal's 15 px. Normal and Large are unchanged */
+  html.rb.rb-bigtext #resTabs{gap:calc(14px * var(--iz,1));padding-left:calc(12px * var(--iz,1));padding-right:calc(12px * var(--iz,1))}
+  html.rb.rb-bigtext #resTabs button{font-size:calc(17px * var(--iz,1))!important;padding:0 calc(2px * var(--iz,1))!important}
   html.rb .layer.rb-main{padding:22px 16px 110px}
   html.rb.rt #L-home.rb-main,html.rb.rt #L-topic.rb-main,html.rb.rt #L-detail.rb-main{padding-top:calc(var(--subh) + 22px)!important}
   html.rb #rbDetail .rb-rhero{margin:-22px -16px 0}
@@ -1260,6 +1266,21 @@ html.rb .segn button[aria-pressed="true"]{color:var(--accink)}
 /* dec8 (Daniel 19 Nov): phone filter labels are short words (rb.js OPTSHORT) so every filter fits on one line beside the view switch; PC labels unchanged */
 html.rb .rb-opt .rb-sh{display:none}
 @media (max-width:820px){html.rb .rb-opt .rb-lg{display:none}html.rb .rb-opt .rb-sh{display:inline}}
+
+/* cost tags (Daniel approved, costtags_mockup 19 Nov; rb.js cpill / data-freeonly): one quiet pill at the front of a card's grey line, the mockup's look */
+html.rb .rb-ct{display:inline;font-size:13px;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:0 7px;margin-right:6px;white-space:nowrap}
+html.rb .rb-opt[data-freeonly][aria-pressed="true"]{color:var(--ink);font-weight:600}
+html.rb .rb-opt[data-freeonly] .rb-ctck{display:none}
+html.rb .rb-opt[data-freeonly][aria-pressed="true"] .rb-ctck{display:inline}
+html.rb .rb-ctchk{font-size:13px;margin:8px 0 0;opacity:.9}
+html.rb.rb-ctoff .rb-ct{display:none}
+html.rb .rb-lk.rb-ct1{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.rb .rb-lk.rb-ct2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* cost tags fix 1 (phones): on Find resources the filters and "Free" fit on one line beside the view switch with no sideways scroll: tighter gaps and
+   no faded edge, since nothing is cut off; at 404px and less the small drop-down arrows go too (Topic, Language and More still open their lists).
+   Topic and result pages can have up to five filters that scroll as before, so there "Free" comes first and is always in sight. Measured 360-412px */
+@media (max-width:820px){html.rb #rbOptsH .rb-ofil:has([data-freeonly]){gap:12px;padding-right:0;-webkit-mask-image:none;mask-image:none}html.rb #rbOptsT [data-freeonly]{order:-1}}
+@media (max-width:404px){html.rb #rbOptsH .rb-ofil:has([data-freeonly]) .rb-opt svg{display:none}}
 </style>
 <script>(h=>{h.classList.add("rb");try{let s=localStorage.getItem("prl-style")||"parchment";s=["light","linen","gray","parchment","bank","d_merlot","d_mist","d_harvest","d_alabaster"].includes(s)?"parchment":"dark";h.dataset.style=s;if(!["light","linen","gray","parchment","bank","d_merlot","d_mist","d_harvest","d_alabaster"].includes(s))h.classList.add("rbdark")}catch(e){}})(document.documentElement)</script>
 
@@ -2038,13 +2059,23 @@ const siteOf = x => host(x.u || "").split("/")[0];
 const kindOf = x => { const pl = plOf(x); return x.c || (pl && MAP.kinds[pl.k]) || ""; };
 const sumOf = x => x.line || x.about || "";
 const where = x => { try { return typeof whereText === "function" ? [...new Set(String(whereText(x) || "").split(", "))].join(", ") : ""; } catch (e) { return ""; } };   // visitor pass (16 Nov): "Online, Online" -> "Online"
+/* ---- cost tags + "Free only" (Daniel approved, costtags_mockup 19 Nov; checked data costtags_data/costs.csv 20 Nov). PRL_COSTS is set only when the
+   build asks for it (make_rebrand_template.py, PRL_COSTTAGS=1); without it nothing here shows and the old Free choices stay. Cards hide "Cost unknown". ---- */
+const COST = window.PRL_COSTS, CTL = {F: "Free", S: "Some free", P: "Paid", U: "Cost unknown"};
+const costOf = x => !COST || !x || isPl(x) ? "" : CTL[COST.u[x.u] || COST.n[x.n]] || "";
+let FREE = false; try { FREE = !!COST && localStorage.getItem("prl-freeonly") === "1"; } catch (e) {}
+const freeOK = x => !FREE || costOf(x) === "Free";
+if (COST) window.rbKeep = freeOK;   // search_v2.js (hits) and local_draft.js (Search settings) read it
+const cpill = x => { const c = costOf(x); return c && c !== "Cost unknown" ? `<span class="rb-ct">${c}</span>` : ""; };
+const NOFREE = `<p class="rb-stats">Nothing free here yet. <button class="rb-seeall" data-freeonly>Turn off Free only</button></p>`;
 function openX(x, e){ if (!x) return; const pl = plOf(x); const pt = e && typeof at === "function" ? at(e) : null; return pl ? openPlace(pl, pt) : openDetail(x, pt); }
 
 /* ---- the mockup's pieces, fed with real entries ---- */
+const circName = on => on ? [`Remove from ${STUDY}`, `In ${STUDY}`] : [`Save to ${STUDY}`, `Save to ${STUDY}`];   // fix22: [aria-label, title] of the page's round + / ✓ button
 const saveLabel = (x, long) => isSaved(x) ? (long ? `✓ In ${STUDY}` : "✓ Saved") : (long ? `+ Save to ${STUDY}` : "+ Save");
 const infoHTML = (x, ref) => `<div class="rb-k">${esc(kindOf(x))}</div><h3>${esc(x.n)}</h3><p>${esc(sumOf(x))}</p><p class="rb-alld">Click for all the details ›</p><div class="rb-acts"><button class="rb-btn rb-pri" data-rbsave="${ref}" data-long="1">${saveLabel(x, true)}</button>${x.u ? `<a class="rb-btn rb-sec" href="${esc(x.u)}" target="_blank" rel="noopener">Website ↗</a>` : ""}</div>`;
-const gcard = (x, ref) => `<button class="rb-card" data-rbx="${ref}">${tile(x)}<b>${esc(x.n)}</b><small>${esc(siteOf(x) || kindOf(x))}</small></button>`;
-const lrow = (x, ref) => { const k = kindOf(x), s = siteOf(x) || where(x); return `<div class="rb-li rb-lrow" data-rbx="${ref}">${tile(x)}<div class="rb-ltext"><small class="rb-lk">${esc(k)}${s ? (k ? " · " : "") + esc(s) : ""}</small><b>${esc(x.n)}</b>${sumOf(x) ? `<p>${esc(sumOf(x))}</p>` : ""}</div><div class="rb-lacts"><button class="rb-btn rb-pri" data-rbsave="${ref}">${saveLabel(x)}</button>${x.u ? `<a class="rb-btn rb-sec" href="${esc(x.u)}" target="_blank" rel="noopener">Website ↗</a>` : ""}</div></div>`; };
+const gcard = (x, ref) => `<button class="rb-card" data-rbx="${ref}">${tile(x)}<b>${esc(x.n)}</b><small>${cpill(x)}${esc(siteOf(x) || kindOf(x))}</small></button>`;
+const lrow = (x, ref) => { const k = kindOf(x), s = siteOf(x) || where(x); return `<div class="rb-li rb-lrow" data-rbx="${ref}">${tile(x)}<div class="rb-ltext"><small class="rb-lk">${cpill(x)}${esc(k)}${s ? (k ? " · " : "") + esc(s) : ""}</small><b>${esc(x.n)}</b>${sumOf(x) ? `<p>${esc(sumOf(x))}</p>` : ""}</div><div class="rb-lacts"><button class="rb-btn rb-pri" data-rbsave="${ref}">${saveLabel(x)}</button>${x.u ? `<a class="rb-btn rb-sec" href="${esc(x.u)}" target="_blank" rel="noopener">Website ↗</a>` : ""}</div></div>`; };
 const SEEALL = / (Tap|Use) “See all” on a topic for its full list\./;
 const PAGE = 240;   // shortcut: very long lists draw 240 at a time with "Show more"; fine for the 1,000+ result searches
 function flatHTML(items, view, k){
@@ -2055,7 +2086,7 @@ function flatHTML(items, view, k){
 function featRow(title, count, items, allAttr){
   const k = reg(items), mid = Math.min(RB.feats[k] ?? 2, items.length - 1); RB.feats[k] = mid; const one = items.length < 2;   // check 5: one item = no "See all 1", no arrows
   return `<section class="rb-row rb-featrow" data-key="${k}"><div class="rb-rowh"><h2>${esc(title)}</h2><div class="rb-rr">${allAttr && count > 1 ? `<button class="rb-seeall" ${allAttr}>See all ${fmt(count)} ›</button>` : ""}</div></div>
-    <div class="rb-feat">${one ? "" : `<button class="rb-arrow" data-feat="-1" aria-label="Previous">‹</button>`}<div class="rb-fwin"><div class="rb-ftrack">${items.map((x, i) => `<button class="rb-fcard ${i === mid ? "rb-mid" : ""}" data-fi="${i}"${i === mid ? ' aria-current="true"' : ""}>${tile(x)}<div><b>${esc(x.n)}</b><small>${esc(siteOf(x) || kindOf(x))}&nbsp;</small></div></button>`).join("")}</div></div>
+    <div class="rb-feat">${one ? "" : `<button class="rb-arrow" data-feat="-1" aria-label="Previous">‹</button>`}<div class="rb-fwin"><div class="rb-ftrack">${items.map((x, i) => `<button class="rb-fcard ${i === mid ? "rb-mid" : ""}" data-fi="${i}"${i === mid ? ' aria-current="true"' : ""}>${tile(x)}<div><b>${esc(x.n)}</b><small>${cpill(x)}${esc(siteOf(x) || kindOf(x))}&nbsp;</small></div></button>`).join("")}</div></div>
     ${one ? "" : `<button class="rb-arrow" data-feat="1" aria-label="Next">›</button>`}<div class="rb-finfo" aria-live="off">${items[mid] ? infoHTML(items[mid], k + ":" + mid) : ""}</div></div></section>`;
 }
 // PC: tiles a fixed size (974 / 4 at the default 3 tiles), the middle one centered; phone: a swipe row
@@ -2079,7 +2110,12 @@ function featTo(row, i){
   document.querySelectorAll('.rb-finfo[aria-live="polite"]').forEach(f => f.setAttribute("aria-live", "off")); info.setAttribute("aria-live", "polite");   // a11y7: only the moved carousel speaks
   setTimeout(() => { info.innerHTML = infoHTML(items[k], key + ":" + k); info.style.opacity = 1; }, 180);
 }
-const layoutAll = box => (box || document).querySelectorAll(".rb-featrow").forEach(r => featLayout(r, true));
+// cost tags: a list row's grey line keeps the number of lines it had without its pill (cut with …), as in the mockup; two layouts for the whole list
+// shortcut: measured once per row at its first width; a turned phone keeps the first result until the list is drawn again
+const ctFit = root => { if (!COST) return; const ls = [...root.querySelectorAll(".rb-lk:not([data-f])")]; if (!ls.length) return;
+  const lh = parseFloat(getComputedStyle(ls[0]).lineHeight); R.classList.add("rb-ctoff"); const n = ls.map(s => Math.round(s.offsetHeight / lh)); R.classList.remove("rb-ctoff");
+  ls.forEach((s, i) => { s.dataset.f = ""; if (!s.querySelector(".rb-ct")) return; if (n[i] > 1) { s.classList.add("rb-ct2"); s.style.webkitLineClamp = n[i]; } else s.classList.add("rb-ct1"); }); };
+const layoutAll = box => { (box || document).querySelectorAll(".rb-featrow").forEach(r => featLayout(r, true)); ctFit(box || document); };
 addEventListener("resize", () => layoutAll());
 
 /* ---- the options row (drop-downs + view switch) ---- */
@@ -2088,7 +2124,7 @@ const OPTSHORT = {"All topics": "Topic", "Any language": "Language", "More filte
 const optLabel = l => OPTSHORT[l] ? `<span class="rb-lg">${esc(l)}</span><span class="rb-sh">${OPTSHORT[l]}</span>` : esc(l);
 function optsRow(items, withViews){
   const v = VIEW();
-  return `<div class="rb-opts" id="${RB.optsId}"><div class="rb-ofil">${items.map(([k, label, set]) => `<button class="rb-opt ${set ? "rb-set" : ""}" data-opt="${k}"${k === "onmap" || k === "clear" ? "" : ' aria-haspopup="menu" aria-expanded="false"'}>${optLabel(label)} ${CARET}</button>`).join("")}</div>
+  return `<div class="rb-opts" id="${RB.optsId}"><div class="rb-ofil">${items.map(([k, label, set]) => `<button class="rb-opt ${set ? "rb-set" : ""}" data-opt="${k}"${k === "onmap" || k === "clear" ? "" : ' aria-haspopup="menu" aria-expanded="false"'}>${optLabel(label)} ${CARET}</button>`).join("")}${COST ? `<button type="button" class="rb-opt" data-freeonly aria-pressed="${FREE}"><span class="rb-ctck" aria-hidden="true">✓ </span><span class="rb-lg">Free only</span><span class="rb-sh">Free</span></button>` : ""}</div>
     ${withViews ? `<div class="rb-views" role="group" aria-label="View">${["list", "carousel", "grid"].map(w => `<button data-view="${w}" aria-pressed="${v === w}" aria-label="${w[0].toUpperCase() + w.slice(1)}" title="${w[0].toUpperCase() + w.slice(1)}">${VICON[w]}<span>${w[0].toUpperCase() + w.slice(1)}</span></button>`).join("")}</div>` : ""}</div>`;
 }
 const MENUS = {};   // key -> () => [[pick, label, checked] | ["#", heading]]
@@ -2132,7 +2168,7 @@ PICKS.topic = v => { if (!v) return; const g = GROUPS[+v.slice(1)]; if (!g) retu
   openGroup(g, null); };
 MENUS.lang = () => [["", "Any language", true], ["Spanish", "Español"], ["Hmong", "Hmong"]];
 PICKS.lang = v => { if (v) clickQ(`.pills [data-pill="${v}"]`); };
-MENUS.more = () => { const pills = [["free", "Free"], ["near", "Near you"]].filter(([p]) => document.querySelector(`.pills [data-pill="${p}"]`)).map(([p, l]) => [`pill:${p}`, l]);
+MENUS.more = () => { const pills = [["free", "Free"], ["near", "Near you"]].filter(([p]) => !(COST && p === "free") && document.querySelector(`.pills [data-pill="${p}"]`)).map(([p, l]) => [`pill:${p}`, l]);
   const ql = [["new", "New on the list"], ["saved", STUDY]].filter(([q]) => { const b = document.querySelector(`.pills [data-ql="${q}"]`); return b && !b.hidden; }).map(([q, l]) => [`ql:${q}`, l]);
   const cm = document.querySelector('.pills a[href*="church-manual"]');
   const ppl = [...($("person") || {options: []}).options].filter(o => o.value).map(o => [`person:${o.value}`, o.value]);
@@ -2163,7 +2199,7 @@ function topOpts(){
 }
 const redrawList = () => { drawFilt(); drawCards(); };
 // ui4 (audit 19 Nov #10): an empty list says why: filters on, a search with no hits, or no notes yet
-const emptyHTML = () => LIST && (LIST.st || LIST.tp) ? `<p class="rb-stats">Nothing matches these filters. <button class="rb-seeall" data-rbclear>Clear filters</button></p>`
+const emptyHTML = () => FREE ? NOFREE : LIST && (LIST.st || LIST.tp) ? `<p class="rb-stats">Nothing matches these filters. <button class="rb-seeall" data-rbclear>Clear filters</button></p>`
   : $("tEye").textContent === "Search" ? `<p class="rb-stats">Nothing found for ${esc($("tTitle").textContent)}. <button class="rb-seeall" data-rbclearq>Clear search</button></p>`
   : $("tTitle").textContent === "My notes" ? "" : `<p class="rb-stats">Nothing here yet.</p>`;   // My notes: the line under its title says how to add one
 PICKS.st = v => { LIST.st = v === "-" ? "" : v; redrawList(); };
@@ -2173,7 +2209,7 @@ function curList(){
   if (!LIST) return [];
   const q = (LIST.q || "").trim().toLowerCase();
   let list = q ? LIST.items.filter(x => q.split(/\s+/).every(w => `${x.n} ${x.line || ""} ${x.c || ""} ${x.p || ""}`.toLowerCase().includes(w))) : LIST.items;
-  list = list.filter(x => (!LIST.st || stOf(x) === LIST.st) && (!LIST.tp || tpOf(x) === LIST.tp));
+  list = list.filter(x => (!LIST.st || stOf(x) === LIST.st) && (!LIST.tp || tpOf(x) === LIST.tp) && freeOK(x));
   if (LIST.sort === "az") list = [...list].sort((a, b) => a.n.localeCompare(b.n));
   if (LIST.sort === "near" && typeof qMiles === "function") list = [...list].sort((a, b) => (qMiles(a) ?? 1e9) - (qMiles(b) ?? 1e9));
   if (LIST.sort === "state") list = [...list].sort((a, b) => (NAME[stOf(a)] || "~").localeCompare(NAME[stOf(b)] || "~") || a.n.localeCompare(b.n));
@@ -2186,8 +2222,8 @@ const setNote = (k, f) => { const n = NOTES(); n[k] = Object.assign(n[k] || {}, 
 function pageHTML(x){
   const pl = plOf(x), it = pl || x, k = reg([x]) + ":0", key = keyX(x), on = isSaved(x), nt = NOTES()[key] || {};
   const pages = (x.pages || []).length ? x.pages : [], pic = picOf(x), kind = kindOf(x), place = pl ? [pl.p, pl.st].filter(Boolean).join(", ") : "";
-  const wh = pl ? (typeof qMiles === "function" && qMiles(pl) !== null ? where(pl) : place) : where(x);
-  const tags = [wh ? (wh === "Online" ? "🌐 Online, works anywhere" : `📍 ${wh}`) : "", /free/i.test(x.about || "") && !/free trial|paid/i.test(x.about || "") ? "Free" : "", it.adv ? "✓ Adventist" : "", x.new ? "New on the list" : "", pl && pl.lang && pl.lang !== "English" ? pl.lang : ""].filter(Boolean);
+  const wh = pl ? (typeof qMiles === "function" && qMiles(pl) !== null ? where(pl) : place) : where(x), cost = costOf(x);
+  const tags = [wh ? (wh === "Online" ? "🌐 Online, works anywhere" : `📍 ${wh}`) : "", COST ? (cost !== "Cost unknown" ? cost : "") : /free/i.test(x.about || "") && !/free trial|paid/i.test(x.about || "") ? "Free" : "", it.adv ? "✓ Adventist" : "", x.new ? "New on the list" : "", pl && pl.lang && pl.lang !== "English" ? pl.lang : ""].filter(Boolean);
   const spk = typeof SPK !== "undefined" && x.u ? SPK[x.u] : null;
   const btns = spk ? [[x.u, "Their talks on ACM"], [spk.av, "Listen on AudioVerse"], [spk.yt, "Watch on YouTube"], [spk.web, "Their website"]].filter(b => b[0]) : [];
   const watch = /video|sermon|watch|listen|audio|podcast/i.test(kind);
@@ -2200,17 +2236,18 @@ function pageHTML(x){
   const mini = list => { return `<div class="rb-mini">${list.map((y, i) => `<a href="${esc(y.u || "#")}" target="_blank" rel="noopener">${picOf(y) ? `<img src="${esc(picOf(y))}" alt="" loading="lazy">` : `<span class="rb-noimg"></span>`}<b>${esc(y.n)}</b><small>${esc(sumOf(y))}</small></a>`).join("")}</div>`; };
   const fact = (l, v) => v ? `<div class="rb-fact"><div class="rb-lab">${esc(l)}</div><div class="rb-val">${v}</div></div>` : "";
   return `<section class="rb-rhero"><div class="rb-wrap">
-    <div class="rb-bar"><button class="rb-circ" data-rbback aria-label="Back">‹</button><button class="rb-circ" data-rbsave="${k}" data-circ="1" aria-pressed="${on}" aria-label="${on ? `Remove from ${STUDY}` : `Save to ${STUDY}`}" title="${on ? `In ${STUDY}` : `Save to ${STUDY}`}">${on ? "✓" : "+"}</button></div>
+    <div class="rb-bar"><button class="rb-circ" data-rbback aria-label="Back">‹</button><button class="rb-circ" data-rbsave="${k}" data-circ="1" aria-pressed="${on}" aria-label="${circName(on)[0]}" title="${circName(on)[1]}">${on ? "✓" : "+"}</button></div>
     ${pic ? `<img class="rb-pic" id="rbPic" src="${esc(pic)}" alt="">` : `<span class="rb-pic rb-mono" aria-hidden="true">${esc(initials(it.n))}</span>`}
     ${pages.length > 1 ? `<div class="rb-pgs" role="group" aria-label="Pictures of this site">${pages.map((p, i) => `<button data-rbpg="${i}" aria-current="${i === 0}" aria-label="${esc(p.label)}" title="${esc(p.label)}"></button>`).join("")}</div>` : ""}
     <div class="rb-txt"><span class="rb-kindtag">${kindIcon(kind)}${esc(kind)}</span><h1>${esc(it.n)}</h1>${pl ? (place ? `<p class="rb-sub">${esc(place)}</p>` : "") : siteOf(x) ? `<p class="rb-sub">${esc(siteOf(x))}</p>` : ""}
     ${tags.length ? `<div class="rb-rtags">${tags.map(t => `<span class="rb-rtag">${esc(t)}</span>`).join("")}</div>` : ""}
+    ${cost ? `<p class="rb-sub rb-ctchk">${cost === "Cost unknown" ? "Cost unknown · checked" : "Cost checked"} Nov 2026</p>` : ""}
     ${btns.length ? `<div class="rb-slinks">${btns.map((b, i) => `<a href="${esc(b[0])}" target="_blank" rel="noopener"${i === 0 ? ' class="rb-lead"' : ""}>${esc(b[1])} ↗</a>`).join("")}</div>`
       : it.u ? `<a class="rb-readbtn" href="${esc(it.u)}" target="_blank" rel="noopener">${watch ? "Watch now ↗" : "Visit website ↗"}</a>` : ""}</div>
   </div></section>
   <section class="rb-rfacts">
     ${about ? `<p class="rb-sum">${esc(about)}</p>` : ""}
-    ${fact("Address", addr && pl ? `${esc(addr)}<small><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}" target="_blank" rel="noopener">Directions ↗</a></small>` : "")}
+    ${fact("Address", addr ? `${esc(addr)}<small><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}" target="_blank" rel="noopener">Directions ↗</a></small>` : "")}
     ${fact("Service times", pl && pl.svc ? esc(pl.svc) : "")}
     ${fact("Phone", tel.length >= 7 ? `<a href="tel:${esc(tel)}">${esc(it.ph)}</a>` : "")}
     ${fact("Language", pl && pl.lang ? esc(pl.lang) : "")}
@@ -2280,6 +2317,7 @@ function sync(){
   RB.prev = stack.slice();
   const tb = $("rbTBack"); if (tb) tb.hidden = !(stack.length > 1 && topId === "L-topic");
   const rk = $("rbRBack"); if (rk) rk.hidden = !(s0.id === "L-room" && stack.length > 1);   // check 5: back to the whole country
+  if (RB.homeOld && topId === "L-home") { RB.homeOld = false; homeHead(); drawRows($("lineups"), "h"); }   // Free only changed on another page
   R.classList.remove("hidebars"); closePops(); peekOff(); fit();
   if (topId !== "L-detail" && RB.detFrom) { const f = RB.detFrom; RB.detFrom = null; if (f.isConnected) setTimeout(() => f.focus({preventScroll: true}), 0); }
 }
@@ -2339,7 +2377,7 @@ document.addEventListener("scroll", e => { const L = e.target; if (!L.classList 
 function toast2(m){ if (typeof toast === "function") return toast(m); }
 function toggleSave(x, b){
   const k = keyX(x); if (!k || typeof qGet !== "function") return; let s = qGet("prl-saved"); const on = !s.includes(k); s = s.filter(v => v !== k); if (on) s.unshift(k); qSet("prl-saved", s);
-  document.querySelectorAll("[data-rbsave]").forEach(o => { const y = itemAt(o.dataset.rbsave); if (y && keyX(y) === k) { if (o.dataset.circ) { o.textContent = on ? "✓" : "+"; o.setAttribute("aria-pressed", on); } else o.textContent = saveLabel(y, !!o.dataset.long); } });
+  document.querySelectorAll("[data-rbsave]").forEach(o => { const y = itemAt(o.dataset.rbsave); if (y && keyX(y) === k) { if (o.dataset.circ) { o.textContent = on ? "✓" : "+"; o.setAttribute("aria-pressed", on); o.setAttribute("aria-label", circName(on)[0]); o.title = circName(on)[1]; } else o.textContent = saveLabel(y, !!o.dataset.long); } });
   if (typeof pillCounts === "function") pillCounts();
   const n = $("appKitN"); if (n) n.textContent = Math.max(0, (+n.textContent || 0) + (on ? 1 : -1)); kitCount();
   toast2(on ? `Added “${x.n}” to ${STUDY}.` : `Removed “${x.n}” from ${STUDY}.`);
@@ -2379,10 +2417,14 @@ document.addEventListener("click", e => {
     optMenu(b); return; }
   if ((b = t.closest(".rb-menu [data-pick]"))) { const k = b.closest(".rb-menu").dataset.opt; closePops(); (PICKS[k] || (() => {}))(b.dataset.pick); return; }
   if ((b = t.closest("[data-view]")) && b.closest(".rb-views")) { lsSet("prl-sview", b.dataset.view); redrawView(); return; }
+  if (t.closest("[data-freeonly]")) { FREE = !FREE; lsSet("prl-freeonly", FREE ? "1" : "0"); RB.homeOld = stack[stack.length - 1].id !== "L-home";
+    const tt = $("tTitle").textContent;   // a search runs again, so its "N found" and rows count only free ones; other pages redraw
+    if (stack[stack.length - 1].id === "L-topic" && $("tEye").textContent === "Search" && /^“.+”$/.test(tt)) search(tt.slice(1, -1), [innerWidth / 2, 220]); else redrawView();
+    return; }
   if ((b = t.closest("[data-rbsave]"))) { e.preventDefault(); toggleSave(itemAt(b.dataset.rbsave), b); return; }
   if ((b = t.closest("[data-rbmore]"))) { const items = REG[b.dataset.rbmore] || [], n = +b.dataset.n, part = items.slice(n, n + PAGE), k = b.dataset.rbmore;
     const html = b.dataset.v === "list" ? part.map((x, i) => lrow(x, `${k}:${n + i}`)).join("") : part.map((x, i) => gcard(x, `${k}:${n + i}`)).join("");
-    b.previousElementSibling.insertAdjacentHTML("beforeend", html); b.dataset.n = n + PAGE;
+    b.previousElementSibling.insertAdjacentHTML("beforeend", html); ctFit(b.previousElementSibling); b.dataset.n = n + PAGE;
     if (n + PAGE >= items.length) b.remove(); else b.textContent = `Show more (${fmt(items.length - n - PAGE)} left)`; return; }
   if ((b = t.closest("[data-feat]"))) { const row = b.closest(".rb-featrow"); featTo(row, (RB.feats[row.dataset.key] ?? 2) + +b.dataset.feat); return; }
   if ((b = t.closest("[data-fi]"))) { const row = b.closest(".rb-featrow"), i = +b.dataset.fi, x = (REG[row.dataset.key] || [])[i];
@@ -2421,8 +2463,10 @@ const hDepth = () => { const s = history.state; return s && s.rb ? s.d : 1; };
 function hSync(){ hQ = 0; if (hBusy) return; const L = stack.length, s = history.state;
   try { if (s && !s.rb) history.replaceState(Object.assign({}, s, {rb: 1, d: L}), "");   // local_draft.js's {lpres} entry stands for this layer
     else if (L > hDepth()) history.pushState({rb: 1, d: L}, "");
-    else if (L < hDepth()) { hBusy = 1; clearTimeout(hT); hT = setTimeout(() => { hBusy = 0; hLater(); }, 800); history.go(L - hDepth()); }   // the timer: a step that only moved an iframe's own history
+    else if (L < hDepth()) { hBusy = 1; clearTimeout(hT); hT = setTimeout(() => { hBusy = 0; hLater(); }, 800); history.go(-1); }   // the timer: a step that only moved an iframe's own history
   } catch (e) { hBusy = 0; } }
+// fix21 (21 Nov): one entry at a time, re-checked on each popstate. One entry can stand for several layers (a Map room search
+// adds state and town at once), so go(L - depth) overshot and a tab switch left the site.
 const hLater = () => { if (!hQ) { hQ = 1; setTimeout(hSync, 0); } };   // after the click's other handlers (local_draft.js pushes right after go())
 // ui4 (audit 19 Nov #2): phone/browser Back closes the top layer. Every deeper layer adds one history entry {rb: 1, d: depth};
 // the app's own Back buttons and tabs step history back to match, so Back on the base layer leaves the site as usual.
@@ -2434,7 +2478,7 @@ addEventListener("popstate", e => { const s = e.state, mine = !!(s && s.rb);
   if (s && !mine) return;   // someone else's entry: theirs to handle
   const d = mine ? s.d : 1;
   if (d < stack.length) back(d - 1);
-  else history.back(); }, true);
+  else if (mine) history.back(); }, true);   // fix21: skip only our own stale entries; the first entry (no state) never steps off the site
 addEventListener("submit", e => { if (e.target.id === "qform") RB.subAt = Date.now(); }, true);   // #15: before the add-ons' submit handlers, which may stop the event
 
 /* ---- install: after every add-on has run, so these wraps sit on top of theirs ---- */
@@ -2487,6 +2531,7 @@ function install(){
   if (sv && !$("setKeepQ")) { sv.insertAdjacentHTML("afterend", `<div class="wtitle" style="margin-top:10px">Keep my search when I change tabs</div><div class="segn" id="setKeepQ"><button type="button" data-k="0">Off</button><button type="button" data-k="1">On</button></div>`);
     $("setKeepQ").onclick = e => { const b = e.target.closest("[data-k]"); if (!b) return; try { localStorage.setItem("prl-keepq", b.dataset.k); } catch (x) {} markKeepQ(); };
     markKeepQ(); }
+  if (sv) sv.addEventListener("click", e => { if (e.target.closest("[data-v]")) redrawView(); });   // fix22: after the app's onclick saved the choice
   // check 5 r2: the long address wording clipped in the 340px panel; r6: at Larger/Largest text both Settings boxes clipped, so they fit like the search boxes
   fitPh($("setHome"), ["123 Main St, St. Paul, MN — or a ZIP or city", "Address, ZIP or city", "ZIP or city"]);
   fitPh($("lpQ2"), ["Type your church name or town", "Church name or town", "Church or town"]);
@@ -2510,8 +2555,9 @@ function install(){
     if (box && box.id === "tRows") { RB.tKey = key; if (key !== "s") RB.isList = false; }
     rows.forEach(r => { r._o = r._o || r.items; r.items = typeof sortNear === "function" ? sortNear(r._o) : r._o; });   // nearest first once a town is saved, as before
     // grid and list are one flat list of every row's items, like the mockup; Show more pages it (the mockup has no paging)
-    if (v !== "carousel") { const seen = new Set(); box.innerHTML = flatHTML(rows.flatMap(r => r.items).filter(x => !seen.has(x) && seen.add(x)), v); }
-    else box.innerHTML = rows.map((r, i) => featRow(r.title, r.count ?? r.items.length, r.items.slice(0, 40), `data-all="${key}:${i}"`)).join("");
+    const its = rows.map(r => r.items.filter(freeOK));   // Free only: rows keep their index (See all), empty ones are not drawn
+    if (v !== "carousel") { const seen = new Set(), all = its.flat().filter(x => !seen.has(x) && seen.add(x)); box.innerHTML = FREE && !all.length ? NOFREE : flatHTML(all, v); }
+    else box.innerHTML = rows.map((r, i) => its[i].length || !FREE ? featRow(r.title, FREE ? its[i].length : r.count ?? r.items.length, its[i].slice(0, 40), `data-all="${key}:${i}"`) : "").join("") || (FREE ? NOFREE : "");
     requestAnimationFrame(() => layoutAll(box));
     if (box && box.id === "tRows" && key !== "s") topOpts();
     // check 5: the search page's "Tap “See all” …" line only where See all exists (carousel), in words for phone and PC
@@ -2529,10 +2575,18 @@ function install(){
           : flatHTML(list, v);
         requestAnimationFrame(() => layoutAll(c)); }
       $("tCarNav").hidden = true; topOpts();
+      // Free only: a list's "N on the list" counts the free ones (search counts are already free-only: search_v2.js reads rbKeep)
+      const ts = $("tSub"); if (COST && ts && LIST) { if (LIST.sub == null) LIST.sub = ts.textContent;
+        if (/^[\d,]+ (free )?on the list/.test(LIST.sub)) ts.textContent = FREE ? LIST.sub.replace(/^[\d,]+ on the list(; showing the first [\d,]+)?/, `${fmt(LIST.items.filter(freeOK).length)} free on the list`) : LIST.sub; }
     } catch (err) { console.error(err); }
     return r;
   };
-  const _og = openGroup; openGroup = function () { RB.isList = false; return _og.apply(this, arguments); };
+  const _og = openGroup; openGroup = function (g) { RB.isList = false; const r = _og.apply(this, arguments);
+    // fix22 (21 Nov): the topic page summed its headings, so a resource under two headings counted twice (Ministry 569, its home row's See all 563).
+    // Count each one once, as the home row does; only when every heading's list is complete (Help's headings hold only national programs: its own handler below)
+    try { const all = g.sets.flatMap(([n]) => SETS[n] || []), ts = $("tSub");
+      if (ts && all.length === g.sets.reduce((a, x) => a + x[1], 0)) ts.textContent = ts.textContent.replace(/[\d,]+ on the list/, `${fmt(new Set(all).size)} on the list`); } catch (err) { console.error(err); }
+    return r; };
   const _od = openDetail; openDetail = function (x) { const f = document.activeElement, r = _od.apply(this, arguments); try { drawPage(x); detFocus(f); } catch (err) { console.error(err); } return r; };
   const _op = openPlace; openPlace = function (x) { const f = document.activeElement, r = _op.apply(this, arguments); try { drawPage(x); detFocus(f); } catch (err) { console.error(err); } return r; };
   const _tr = trail; trail = function () { const r = _tr.apply(this, arguments); try { sync(); hLater(); } catch (err) { console.error(err); } return r; };
@@ -3532,15 +3586,20 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
   // ("food") is not flooded with 15,000 places. PLIDX: per state {n: count, b: [lon/lat box], k: {kind number: count}}.
   const PL = [], PLIDX = {"AK":{"n":86,"b":[-171.723441,55.357145,-131.674552,66.886842],"k":{"1":30,"0":27,"6":1,"4":21,"2":12,"3":11}},"AL":{"n":372,"b":[-88.307545,30.397068,-85.031019,34.987838],"k":{"0":197,"3":57,"4":82,"2":63,"1":37,"6":6,"5":9}},"AR":{"n":215,"b":[-94.530029,33.218982,-90.206715,36.484076],"k":{"0":117,"3":32,"2":16,"1":22,"6":2,"4":43,"5":3}},"AZ":{"n":254,"b":[-114.721947,31.361928,-109.306892,36.941815],"k":{"0":114,"6":9,"1":36,"2":37,"3":36,"4":59,"5":2}},"CA":{"n":1575,"b":[-124.200779,32.613089,-114.621823,41.764514],"k":{"0":838,"1":230,"4":330,"5":82,"6":21,"3":151,"2":105}},"CO":{"n":233,"b":[-108.907173,37.173157,-102.614723,40.620487],"k":{"0":128,"3":21,"1":41,"4":48,"2":23,"6":6,"5":7}},"CT":{"n":223,"b":[-73.626931,41.027773,-71.910703,41.916752],"k":{"0":87,"1":35,"2":41,"4":44,"6":7,"3":21,"5":4}},"DC":{"n":25,"b":[-77.016517,38.904247,-77.016517,38.904247],"k":{"0":9,"1":8,"2":4,"5":1,"3":5,"4":5}},"DE":{"n":98,"b":[-75.757479,38.58872,-75.309561,39.735651],"k":{"0":34,"2":15,"4":16,"1":9,"3":11,"5":16,"6":1}},"SD":{"n":79,"b":[-103.816297,42.889751,-96.731962,45.52355],"k":{"0":40,"1":12,"3":13,"2":11,"4":18,"5":3,"6":2}},"ND":{"n":79,"b":[-103.649117,46.004354,-96.612203,48.824799],"k":{"0":53,"1":12,"2":9,"3":3,"4":11,"6":1,"5":1}},"FL":{"n":571,"b":[-87.191242,25.026449,-80.058718,30.781349],"k":{"0":316,"5":7,"1":77,"4":120,"2":70,"3":73,"6":3}},"GA":{"n":445,"b":[-85.50965,30.784529,-81.176614,34.975773],"k":{"0":209,"3":65,"2":64,"5":38,"4":70,"1":45,"6":4}},"WI":{"n":276,"b":[-92.730253,42.523506,-87.369806,46.692119],"k":{"0":146,"4":32,"1":50,"2":35,"3":53,"5":5,"6":7}},"IA":{"n":205,"b":[-96.389495,40.409546,-90.242816,43.301618],"k":{"0":116,"2":55,"1":32,"3":37,"4":21,"5":2}},"MN":{"n":330,"b":[-96.744552,43.628733,-91.668076,48.917103],"k":{"0":160,"2":58,"3":58,"5":9,"1":69,"4":33,"6":5}},"MO":{"n":205,"b":[-94.70434,36.240223,-89.333912,40.42362],"k":{"0":116,"1":39,"3":38,"5":2,"2":43,"4":28,"6":4}},"KS":{"n":164,"b":[-101.713819,37.032717,-94.690584,39.562552],"k":{"0":107,"3":26,"2":35,"1":31,"5":2,"4":23,"6":1}},"NE":{"n":108,"b":[-103.662035,40.144738,-95.93856,42.875511],"k":{"0":53,"2":19,"3":12,"4":21,"1":28,"5":2}},"WY":{"n":78,"b":[-109.220921,41.128702,-104.173528,44.796219],"k":{"0":36,"4":12,"2":12,"1":16,"5":4,"3":7,"6":1}},"NM":{"n":195,"b":[-108.761384,31.823559,-103.148863,36.884966],"k":{"2":24,"0":87,"1":36,"3":26,"4":38,"6":2,"5":1}},"HI":{"n":116,"b":[-159.518733,19.495967,-154.94535,22.088215],"k":{"0":58,"4":29,"3":5,"1":18,"2":10,"5":3}},"ID":{"n":208,"b":[-116.998909,42.537439,-111.104129,48.281694],"k":{"0":116,"1":31,"2":20,"4":41,"6":3,"3":14,"5":1}},"IL":{"n":501,"b":[-91.428019,37.006288,-87.546004,42.479696],"k":{"0":260,"4":77,"2":74,"3":67,"1":72,"6":8,"5":12}},"IN":{"n":408,"b":[-87.534705,37.911543,-84.872266,41.727622],"k":{"1":62,"4":71,"0":203,"3":54,"2":58,"6":3,"5":2}},"KY":{"n":341,"b":[-88.644477,36.614202,-82.528796,39.039429],"k":{"0":150,"2":73,"5":11,"1":57,"3":59,"4":38,"6":5}},"LA":{"n":165,"b":[-93.792193,29.578681,-89.782926,32.619146],"k":{"0":73,"2":23,"4":55,"3":17,"6":4,"5":6,"1":21}},"MA":{"n":338,"b":[-73.260685,41.271448,-70.095881,42.851277],"k":{"0":170,"1":79,"2":50,"5":12,"3":35,"4":46,"6":2}},"MD":{"n":370,"b":[-79.402352,38.063177,-75.071208,39.701401],"k":{"0":198,"5":17,"3":57,"1":46,"2":44,"4":48,"6":2}},"ME":{"n":190,"b":[-70.786351,43.438733,-66.989856,47.34245],"k":{"0":122,"1":38,"2":34,"4":13,"5":4,"3":12}},"MI":{"n":715,"b":[-90.049836,41.795374,-82.433743,47.136727],"k":{"0":376,"2":113,"3":107,"1":112,"4":114,"6":8,"5":8}},"MS":{"n":228,"b":[-91.385649,30.295414,-88.407128,34.955752],"k":{"6":9,"0":74,"2":48,"5":32,"4":44,"1":21,"3":15}},"MT":{"n":141,"b":[-115.98022,45.217876,-104.167161,48.878942],"k":{"0":69,"4":22,"3":16,"2":18,"5":7,"1":24,"6":1}},"NC":{"n":582,"b":[-84.024901,33.933326,-75.625685,36.508487],"k":{"0":316,"3":68,"4":94,"1":87,"2":77,"5":25,"6":4}},"NH":{"n":94,"b":[-72.353638,42.749074,-70.780349,44.484328],"k":{"0":33,"1":24,"2":17,"4":13,"5":7,"3":10,"6":1}},"NJ":{"n":316,"b":[-75.500331,38.98755,-73.972515,41.051487],"k":{"0":163,"2":26,"3":25,"4":69,"5":11,"1":48,"6":1}},"NV":{"n":133,"b":[-119.849907,35.84376,-114.870868,40.964432],"k":{"0":54,"3":23,"1":23,"2":19,"4":26,"5":9,"6":1}},"NY":{"n":474,"b":[-79.574765,40.621346,-72.196094,44.692025],"k":{"0":253,"4":59,"3":60,"2":40,"5":16,"1":82,"6":7}},"OH":{"n":492,"b":[-84.786202,38.689237,-80.645902,41.879462],"k":{"0":234,"2":68,"1":70,"3":90,"5":11,"6":9,"4":71}},"OK":{"n":185,"b":[-101.477046,33.995153,-94.631465,36.887738],"k":{"0":93,"4":31,"2":32,"3":36,"5":3,"6":1,"1":29}},"OR":{"n":257,"b":[-124.422162,42.072408,-116.977368,46.187375],"k":{"0":161,"1":45,"2":32,"3":33,"4":28,"5":5,"6":1}},"PA":{"n":292,"b":[-80.49982,39.845558,-74.991563,42.116594],"k":{"0":135,"3":30,"2":34,"1":71,"5":20,"4":42,"6":3}},"RI":{"n":63,"b":[-71.677124,41.769734,-71.359258,41.967496],"k":{"0":19,"3":12,"1":11,"2":8,"5":2,"4":15,"6":1}},"SC":{"n":253,"b":[-83.090658,32.190307,-78.886024,35.11162],"k":{"0":129,"2":44,"4":56,"1":32,"3":39,"5":3,"6":1}},"TN":{"n":352,"b":[-89.968511,34.997302,-81.804891,36.597486],"k":{"0":196,"1":55,"2":78,"4":59,"3":59,"6":5,"5":3}},"VA":{"n":426,"b":[-83.115313,36.583334,-75.717141,39.173869],"k":{"0":196,"4":89,"2":71,"5":35,"6":4,"1":61,"3":71}},"TX":{"n":984,"b":[-106.431106,25.995689,-93.754548,36.057423],"k":{"2":148,"4":169,"0":519,"1":142,"3":176,"5":10,"6":9}},"UT":{"n":84,"b":[-113.09554,37.683818,-109.538007,41.740256],"k":{"1":19,"2":6,"0":29,"3":9,"4":26,"5":1,"6":1}},"VT":{"n":66,"b":[-73.255316,42.861623,-72.124464,44.936689],"k":{"0":28,"3":6,"4":10,"1":24,"6":2,"2":9,"5":1}},"WA":{"n":618,"b":[-124.390294,45.694743,-117.050135,48.94992],"k":{"0":293,"1":96,"3":79,"2":85,"6":8,"4":107,"5":11}},"WV":{"n":217,"b":[-82.434689,37.262822,-77.881276,40.406331],"k":{"0":65,"1":35,"2":47,"3":42,"4":43,"5":34,"6":7}}}, PLKINDS = ["Food", "Shelter and housing", "Rent, bills and energy", "Clothing and household", "Health and clinics", "Benefits and county help", "Other help"], done = {}, wait = {}; window.LPPL = PL; window.LPIDX = PLIDX; window.LPKINDS = PLKINDS;
   const kindsTxt = p => (p.k || []).map(i => PLKINDS[i]).join(", ");
+  const hAddr = p => p.a ? `${p.a}, ${p.t}, ${p.s}` : "";   // fix22 (21 Nov): the street address split out of the help text (add_local_draft.py, item 17) reaches the resource page and its Directions link
   function addPlaces(rows) {
     rows.forEach(p => {
       if (p.note === undefined) p.note = "Call to confirm hours.";   // the build leaves out this usual note to save size
       p.xy = geoXY(p.lon, p.lat);
       // the words searched are the place's own kinds of help, so "food" finds food places, not every shelter and clinic
-      ITEMS.push({n: p.n, c: p.h, u: p.u || "", ph: p.ph || "", sets: ["Local help places"], hk: p.k, about: `${p.n} in ${p.t}, ${p.s}. ${p.h}.${p.a ? " Address: " + p.a + "." : ""}${(p.k || []).some(i => PLKINDS[i] !== "Other help") ? " Help with " + (p.k || []).map(i => PLKINDS[i]).filter(k => k !== "Other help").join(", ").toLowerCase() + "." : ""} ${p.v === "yes" ? "Volunteers wanted." : "Call to ask about volunteering."} ${p.note || ""}`, p: p.t, s: p.s, local: true, v: p.v, xy: p.xy, pages: [], lang: "English"});
-      P.push({n: p.n, k: "hserv", c: p.h, p: p.t, st: p.s, xy: p.xy, u: p.u || "", ph: p.ph || "", local: true, lang: "English", why: `${p.n} in ${p.t}, ${p.s} (${p.h}). ${p.v === "yes" ? "Volunteers wanted." : "Call to ask about volunteering."} Call before you go.`});
+      ITEMS.push({n: p.n, c: p.h, u: p.u || "", ph: p.ph || "", addr: hAddr(p), sets: ["Local help places"], hk: p.k, about: `${p.n} in ${p.t}, ${p.s}. ${p.h}.${p.a ? " Address: " + p.a + "." : ""}${(p.k || []).some(i => PLKINDS[i] !== "Other help") ? " Help with " + (p.k || []).map(i => PLKINDS[i]).filter(k => k !== "Other help").join(", ").toLowerCase() + "." : ""} ${p.v === "yes" ? "Volunteers wanted." : "Call to ask about volunteering."} ${p.note || ""}`, p: p.t, s: p.s, local: true, v: p.v, xy: p.xy, pages: [], lang: "English"});
+      P.push({n: p.n, k: "hserv", c: p.h, p: p.t, st: p.s, xy: p.xy, u: p.u || "", ph: p.ph || "", addr: hAddr(p), local: true, lang: "English", why: `${p.n} in ${p.t}, ${p.s} (${p.h}). ${p.v === "yes" ? "Volunteers wanted." : "Call to ask about volunteering."} Call before you go.`});
       PL.push(p);
     });
+    // fix21 (21 Nov): roomInit() drew dots only for the places already in P; help places that arrive later get theirs here
+    const dg = document.getElementById("bDots");
+    if (dg && typeof roomReady !== "undefined" && roomReady) P.forEach((x, i) => { if (x.el) return; const c = document.createElementNS(dg.namespaceURI, "circle");
+      c.setAttribute("cx", x.xy[0]); c.setAttribute("cy", x.xy[1]); c.setAttribute("fill", KC[x.k] || "#fff"); c.dataset.i = i; c.classList.add("out"); x.el = c; dg.append(c); });
     if (typeof __RW !== "undefined") for (const k in __RW) delete __RW[k];   // search_fix.js word cache: new words arrived
   }
   // load these states (once each); resolves to how many states were newly added. Offline: the app's saved copy answers.
@@ -3588,7 +3647,7 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
   const milesTxt = d => d < 1 ? "under 1 mile" : "about " + Math.round(d) + (Math.round(d) === 1 ? " mile" : " miles");
   function rowsFor() {
     const rows = [], loc = PL.map(p => ({p, d: mi(center.xy, p.xy)})).filter(r => r.d <= 60).sort((a, b) => a.d - b.d);
-    if (loc.length) rows.push({title: "Local help places", count: loc.length, items: loc.map(({p, d}) => ({n: p.n, c: p.h + " · " + milesTxt(d), u: p.u || "", ph: p.ph || "", sets: [], p: p.t, s: p.s, xy: p.xy, local: true, v: p.v, line: `${milesTxt(d)} · ${p.t}, ${p.s}.${p.a ? " " + p.a + "." : ""} ${p.v === "yes" ? "Volunteers wanted." : "Call to ask about volunteering."}${p.ph ? " Phone " + p.ph + "." : ""}${p.note ? " " + p.note : ""}`, about: `${p.n} in ${p.t}, ${p.s} (${p.h}). ${p.v === "yes" ? "Volunteers wanted." : "Call to ask about volunteering."} Call before you go.`}))});
+    if (loc.length) rows.push({title: "Local help places", count: loc.length, items: loc.map(({p, d}) => ({n: p.n, c: p.h + " · " + milesTxt(d), u: p.u || "", ph: p.ph || "", addr: hAddr(p), sets: [], p: p.t, s: p.s, xy: p.xy, local: true, v: p.v, line: `${milesTxt(d)} · ${p.t}, ${p.s}.${p.a ? " " + p.a + "." : ""} ${p.v === "yes" ? "Volunteers wanted." : "Call to ask about volunteering."}${p.ph ? " Phone " + p.ph + "." : ""}${p.note ? " " + p.note : ""}`, about: `${p.n} in ${p.t}, ${p.s} (${p.h}). ${p.v === "yes" ? "Volunteers wanted." : "Call to ask about volunteering."} Call before you go.`}))});
     const byKind = new Map();
     P.filter(y => y.xy && y.sda !== false && !y.local).forEach(y => { const d = mi(center.xy, y.xy); if (d <= (y.k === "church" ? 30 : 60)) (byKind.get(y.k) || byKind.set(y.k, []).get(y.k)).push([d, y]); });
     // audit 18 Nov: churches right after help places, before shops and schools
@@ -3705,7 +3764,7 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
   const asItem = y => ({n: y.n, c: KIND(y), u: y.u || "", sets: [], place: y, line: [y.p, y.st].filter(Boolean).join(", ")});
   function compute() {
     const qt = (S("q").value || "").trim(), c = centerNow(), only = SS.only, R = rankedList(qt, !!c), rows = [];
-    const flt = x => (!only.has("free") || FREEOK(x)) && (!only.has("spanish") || langOf(x) === "Spanish" || /spanish/i.test((x.sets || []).join(" "))) && (!only.has("hmong") || langOf(x) === "Hmong" || /hmong/i.test((x.sets || []).join(" ")))
+    const flt = x => (window.rbKeep ? window.rbKeep(x) : !only.has("free") || FREEOK(x)) && (!only.has("spanish") || langOf(x) === "Spanish" || /spanish/i.test((x.sets || []).join(" "))) && (!only.has("hmong") || langOf(x) === "Hmong" || /hmong/i.test((x.sets || []).join(" ")))
       && (!only.has("volunteers") || (x.local && x.v === "yes")) && (!SS.topics.size || (x.sets || []).some(s => SS.topics.has(s)) || (x.place && SS.topics.has("Adventist churches")));
     if (SS.near === "other" && !SS.other) return {rows, c: null};
     if (c && !ready(c)) ensure(c).then(n => { if (n && !ssp.hidden) refreshLite(); });   // the count updates once that state's help places arrive
@@ -3739,7 +3798,7 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
       <div class="note" id="ssUse">${e(usingLine())}<\/div>
       <div class="sl">How far<\/div>${[[0, "Any distance"], [10, "10 miles"], [25, "25 miles"], [50, "50 miles"], [100, "100 miles"]].map(([m, l]) => opt("miles", m, l, SS.miles === m)).join("")}<div class="note">Only cuts the list when you pick a distance. Otherwise everything is listed, nearest first.<\/div>
       <div class="sl">Sort by<\/div>${[["best", "Best match"], ["near", "Nearest first"], ["az", "A to Z"], ["new", "Newest"]].map(([v, l]) => opt("sort", v, l, SS.sort === v)).join("")}
-      <div class="sl">Show only<\/div>${[["free", "Free"], ["spanish", "Spanish"], ["hmong", "Hmong"], ["volunteers", "Volunteers wanted"]].map(([v, l]) => opt("only", v, l, SS.only.has(v))).join("")}
+      <div class="sl">Show only<\/div>${[["free", "Free"], ["spanish", "Spanish"], ["hmong", "Hmong"], ["volunteers", "Volunteers wanted"]].filter(([v]) => v !== "free" || !window.rbKeep).map(([v, l]) => opt("only", v, l, SS.only.has(v))).join("")}
       <div class="sl">Topics<\/div><button type="button" class="o${SS.topics.size ? "" : " on"}" data-g="topicsAll" data-v="1">All topics<\/button>
       <details><summary>Pick topics${SS.topics.size ? " (" + SS.topics.size + ")" : ""}<\/summary><div style="max-height:150px;overflow:auto">${TOP.map(t => opt("topic", t, t, SS.topics.has(t))).join("")}<\/div><\/details>
       <div class="sl">View results as<\/div>${[["list", "List"], ["map", "Map"]].map(([v, l]) => opt("view", v, l, SS.view === v)).join("")}
@@ -3893,7 +3952,7 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
       if (n.find) items = ITEMS.filter(x => n.find.test(`${x.n} ${x.about || ""}`) && !/Sermon Illustrations/i.test((x.sets || [])[0] || ""));
       if (n.pick) items = ITEMS.filter(x => HELPSET(x) && n.pick.test(`${x.n} ${x.u}`));
       if (n.words && typeof rankedList === "function") items = (rankedList(n.words) || []).filter(x => !x.place).slice(0, 15);
-      if (n.hk !== undefined && c) items = [...PL.filter(p => (p.k || []).includes(n.hk)).map(p => ({p, d: mi(c.xy, p.xy)})).filter(r => c.stateOnly ? r.p.s === c.st : r.d <= 60).sort((a, b) => a.d - b.d).map(({p, d}) => ({n: p.n, c: p.h + " · " + milesTxt(d), u: p.u || "", ph: p.ph || "", sets: [], p: p.t, s: p.s, xy: p.xy, local: true, v: p.v, line: `${milesTxt(d)} · ${p.t}, ${p.s}.${p.ph ? " Phone " + p.ph + "." : ""}`, about: `${p.n} in ${p.t}, ${p.s}. Call before you go.`})), ...items];
+      if (n.hk !== undefined && c) items = [...PL.filter(p => (p.k || []).includes(n.hk)).map(p => ({p, d: mi(c.xy, p.xy)})).filter(r => c.stateOnly ? r.p.s === c.st : r.d <= 60).sort((a, b) => a.d - b.d).map(({p, d}) => ({n: p.n, c: p.h + " · " + milesTxt(d), u: p.u || "", ph: p.ph || "", addr: hAddr(p), sets: [], p: p.t, s: p.s, xy: p.xy, local: true, v: p.v, line: `${milesTxt(d)} · ${p.t}, ${p.s}.${p.ph ? " Phone " + p.ph + "." : ""}`, about: `${p.n} in ${p.t}, ${p.s}. Call before you go.`})), ...items];
       add(n.title, items);
     }
     if (c) {   // churches can pray, visit and often help through Community Services or a food pantry
@@ -5481,7 +5540,7 @@ function searchAdj(x, q) {
     const raw = (q || "").trim(); let hits = null; try { hits = raw ? rank(raw) : null; } catch (e) { console.error("search v2", e); }
     // audit 18 Nov: help places loaded for an earlier ZIP or town stay out of a plain search ("sabath school" found Sabathani Food Distribution); searches near a place (peek) keep them
     const miss = hits && hits.miss || [];   // find10 (Z): words no item uses
-    if (hits && !pt.peek) hits = hits.filter(h => !h[1].local);
+    if (hits && !pt.peek) hits = hits.filter(h => !h[1].local && (!window.rbKeep || window.rbKeep(h[1])));   // cost tags: "Free only" (rb.js) narrows the hits, so "N found" counts free ones
     if (hits && !hits.length) return nothing(raw, pt);
     if (!hits) { const r = _s.apply(this, arguments);
       // audit 18 Nov: the older search's "Churches open on their own map page" only when churches are in the list
@@ -5754,64 +5813,3 @@ function searchAdj(x, q) {
 })();
 
 </script>
-<script>
-// Daniel's own devices (11 Nov 2026): open the site once with #this-is-me on each of his devices; after that, that device's
-// visits are counted under me-pc/ or me-phone/ so the report can tell him apart from everyone else (#not-me undoes it).
-// Stored only in that browser; nothing about other visitors changes.
-window.PRL_ME = (() => { try {
-  if (location.hash === "#this-is-me") { localStorage.setItem("prl-me", "1"); history.replaceState(null, "", location.pathname + location.search);
-    addEventListener("DOMContentLoaded", () => { const n = document.createElement("div"); n.textContent = "This device is marked as yours. Your visits now count separately."; n.style.cssText = "position:fixed;left:50%;top:16px;transform:translateX(-50%);z-index:999;background:#d4af5a;color:#1b1404;padding:10px 16px;border-radius:12px;font:600 14px system-ui"; document.body.appendChild(n); setTimeout(() => n.remove(), 5000); }); }
-  if (location.hash === "#not-me") { localStorage.removeItem("prl-me"); history.replaceState(null, "", location.pathname + location.search); }
-  return localStorage.getItem("prl-me") ? (/Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent) ? "me-phone/" : "me-pc/") : "";
-} catch (e) { return ""; } })();
-if (window.PRL_ME) window.goatcounter = {path: p => "/" + window.PRL_ME + p.replace(/^\//, "")};   // page visits from Daniel's devices
-</script>
-<script data-goatcounter="https://pastor-resource-list.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<script>
-// usage counts for Daniel's GoatCounter dashboard (3 Nov 2026): no cookies, no names of visitors
-(() => {
-  const ev = (path, title) => { path = (window.PRL_ME || "") + path; try { window.goatcounter && goatcounter.count && goatcounter.count({path: path.slice(0, 200), title: title || path, event: true}); } catch (e) {} };
-  const wrap = (name, f) => { const old = window[name]; if (typeof old === "function") window[name] = function(...a) { try { f(...a); } catch (e) {} return old.apply(this, a); }; };
-  wrap("openList", (eye, title, sub, chips, items) => { if (eye === "Search") ev(`search/${items.length ? "" : "NOTHING FOUND/"}${title.replace(/[“”]/g, "").toLowerCase()}`); else if (eye === "Person") ev(`person/${title}`); });
-  wrap("goLevel", (lv, name) => { if (lv && lv.level && lv.level !== "us") ev(`map/${lv.level}/${name || ""}`); });
-  wrap("openPlace", x => x && ev(`open/place/${x.n}`));
-  wrap("openDetail", x => x && ev(`open/resource/${x.n}`));
-  document.addEventListener("click", e => { const a = e.target.closest("a[href^='http']"); if (a && new URL(a.href).host !== location.host) ev(`link/${new URL(a.href).host}`, a.href); }, true);
-  addEventListener("appinstalled", () => ev("app/installed"));
-})();
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js").then(r => r.update()).catch(() => {});
-  // No reload when a new helper takes over (Daniel, 9 Nov 2026: the app "blinks" 1-2 s after opening).
-  // sw.js is network-first, so the page that just opened is already the newest; the new helper only refreshes the offline copy.
-}
-document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 19 Nov 2026, 03:35"; document.body.appendChild(f); });
-(() => {
-  const bar = document.getElementById("installBar"), btn = document.getElementById("installBtn");
-  const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone;
-  let hidden = false; try { hidden = localStorage.getItem("prl-install-hidden") === "1"; } catch (e) {}
-  if (installed || hidden) { bar.hidden = true; return; }
-  const ua = navigator.userAgent, os = /iPhone|iPad|iPod/.test(ua) ? "ios" : /SamsungBrowser/.test(ua) ? "android-samsung" : /Android/.test(ua) ? "android" : "desktop";
-  // this device's steps first, then the others, all shown (no folding)
-  const mine = document.querySelector(`[data-os="${os}"]`); mine.parentNode.insertBefore(mine, mine.parentNode.children[1]);
-  document.querySelectorAll("[data-os]").forEach(d => { d.hidden = false; d.style.opacity = d === mine ? "1" : ".8"; });
-  let ask = window.__bip;   // caught in the head (Daniel, 5 Nov 2026: "works on pc but not phone")
-  addEventListener("beforeinstallprompt", e => { e.preventDefault(); ask = e; });  // one-tap install where the browser allows it
-  // the button is always there: one tap installs where the browser allows it; otherwise it shows this browser's own 2 or 3 taps
-  btn.onclick = async () => {
-    if (ask) { ask.prompt(); const r = await ask.userChoice; ask = null; if (r.outcome === "accepted") bar.hidden = true; return; }
-    ask = ask || window.__bip; if (ask) { ask.prompt(); const r = await ask.userChoice; ask = null; window.__bip = null; if (r.outcome === "accepted") bar.hidden = true; return; }
-    const w = document.createElement("div");
-    w.style.cssText = "position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.6);display:grid;place-items:center;padding:20px";
-    w.innerHTML = `<div style="background:#fff;color:#111;border-radius:16px;max-width:440px;width:100%;padding:20px;font:17px/1.5 system-ui,sans-serif;display:grid;gap:12px">
-      <b style="font-size:20px">Add it to your home screen</b>
-      <div>This phone installs apps from its own browser. Follow these taps to get the real app (not just a shortcut):</div>
-      <div style="background:#f2f2f6;border-radius:10px;padding:12px">${mine.innerHTML}</div>
-      <div style="font-size:14px;color:#555">It installs the real app: its own icon, full screen, works without signal.</div>
-      <button style="justify-self:end;font:700 16px system-ui;padding:10px 20px;border:0;border-radius:10px;background:${getComputedStyle(bar).backgroundColor};color:#fff">OK</button></div>`;
-    w.onclick = e => { if (e.target === w || e.target.tagName === "BUTTON") w.remove(); };
-    document.body.appendChild(w);
-  };
-  addEventListener("appinstalled", () => { bar.hidden = true; });
-  document.getElementById("installHide").onclick = () => { bar.hidden = true; try { localStorage.setItem("prl-install-hidden", "1"); } catch (e) {} };
-})();
-</script></body></html>
