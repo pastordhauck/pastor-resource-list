@@ -5560,13 +5560,15 @@ window.SV3 = (() => {
   const CHW = new Set("church churches sda adventist adventists seventh day company congregation school schools academy academies college colleges local english spanish hispanic latino hmong korean chinese french haitian filipino japanese vietnamese russian romanian portuguese brazilian african ghanaian samoan tongan laotian lao cambodian karen arabic german polish ukrainian slavic indonesian ethiopian nepali burmese deaf multicultural international bilingual iglesia iglesias hispana hispano adventista espanol habla service services pastor pastors".split(" "));
   const SCHOOL = /^Adventist (Schools|K-|elementary)/i;
   const FK = new WeakMap(), fk = x => { let k = FK.get(x); if (k === undefined) FK.set(x, k = flat(x.n) + "|" + flat(x.p)); return k; };   // speed (23 Nov): name|town key, once per entry
+  const SPW = /\b(spanish|espanol|hispan\w*|latin[oa]s?|ayuda|comida|gratis|estudios?|biblic[oa]s?|biblia|elena|iglesias?|jovenes|mayordomia|oracion|grupos|bodas?|cena|sermones|recetas|escuela|familias?|recursos|ancianos|diacon\w*|himnario|adventistas?|funerales)\b/;
+  window.searchV2Spanish = q => { const ql = norm(q); return toks(ql).some(w => /^(de|la|el|los|las|para|del|y|en|con|por|una)$/.test(w)) || SPW.test(ql); };   // push90: Spanish searches keep word search only (meaning.js)
   function rank(q) {
     const {cs, ws} = concepts(q); if (!cs.length) return null;
     const ql = norm(q), qf = flat(q), qt = " " + toks(ql).map(pstem).join(" ") + " ", shopOk = s => SHOP[s] ? SHOP[s].test(ql) : true;
     const hw = ws.filter(w => !SOFT.has(w)), chOk = (hw.length ? hw : ws).every(w => CHW.has(w) || CHW.has(stem(w)) || (w.length === 2 && NAME[w.toUpperCase()])) || Object.keys(NAME).some(k => (q.includes(k) && new RegExp("\\b" + k + "\\b").test(q)) || new RegExp("\\b" + NAME[k].toLowerCase() + "\\b").test(ql));   // find10 (G): soft words aside, "korean church resources" still asks for churches
     const ac = chOk ? cs.findIndex(c => c.alts[0] === "adventist church") : -1; if (ac >= 0) cs.splice(ac, 1, {alts: ["adventist"]}, {alts: ["church"], soft: true});   // find12: a church search ("karen adventist church") keeps the two words as before
     const sabOnly = /\bsabb?ath\b/.test(ql) && !/\bschool\b/.test(ql);   // "sabbath" alone: the day itself before Sabbath School lessons
-    const storyQ = /\b(illustrat\w*|stor(y|ies)|anecdotes?)\b/.test(ql), spQ = ES || /\b(spanish|espanol|hispan\w*|latin[oa]s?|ayuda|comida|gratis|estudios?|biblic[oa]s?|biblia|elena|iglesias?|jovenes|mayordomia|oracion|grupos|bodas?|cena|sermones|recetas|escuela|familias?|recursos|ancianos|diacon\w*|himnario|adventistas?|funerales)\b/.test(ql);   // Spanish words from SYN
+    const storyQ = /\b(illustrat\w*|stor(y|ies)|anecdotes?)\b/.test(ql), spQ = ES || SPW.test(ql);   // Spanish words from SYN
     const pairs = ws.slice(1).map((w, i) => new RegExp("\\b" + ws[i] + "\\w*[^a-z0-9]+(?:[a-z]+[^a-z0-9]+)?" + w));   // side by side (one small word between is fine)
     const cand = [], listed = new Set(ITEMS.map(fk));
     ITEMS.forEach(x => cand.push([x, prep(x, `${x.n} ${x.c} ${x.about} ${x.p} ${x.s} ${NAME[x.s] || ""}`, `${x.c} ${x.sets.join(" ")}`)]));
@@ -5612,7 +5614,8 @@ window.SV3 = (() => {
   // search v3: the query's meaning words, stemmed the way the homework was (design/search_v3/build_data.py calls this too)
   const words = q => toks(norm(q)).filter(w => w.length > 1 && !STOPW.has(w)).map(w => stem(spell(w)));
   if (window.SV3) SV3.words = words;
-  function rank3(raw) {   // search v3: a sentence whose homework topic is clear shows that topic first, then the word matches
+  function rank3(raw) { const r = rank3w(raw); return window.PRLM && r ? PRLM.blend(raw, r, rank3w) : r; }   // push90: meaning search re-orders once its answer for this exact search is ready (meaning.js)
+  function rank3w(raw) {   // search v3: a sentence whose homework topic is clear shows that topic first, then the word matches
     const r0 = rank(raw), g = window.SV3 && SV3.topic(raw, r0); if (!g) return r0;
     const inT = x => (x.sets || []).includes(g), a = r0.filter(h => inT(h[1])), seen = new Set(a.map(h => h[1]));
     if (a.length < 8) rank(g.replace(/[^A-Za-z ]+/g, " ")).forEach(h => { if (inT(h[1]) && !seen.has(h[1])) { seen.add(h[1]); a.push(h); } });
@@ -6139,6 +6142,118 @@ const SPT = {"big":{"newyork":["NY"],"losangeles":["CA"],"chicago":["IL"],"houst
   G.SP = SP;
 })();
 
+/* ---- meaning search (push90, 24 Nov 2026; work/design/search_v3/push90/PUSH90_REPORT.md "Final recipe", LIVE_REPORT.md) ----
+   Word results always show first. Then, on this device only, the small gte-small model (self-hosted in meaning/, never Hugging Face)
+   turns the search into numbers, asks the topic memory (7,966 labelled questions, 666 of them Reddit-style) which topics it belongs to, and re-orders the list
+   quietly, unless the visitor has touched the page since. Nothing typed is ever sent anywhere.
+   Daniel's rules: download only on Wi-Fi or an unknown connection (desktop, iPhone), never on a phone network or with Save-Data on;
+   download once (browser cache) and ask the browser to keep it (storage.persist). Spanish searches keep word search only. */
+window.PRLM = (() => {
+  const LIB = "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.1", BASE = new URL("meaning/", location.href).href, CN = "prl-meaning-v2";
+  const KW = {a: 0.4, b: 3, k: 20, p: 4, guard: 0.8, cap: 2, ntop: 3, K: 100, gate: 0.85};   // fast.py Ranker.rank settings; gate: meaning-only results (word search found nothing) need a training question this close (gate.py)
+  let ready = null, M = null, ext = null, IV = null, TV = null, itemAt = null, rowOf = null, seq = 0, touched = false, upgrading = false;
+  const vecs = new Map(), done = new Map();   // query -> its vector; query -> the blended order (rows)
+  const conn = () => navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  const cached = async () => { try { return !!(await caches.match(BASE + "models/Xenova/gte-small/onnx/model_quantized.onnx")) && !!(await caches.match(BASE + "items_i8.bin?" + CN)); } catch (e) { return false; } };
+  const allowed = async () => { const c = conn(); if (c && c.saveData) return false;   // data-saver: never, not even from the cache (0 bytes)
+    if (c && c.type && !/^(wifi|ethernet|wimax|unknown|other)$/.test(c.type)) return cached();   // a phone network: only what is already downloaded
+    return true; };   // Wi-Fi, or the type is unknown (desktop, iPhone)
+  const get = async (f, as) => { const u = BASE + f + "?" + CN; let c = null, r; try { c = await caches.open(CN); r = await c.match(u); } catch (e) {}
+    if (!r) { r = await fetch(u); if (!r.ok) throw new Error(f + " " + r.status); if (c) try { await c.put(u, r.clone()); } catch (e) {} }
+    return as === "json" ? r.json() : r.arrayBuffer(); };
+  const key = s => { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h; };   // = make_meaning_data.py fnv()
+  const init = () => ready || (ready = (async () => {
+    if (!(await allowed())) { ready = null; return false; }   // asked again at the next search (maybe on Wi-Fi by then)
+    try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
+    try { (await caches.keys()).filter(k => k.startsWith("prl-meaning-") && k !== CN).forEach(k => caches.delete(k)); } catch (e) {}
+    const T = await import(LIB); Object.assign(T.env, {allowRemoteModels: false, allowLocalModels: true, localModelPath: BASE + "models/", useBrowserCache: true});
+    const [e, iv, tv, m] = await Promise.all([T.pipeline("feature-extraction", "Xenova/gte-small", {dtype: "q8", device: "wasm"}), get("items_i8.bin"), get("train_i8.bin"), get("meta.json", "json")]);
+    ext = e; IV = new Int8Array(iv); TV = new Int8Array(tv); M = m;
+    const byKey = new Map(); M.keys.forEach((k, i) => byKey.set(k, i)); itemAt = []; rowOf = new Map(); let i = 0;
+    ITEMS.forEach(x => { if (x.local) return; const k = key(x.n + "\u0001" + (x.sets || []).slice(0, 3).join("\u0001")), r = M.keys[i] === k ? i : byKey.get(k); i++;
+      if (r !== undefined) { itemAt[r] = x; rowOf.set(x, r); } });
+    M.rareS = new Set(M.rare); return true;
+  })().catch(e => { console.warn("meaning search off:", e); return false; }));
+  // word list v08 expansion (push90/qexp.py fix+abbr+syn): fix whole-phrase misspellings, add short-name expansions and synonyms
+  const grams = (t, n = 6) => { const ts = [...t.matchAll(/[A-Za-z0-9'À-ſ]+/g)], out = [];
+    for (let i = 0; i < ts.length; i++) for (let j = i; j < Math.min(ts.length, i + n); j++) out.push([ts[i].index, ts[j].index + ts[j][0].length, t.slice(ts[i].index, ts[j].index + ts[j][0].length).toLowerCase()]);
+    return out; };
+  const expand = q => { let out = q; const used = [];
+    grams(q).filter(g => M.fix[g[2]]).sort((a, b) => (b[1] - b[0]) - (a[1] - a[0])).forEach(([s, e]) => { if (!used.some(([us, ue]) => s < ue && us < e)) used.push([s, e]); });
+    used.sort((a, b) => b[0] - a[0]).forEach(([s, e]) => { out = out.slice(0, s) + M.fix[q.slice(s, e).toLowerCase()] + out.slice(e); });
+    const add = [];
+    for (const [t] of q.matchAll(/[A-Za-z0-9]+/g)) { const up = /[A-Z]/.test(t) && t === t.toUpperCase();
+      const e = up && t.length >= 2 ? M.abbr[t] : (t.length >= 3 && M.rareS.has(t.toUpperCase()) ? M.abbr[t.toUpperCase()] : null);
+      if (e && !out.toLowerCase().includes(e.toLowerCase())) add.push(e); }
+    const low = out.toLowerCase();
+    grams(low).forEach(([, , p]) => { if (p.length >= 6 && M.syn[p]) add.push(...M.syn[p].filter(s => !low.includes(s.toLowerCase())).slice(0, 2)); });
+    return (out + (add.length ? " (" + [...new Set(add)].join("; ") + ")" : "")).trim(); };
+  const dots = (A, q) => { const n = A.length / 384, s = new Float32Array(n);
+    for (let i = 0, o = 0; i < n; i++, o += 384) { let a = 0; for (let k = 0; k < 384; k++) a += A[o + k] * q[k]; s[i] = a / M.scale; } return s; };
+  const topk = (s, k, ok) => { const t = []; for (let i = 0; i < s.length; i++) { if (ok && !ok(i)) continue; if (t.length === k && s[i] <= s[t[k - 1]]) continue;
+    let j = t.length < k ? t.length : k - 1; while (j > 0 && s[t[j - 1]] < s[i]) { t[j] = t[j - 1]; j--; } t[j] = i; } return t; };   // best first; ties keep the lower index
+  const nm = s => (s || "").toLowerCase().replace(/[^a-z0-9 ]+/g, "").split(/\s+/).filter(Boolean);
+  const ratio = (a, b) => { if (!a.length && !b.length) return 1;   // difflib.SequenceMatcher(None, a, b).ratio()
+    const m = (al, ah, bl, bh) => { let bi = al, bj = bl, bk = 0;
+      for (let i = al; i < ah; i++) for (let j = bl; j < bh; j++) { let k = 0; while (i + k < ah && j + k < bh && a[i + k] === b[j + k]) k++; if (k > bk) { bi = i; bj = j; bk = k; } }
+      return bk ? bk + m(al, bi, bl, bj) + m(bi + bk, ah, bj + bk, bh) : 0; };
+    return 2 * m(0, a.length, 0, b.length) / (a.length + b.length); };
+  function order(raw, q, r0, rw) {   // fast.py Ranker.rank: rows best first, or null to keep the word list
+    const {a, b, k, p, guard, cap, ntop, K} = KW, c = dots(IV, q), top = topk(c, K, i => !!itemAt[i]), lo = c[top[top.length - 1]], hi = c[top[0]], sc = new Map();
+    const mean = i => a * Math.max(0, (c[i] - lo) / (hi - lo + 1e-9));
+    top.forEach(i => sc.set(i, mean(i)));
+    const w = rw.slice(0, 100).map(h => rowOf.get(h[1])).filter(i => i !== undefined);
+    w.forEach((i, j) => sc.set(i, (sc.get(i) || 0) + (1 - a) / (1 + j / 5)));
+    const s = dots(TV, q), best = s[topk(s, 1)[0]];
+    if (!w.length && best < KW.gate) return null;   // word search found nothing and nothing in the topic memory is close: keep "Nothing on ..."
+    const qs = new Set(nm(raw)), ns = w.length ? new Set(nm(itemAt[w[0]].n)) : null, both = ns ? [...qs].filter(x => ns.has(x)).length : 0;
+    const isname = !!ns && qs.size > 0 && both / qs.size >= 0.75 && both / Math.max(1, ns.size) >= 0.5;
+    let fuzzy = null;
+    if (!isname) { const qn = nm(raw).join(" ");
+      for (const i of [...top.slice(0, 10), ...w.slice(0, 10)]) { const n = nm(itemAt[i].n).join(" ");
+        if (2 * Math.min(qn.length, n.length) / (qn.length + n.length || 1) >= guard && ratio(qn, n) >= guard) { fuzzy = i; break; } } }
+    if (!isname) {   // topic memory: the 20 nearest training questions vote for their topics
+      const v = new Float32Array(M.topics.length); topk(s, k).forEach(j => { v[M.tt[j]] += Math.max(s[j], 0) ** p; });
+      const mx = Math.max(...v) + 1e-9; for (let t = 0; t < v.length; t++) v[t] /= mx;
+      topk(v, ntop).forEach(t => { topk(c, 5, i => !!itemAt[i] && M.sets[i].includes(t)).forEach(i => { if (!sc.has(i)) sc.set(i, mean(i)); }); });
+      sc.forEach((x, i) => sc.set(i, x + b * [...new Set(M.sets[i])].reduce((z, t) => z + v[t], 0))); }
+    let out = [...sc.keys()].sort((x, y) => sc.get(y) - sc.get(x) || x - y);
+    if (isname) out = [w[0], ...out.filter(i => i !== w[0])]; else if (fuzzy !== null) out = [fuzzy, ...out.filter(i => i !== fuzzy)];
+    const got = [], rest = [], cnt = new Map();   // at most `cap` items of one first topic in the top 5
+    out.forEach(i => { const t = (itemAt[i].sets || [])[0] || ""; if (got.length < 5 && (cnt.get(t) || 0) < cap) { got.push(i); cnt.set(t, (cnt.get(t) || 0) + 1); } else rest.push(i); });
+    const all = got.concat(rest);   // a search that asks for sermon stories keeps the stories first, as word search does (search_v2.js storyQ)
+    if (!/\b(illustrat\w*|anecdotes?)\b/i.test(raw) && !(/\bstor(y|ies)\b/i.test(raw) && /\b(sermons?|preach\w*)\b/i.test(raw))) return all;   // "story hour", "children's story ideas" are not asks for sermon stories
+    const ill = i => (itemAt[i].sets || [])[0] === "Sermon Illustrations"; return all.filter(ill).concat(all.filter(i => !ill(i))); }
+  const skip = raw => !raw || (window.searchV2Spanish && searchV2Spanish(raw));
+  // rank3 (search_v2.js) asks: the word hits r re-ordered, when this exact search's meaning answer is ready; else r unchanged
+  const blend = (raw, r) => { const o = done.get(raw); if (!o) return r;
+    const seen = new Set(), res = []; o.forEach(i => { const x = itemAt[i]; if (x && !seen.has(x)) { seen.add(x); res.push([0, x]); } });
+    r.forEach(h => { if (!seen.has(h[1])) { seen.add(h[1]); res.push(h); } });
+    res.miss = r.miss || []; res.full = r.full; return res; };
+  const work = async (raw, rank3w) => {   // -> truthy when this search now has a meaning order
+    if (done.has(raw)) return true; if (skip(raw) || !(await init())) return false;
+    const e = expand(raw); let q = vecs.get(e);
+    if (!q) { q = (await ext(e, {pooling: "mean", normalize: true})).data; vecs.set(e, q); if (vecs.size > 60) vecs.delete(vecs.keys().next().value); }
+    const r0 = rank3w(raw) || [], rw = e !== raw ? rank3w(e) || [] : r0, o = order(raw, q, r0.filter(h => !h[1].local), rw);
+    if (!o) return false; done.set(raw, o); if (done.size > 60) done.delete(done.keys().next().value); return r0; };   // r0: the word order on screen
+  let last = Promise.resolve(), R3 = null;
+  ["pointerdown", "touchstart", "wheel", "keydown"].forEach(t => addEventListener(t, () => { touched = true; }, {capture: true, passive: true}));   // the visitor's own moves only (not the page's scroll reset)
+  // after a plain search has drawn its word results: work out the meaning order, then redraw in place if nothing moved since
+  const after = (raw, pt, s0) => { const my = ++seq; touched = false;
+    last = (async () => { if (!R3 || skip(raw)) return; if (done.has(raw)) return;   // a repeat search already drew the meaning order
+      await new Promise(r => requestAnimationFrame(() => setTimeout(r, 0))); if (my !== seq || touched) return;   // let the word results paint before the model runs on this thread
+      const r0 = await work(raw, R3); if (!r0 || my !== seq || touched) return;
+      const before = r0.slice(0, 12).map(h => h[1]), now = blend(raw, r0).slice(0, 12).map(h => h[1]); if (now.length === before.length && now.every((x, i) => x === before[i])) return;
+      const t = document.getElementById("tTitle"); if (!t || t.textContent !== `“${raw}”` || typeof stack === "undefined" || stack[stack.length - 1].id !== "L-topic") return;
+      const n = stack.length; upgrading = true; try { s0.call(window, raw, pt); } finally { upgrading = false; }
+      if (stack.length === n + 1 && stack[n].id === stack[n - 1].id) { stack.pop(); if (typeof trail === "function") trail(); }   // a redraw, not a new page: Back still goes where it went
+    })().catch(e => console.warn("meaning search:", e)); };
+  if (typeof search === "function") { const s0 = search;
+    search = function (q, pt) { const r = s0.apply(this, arguments); if (!upgrading && !(pt && pt.peek)) after((q || "").trim(), pt, s0); return r; }; }
+  const qi = document.getElementById("q"); if (qi) qi.addEventListener("focus", () => { init(); }, {once: true});   // start the download when the visitor starts a search
+  return {blend: (raw, r, rank3w) => { R3 = R3 || rank3w; return blend(raw, r); }, init, expand, settled: () => last, state: () => ({ready: !!M, items: rowOf ? rowOf.size : 0}), _work: raw => R3 ? work(raw, R3) : Promise.resolve(false)};
+})();
+
 /* Screenshot harness: only runs when the page is opened with #shot=NAME (used to take real pictures of the real app for the welcome tour). Never runs for visitors. */
 (() => {
   const m = location.hash.match(/^#shot=(\w+)/); if (!m) return;
@@ -6407,7 +6522,7 @@ if ("serviceWorker" in navigator) {
   // No reload when a new helper takes over (Daniel, 9 Nov 2026: the app "blinks" 1-2 s after opening).
   // sw.js is network-first, so the page that just opened is already the newest; the new helper only refreshes the offline copy.
 }
-document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 24 Nov 2026, 02:39"; document.body.appendChild(f); });
+document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 24 Nov 2026, 05:50"; document.body.appendChild(f); });
 (() => {
   const bar = document.getElementById("installBar"), btn = document.getElementById("installBtn");
   const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone;
