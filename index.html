@@ -1281,6 +1281,25 @@ html.rb .rb-lk.rb-ct2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orien
    Topic and result pages can have up to five filters that scroll as before, so there "Free" comes first and is always in sight. Measured 360-412px */
 @media (max-width:820px){html.rb #rbOptsH .rb-ofil:has([data-freeonly]){gap:12px;padding-right:0;-webkit-mask-image:none;mask-image:none}html.rb #rbOptsT [data-freeonly]{order:-1}}
 @media (max-width:404px){html.rb #rbOptsH .rb-ofil:has([data-freeonly]) .rb-opt svg{display:none}}
+
+/* search features (Daniel 23-24 Nov): voice button inside the thin search bar, its one-line note, the three empty-search lines, and the
+   Free / Near me / Online buttons above search results (the result page's own chip look) */
+html.rb #qform #qmic{display:flex;align-items:center;justify-content:center;flex:none;width:34px;height:34px;padding:0;margin:0;border:0;border-radius:50%;background:none;color:var(--muted);cursor:pointer}
+html.rb #qform #qmic:hover{color:var(--ink)}
+html.rb #qform #qmic.on{color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent)}
+@media (prefers-reduced-motion:no-preference){html.rb #qform #qmic.on{animation:rbMic 1.4s ease-in-out infinite}}
+@keyframes rbMic{50%{background:color-mix(in srgb,var(--acc) 24%,transparent)}}
+html.rb .rb-micnote{margin:6px 2px 0;font-size:13px;line-height:1.35;color:var(--muted);width:100%}
+html.rb .rb-top .rb-micnote{color:var(--topmuted,var(--muted))}
+html.rb .rb-empty{display:grid;gap:6px;width:100%;margin:2px 0 6px;font-size:15px;color:var(--ink)}
+html.rb .rb-empty p{margin:0}
+html.rb #tChips .rb-empty .rb-elink{all:unset;cursor:pointer;color:var(--acc);font-weight:600;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+html.rb #tChips .rb-empty .rb-elink:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:3px}
+html.rb .rb-sf{display:flex;flex-wrap:wrap;gap:8px;width:100%;margin:4px 0 0}
+html.rb #tChips .rb-sf .rb-opt{display:inline-flex;align-items:center;min-height:32px;padding:3px 13px;font-size:14px;font-weight:500;color:var(--ink);cursor:pointer}
+html.rb #tChips .rb-sf .rb-opt[aria-pressed="true"]{font-weight:600;border-color:var(--ink)}
+html.rb .rb-sf .rb-ctck{display:none}
+html.rb .rb-sf .rb-opt[aria-pressed="true"] .rb-ctck{display:inline;white-space:pre}
 </style>
 <script>(h=>{h.classList.add("rb");try{let s=localStorage.getItem("prl-style")||"parchment";s=["light","linen","gray","parchment","bank","d_merlot","d_mist","d_harvest","d_alabaster"].includes(s)?"parchment":"dark";h.dataset.style=s;if(!["light","linen","gray","parchment","bank","d_merlot","d_mist","d_harvest","d_alabaster"].includes(s))h.classList.add("rbdark")}catch(e){}})(document.documentElement)</script>
 
@@ -5600,10 +5619,30 @@ window.SV3 = (() => {
     // three searches to try: synonym words and topic names that share a word start with the query, then common topics
     const qw = toks(norm(raw)).filter(w => w.length > 3 && !STOPW.has(w)).map(w => w.slice(0, 4));
     const near = qw.length ? [...Object.keys(SYN), ...new Set(ITEMS.flatMap(x => x.sets))].filter(k => toks(norm(k)).some(t => qw.some(p => t.startsWith(p)))) : [];
-    const sug = [...new Set([...near, ...TRY])].filter(k => flat(k) !== flat(raw)).slice(0, 3);
-    openList("Search", `“${raw}”`, `Nothing on “${raw}” yet. Try fewer or simpler words, a town or state name, or one of these searches:`, [], [], pt);
-    const ch = document.getElementById("tChips"); if (ch) { ch.innerHTML = sug.map(k => `<button type="button" class="chip" data-sq="${esc(k)}">${esc(k)}<\/button>`).join("");
-      ch.onclick = e => { const b = e.target.closest("[data-sq]"); if (!b) return; const qi = document.getElementById("q"); qi.value = b.dataset.sq; qi.form.requestSubmit(); }; }
+    // features (Daniel 23 Nov, "Kept to one line each"): three short lines: close searches to try, the nearest topic's full list, tell us
+    const found = k => { try { const r = rank3(k); return !(r.miss || []).length && r.some(h => !h[1].local); } catch (e) { return false; } };   // every word found, none dropped
+    const close = [];   // a looser typo fix than spell(): two letters off a word the list uses ("evangalsim" -> evangelism)
+    const fix = toks(norm(raw)).map(w => { if (w.length < 4 || /\d/.test(w) || STOPW.has(w) || isWord(w)) return w; let best = w, bn = 0;
+      for (const [k, n] of voc()) if (n > bn && k[0] === w[0] && Math.abs(k.length - w.length) <= 2 && osa(w, k) <= 2) { best = k; bn = n; } return best; }).join(" ");
+    if (fix !== toks(norm(raw)).join(" ") && found(fix)) close.push(fix);
+    for (const k of near) { if (close.length >= 2) break; if (flat(k) !== flat(raw) && !close.includes(k.toLowerCase()) && found(k)) close.push(k); }
+    const sets = new Set(ITEMS.flatMap(x => x.sets)); let topic = near.find(k => sets.has(k));
+    if (!topic && close.length) try { const h = rank3(close[0]).find(h => !h[1].local && (h[1].sets || [])[0]); topic = h && h[1].sets[0]; } catch (e) {}
+    const sug = close.length ? close : TRY.slice(0, 2), CH = k => `<button type="button" class="rb-elink" data-sq="${esc(k)}">${esc(k)}<\/button>`;
+    openList("Search", `“${raw}”`, `Nothing on “${raw}” yet.`, [], [], pt);
+    const tc = document.getElementById("tCards"); if (tc && /Nothing found/.test(tc.textContent)) tc.innerHTML = "";   // the three lines below say it
+    const ch = document.getElementById("tChips"); if (ch) {
+      ch.innerHTML = `<div id="rbEmpty" class="rb-empty"><p>${close.length ? "Did you mean" : "Try"} ${sug.map(CH).join(" or ")}${close.length ? "?" : "."}<\/p>`
+        + `<p>${topic ? `See the full list: <button type="button" class="rb-elink" data-topic="${esc(topic)}">${esc(topic)} ›<\/button>` : `<button type="button" class="rb-elink" data-rbclearq>Browse every topic ›<\/button>`}<\/p>`
+        + (typeof FORM === "string" && FORM ? `<p><a class="rb-elink" href="${esc(FORM)}" target="_blank" rel="noopener">Tell us what you were looking for ↗<\/a><\/p>` : "") + `<\/div>`;
+      ch.onclick = e => { const b = e.target.closest("[data-sq],[data-topic]"); if (!b) return;
+        if (b.dataset.topic) { const t = b.dataset.topic, its = ITEMS.filter(x => (x.sets || []).includes(t)); return openList("Topic", t, `${fmt(its.length)} on the list.`, [], its, typeof at === "function" ? at(e) : pt); }
+        const qi = document.getElementById("q"); qi.value = b.dataset.sq; qi.form.requestSubmit(); }; }
+    // empty-search counter (Daniel 23 Nov): short word searches only; never a story, an email or numbers other than a ZIP. A speaker match is not empty.
+    const ws = raw.toLowerCase().replace(/[“”"]/g, "").split(/\s+/).filter(Boolean);
+    if (ws.length && ws.length <= 5 && !/@/.test(raw) && ws.every(w => !/\d/.test(w) || /^\d{5}$/.test(w)) && !(window.SV3 && SV3.story && SV3.story(raw, [1, 1])))
+      setTimeout(() => { if (document.getElementById("rbSpkHits")) return;
+        try { window.goatcounter && goatcounter.count && goatcounter.count({path: ((window.PRL_ME || "") + "search-empty/" + ws.join(" ")).slice(0, 200), title: "search-empty", event: true}); } catch (e) {} }, 0);
     if (typeof window.lpHelpHint === "function") window.lpHelpHint(raw); }   // for the audit test (work/design/search_audit_2026-11-17)
   search = function (q, pt) {
     if (pt && pt.peek === NOP) return _s.apply(this, arguments), null;
@@ -5611,6 +5650,9 @@ window.SV3 = (() => {
     // audit 18 Nov: help places loaded for an earlier ZIP or town stay out of a plain search ("sabath school" found Sabathani Food Distribution); searches near a place (peek) keep them
     const miss = hits && hits.miss || [];   // find10 (Z): words no item uses
     if (hits && !pt.peek) hits = hits.filter(h => !h[1].local && (!window.rbKeep || window.rbKeep(h[1])));   // cost tags: "Free only" (rb.js) narrows the hits, so "N found" counts free ones
+    const all = hits ? hits.length : 0; if (hits && !pt.peek && (SF.free || SF.online)) hits = hits.filter(h => sfKeep(h[1]));   // features: the Free / Online buttons
+    if (hits && !hits.length && all) { openList("Search", `“${raw}”`, `Nothing ${SF.free && SF.online ? "free and online" : SF.free ? "free" : "online"} for this search. Turn the button off to see all ${fmt(all)}.`, [], [], pt);
+      const tc = document.getElementById("tCards"); if (tc && /Nothing found/.test(tc.textContent)) tc.innerHTML = ""; sfDraw(raw); return; }
     if (hits && !hits.length) return nothing(raw, pt);
     if (!hits) { const r = _s.apply(this, arguments);
       // audit 18 Nov: the older search's "Churches open on their own map page" only when churches are in the list
@@ -5630,8 +5672,48 @@ window.SV3 = (() => {
     const tw = toks(norm(raw)), fw = tw.map(w => w.length > 1 && !STOPW.has(w) && !ES ? spell(w) : w), sb = $("tSub");
     if (sb && fw.some((w, i) => w !== tw[i])) sb.textContent = `Showing results for “${fw.join(" ")}”. ` + sb.textContent;   // a typo was fixed
     if (sb && miss.length) sb.textContent = `No results for “${miss.join(" ")}”: nothing on it yet, so these match your other words. ` + sb.textContent;
-    side(); if (typeof window.lpHelpHint === "function") window.lpHelpHint(raw);
+    side(); if (typeof window.lpHelpHint === "function") window.lpHelpHint(raw); sfDraw(raw);
   };
+  // features (Daniel 24 Nov, "Use only those three"): Free, Near me and Online buttons above search results, in the list's own button style.
+  // Free and Online narrow these results; Near me reruns the search "near me", so the page's own place logic (saved place, or ask for one) runs.
+  const SF = {free: false, online: false}; let sfOwn = false;
+  const FREEOK = x => /\bfree\b/i.test(x.about || "") && !/free trial|\bpaid\b/i.test(x.about || "");   // as local_draft.js; cost tags (when on) decide instead
+  const sfKeep = x => (!SF.free || (window.PRL_COSTS ? (PRL_COSTS.u[x.u] || PRL_COSTS.n[x.n]) === "F" : FREEOK(x))) && (!SF.online || (!x.place && !x.p && !!x.u));
+  const NEARQ = /\s*\b(near|close to|around)\s+me\b/i;
+  function sfDraw(raw) { const ch = document.getElementById("tChips"); if (!ch || document.getElementById("tEye").textContent !== "Search") return;
+    const b = (k, label, on) => `<button type="button" class="rb-opt" data-sf="${k}" aria-pressed="${on}"><span class="rb-ctck" aria-hidden="true">✓ <\/span>${label}<\/button>`;
+    ch.insertAdjacentHTML("beforeend", `<div class="rb-ofil rb-sf" id="rbSF" role="group" aria-label="Narrow these results">${b("free", "Free", SF.free)}${b("near", "Near me", NEARQ.test(raw))}${b("online", "Online", SF.online)}<\/div>`);
+    document.getElementById("rbSF").onclick = e => { const t = e.target.closest("[data-sf]"); if (!t) return; const k = t.dataset.sf, qi = document.getElementById("q");
+      if (k === "near") qi.value = NEARQ.test(raw) ? raw.replace(NEARQ, " ").trim() : raw + " near me"; else { SF[k] = !SF[k]; qi.value = raw; }
+      sfOwn = true; qi.form.requestSubmit(); setTimeout(() => document.querySelector(`#rbSF [data-sf="${k}"]`)?.focus({preventScroll: true}), 60); }; }
+  addEventListener("submit", e => { if (e.target.id === "qform") { if (!sfOwn) SF.free = SF.online = false; sfOwn = false; } }, true);   // a new typed search starts unfiltered
+  // features (Daniel 23 Nov, "browser, and then voice model"): the browser's own voice typing in the search bar; hidden where the browser has none.
+  // On-device recognition (Chrome 139+ processLocally) when this device has it, else the browser's speech service; the note says so once.
+  (() => { const SR = window.SpeechRecognition || window.webkitSpeechRecognition, qf = document.getElementById("qform"), qi = document.getElementById("q");
+    if (!SR || !qf || !qi || document.getElementById("qmic")) return;
+    const btn = document.createElement("button"); btn.type = "button"; btn.id = "qmic"; btn.setAttribute("aria-label", "Search by voice"); btn.setAttribute("aria-pressed", "false"); btn.title = "Search by voice";
+    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/><\/svg>';
+    qf.insertBefore(btn, qf.querySelector("button.btn") || null);
+    let rec = null, said = "";
+    const note = t => { let n = document.getElementById("qmicNote"); if (!t) { n?.remove(); return; }
+      if (!n) { n = document.createElement("p"); n.id = "qmicNote"; n.className = "rb-micnote"; n.setAttribute("role", "status"); qf.after(n); } n.textContent = t; };
+    const stop = () => { btn.classList.remove("on"); btn.setAttribute("aria-pressed", "false"); btn.setAttribute("aria-label", "Search by voice"); };
+    btn.onclick = async () => {
+      if (rec) { rec.stop(); return; }
+      const lang = document.documentElement.lang || navigator.language || "en-US"; let r;
+      try { r = new SR(); } catch (e) { return; }
+      r.lang = lang; r.interimResults = true; r.continuous = false; r.maxAlternatives = 1;
+      try { if ("processLocally" in r && typeof SR.available === "function" && await SR.available({langs: [lang], processLocally: true}) === "available") r.processLocally = true; } catch (e) {}
+      let seen = false; try { seen = localStorage.getItem("prl-micnote") === "1"; localStorage.setItem("prl-micnote", "1"); } catch (e) {}
+      note(seen ? "" : "Voice is sent to your browser's speech service (Google on Chrome) unless your device can do it on its own.");
+      said = ""; rec = r;
+      r.onresult = e => { said = [...e.results].map(x => x[0].transcript).join(" ").replace(/\s+/g, " ").trim(); qi.value = said; };
+      r.onerror = e => { if (e.error === "not-allowed" || e.error === "service-not-allowed") note("The microphone is blocked for this page. Allow it in the browser's site settings to search by voice.");
+        else if (e.error === "no-speech") note("Nothing was heard. Tap the microphone and try again."); };
+      r.onend = () => { rec = null; stop(); setTimeout(() => { if (!rec) note(""); }, said ? 4000 : 8000); if (said) qf.requestSubmit(); };
+      btn.classList.add("on"); btn.setAttribute("aria-pressed", "true"); btn.setAttribute("aria-label", "Stop listening");
+      try { r.start(); } catch (e) { rec = null; stop(); } };
+  })();
 })();
 
 /* Screenshot harness: only runs when the page is opened with #shot=NAME (used to take real pictures of the real app for the welcome tour). Never runs for visitors. */
@@ -5883,3 +5965,53 @@ window.SV3 = (() => {
 })();
 
 </script>
+<script>
+// Daniel's own devices (11 Nov 2026): open the site once with #this-is-me on each of his devices; after that, that device's
+// visits are counted under me-pc/ or me-phone/ so the report can tell him apart from everyone else (#not-me undoes it).
+// Stored only in that browser; nothing about other visitors changes.
+window.PRL_ME = (() => { try {
+  if (location.hash === "#this-is-me") { localStorage.setItem("prl-me", "1"); history.replaceState(null, "", location.pathname + location.search);
+    addEventListener("DOMContentLoaded", () => { const n = document.createElement("div"); n.textContent = "This device is marked as yours. Your visits now count separately."; n.style.cssText = "position:fixed;left:50%;top:16px;transform:translateX(-50%);z-index:999;background:#d4af5a;color:#1b1404;padding:10px 16px;border-radius:12px;font:600 14px system-ui"; document.body.appendChild(n); setTimeout(() => n.remove(), 5000); }); }
+  if (location.hash === "#not-me") { localStorage.removeItem("prl-me"); history.replaceState(null, "", location.pathname + location.search); }
+  return localStorage.getItem("prl-me") ? (/Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent) ? "me-phone/" : "me-pc/") : "";
+} catch (e) { return ""; } })();
+if (window.PRL_ME) window.goatcounter = {path: p => "/" + window.PRL_ME + p.replace(/^\//, "")};   // page visits from Daniel's devices
+</script>
+<script data-goatcounter="https://pastor-resource-list.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").then(r => r.update()).catch(() => {});
+  // No reload when a new helper takes over (Daniel, 9 Nov 2026: the app "blinks" 1-2 s after opening).
+  // sw.js is network-first, so the page that just opened is already the newest; the new helper only refreshes the offline copy.
+}
+document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 24 Nov 2026, 01:55"; document.body.appendChild(f); });
+(() => {
+  const bar = document.getElementById("installBar"), btn = document.getElementById("installBtn");
+  const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone;
+  let hidden = false; try { hidden = localStorage.getItem("prl-install-hidden") === "1"; } catch (e) {}
+  if (installed || hidden) { bar.hidden = true; return; }
+  const ua = navigator.userAgent, os = /iPhone|iPad|iPod/.test(ua) ? "ios" : /SamsungBrowser/.test(ua) ? "android-samsung" : /Android/.test(ua) ? "android" : "desktop";
+  // this device's steps first, then the others, all shown (no folding)
+  const mine = document.querySelector(`[data-os="${os}"]`); mine.parentNode.insertBefore(mine, mine.parentNode.children[1]);
+  document.querySelectorAll("[data-os]").forEach(d => { d.hidden = false; d.style.opacity = d === mine ? "1" : ".8"; });
+  let ask = window.__bip;   // caught in the head (Daniel, 5 Nov 2026: "works on pc but not phone")
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); ask = e; });  // one-tap install where the browser allows it
+  // the button is always there: one tap installs where the browser allows it; otherwise it shows this browser's own 2 or 3 taps
+  btn.onclick = async () => {
+    if (ask) { ask.prompt(); const r = await ask.userChoice; ask = null; if (r.outcome === "accepted") bar.hidden = true; return; }
+    ask = ask || window.__bip; if (ask) { ask.prompt(); const r = await ask.userChoice; ask = null; window.__bip = null; if (r.outcome === "accepted") bar.hidden = true; return; }
+    const w = document.createElement("div");
+    w.style.cssText = "position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.6);display:grid;place-items:center;padding:20px";
+    w.innerHTML = `<div style="background:#fff;color:#111;border-radius:16px;max-width:440px;width:100%;padding:20px;font:17px/1.5 system-ui,sans-serif;display:grid;gap:12px">
+      <b style="font-size:20px">Add it to your home screen</b>
+      <div>This phone installs apps from its own browser. Follow these taps to get the real app (not just a shortcut):</div>
+      <div style="background:#f2f2f6;border-radius:10px;padding:12px">${mine.innerHTML}</div>
+      <div style="font-size:14px;color:#555">It installs the real app: its own icon, full screen, works without signal.</div>
+      <button style="justify-self:end;font:700 16px system-ui;padding:10px 20px;border:0;border-radius:10px;background:${getComputedStyle(bar).backgroundColor};color:#fff">OK</button></div>`;
+    w.onclick = e => { if (e.target === w || e.target.tagName === "BUTTON") w.remove(); };
+    document.body.appendChild(w);
+  };
+  addEventListener("appinstalled", () => { bar.hidden = true; });
+  document.getElementById("installHide").onclick = () => { bar.hidden = true; try { localStorage.setItem("prl-install-hidden", "1"); } catch (e) {} };
+})();
+</script></body></html>
