@@ -2670,7 +2670,9 @@ if ($("wsvg")) new MutationObserver(() => document.querySelectorAll("#wLabels te
     spk = {raw, rest}; search(rest, [innerWidth / 2, 220]); spk = null; const tt = $("tTitle"); if (tt) tt.textContent = `“${raw}”`; }, true);
   const show = q => { document.getElementById("rbSpkHits")?.remove(); const tb = $("rbTBack"); if (tb) tb.textContent = "‹ Back to all resources"; const ws = fl(q).split(" ").filter(w => w.length > 1);
     const sp = spk && spk.rest === q ? spk.rest : "";
-    const m = names && ws.length && ws.length <= 4 ? names.filter(n => hit(n, ws)) : []; if (!sp && (!m.length || m.length > 8)) return;
+    let m = names && ws.length && ws.length <= 4 ? names.filter(n => hit(n, ws)) : [];
+    if (!sp && (!m.length || m.length > 8) && names && window.PRLES && PRLES.isES(q)) m = PRLES.spk(q, names, hit);   // spanishlive (24 Nov 2026): "sermones de Mark Finley" (spanish.js)
+    if (!sp && (!m.length || m.length > 8)) return;
     const box = document.createElement("div"); box.id = "rbSpkHits"; box.className = "rbSpkHits";
     // 18 Nov (Daniel: "still cant find pavel goia", main search bar): 1-3 name matches show as big speaker cards, not small pills, and count in the "found" line
     const cards = !sp && m.length <= 3, ini = n => n.split(" ").filter(w => /^[A-Za-z]/.test(w)).map(w => w[0]).slice(0, 2).join("").toUpperCase();
@@ -2683,6 +2685,29 @@ if ($("wsvg")) new MutationObserver(() => document.querySelectorAll("#wLabels te
       if (!k) { if ($("tChips")) $("tChips").innerHTML = ""; const tc = $("tCards"); if (tc && /Nothing (matches|found)/.test(tc.textContent)) tc.innerHTML = ""; } }, 0); };   // speakers only: drop the "try these searches" chips and the empty-filters note
   try { const s0 = search; search = function (q) { const r = s0.apply(this, arguments); try { show(String(q || "")); } catch (e) { console.error(e); } return r; }; } catch (e) { console.error(e); }
 })();
+
+// ---- verse search (24 Nov 2026, work/design/verse_tags/) ----
+// A Bible reference typed in the main Resources search ("John 3:16", "Psalm 23", "1 Cor 13") also shows the Illustrations stories
+// tagged with an overlapping reference (illustrations/verse.js, written by build_illustrations_rebrand.py). A tap opens the story;
+// "See all" opens the Illustrations search for that reference.
+(() => {
+  const sc = document.createElement("script"); sc.src = "illustrations/verse.js"; sc.async = true; document.head.append(sc);
+  const openIll = (q, id) => { const b = document.querySelector("#resTabs [data-rt=ill]"); if (b) b.click();
+    let k = 0; const t = setInterval(() => { let w = null, iq = null; try { w = $("illFrame").contentWindow; iq = w.document.getElementById("q"); } catch (e) {}
+      if (iq || ++k > 50) { clearInterval(t); if (!iq) return; if (id) w.location.hash = "s-" + id; else { iq.value = q; iq.dispatchEvent(new Event("input")); } } }, 100); };
+  const show = q => { document.getElementById("rbVerseHits")?.remove(); const V = window.VERSE; if (!V || !V.idx) return;
+    const r = V.find(q, V.items || (V.items = V.idx.map(([id, t, bible]) => ({id, t, bible})))); if (!r || !r.length) return;
+    const ref = V.parse(q).map(x => x.s).join(", "), box = document.createElement("div"); box.id = "rbVerseHits"; box.className = "rbSpkHits rbSpkCards";
+    box.innerHTML = r.slice(0, 3).map(x => `<button type="button" data-id="${esc(x.id)}"><i>📖</i><b>${esc(x.t)}<small>Story · ${esc(x.bible)} ›</small></b></button>`).join("")
+      + (r.length > 3 ? `<button type="button" data-q="${esc(ref)}"><i>${r.length}</i><b>See all ${r.length} stories for ${esc(ref)} ›</b></button>` : "");
+    box.onclick = e => { const b = e.target.closest("button"); if (b) openIll(b.dataset.q || ref, b.dataset.id); };
+    $("tRows").before(box);
+    setTimeout(() => { const ts = $("tSub"); if (!ts) return; const k = parseInt(ts.textContent) || 0, sw = r.length === 1 ? "1 story" : r.length + " stories";
+      ts.textContent = /^Nothing found/.test(ts.textContent) ? sw + " found." : /^\d+ found\./.test(ts.textContent) ? `${sw} and ${k} resource${k === 1 ? "" : "s"} found.` : ts.textContent;
+      if (!k) { if ($("tChips")) $("tChips").innerHTML = ""; const tc = $("tCards"); if (tc && /Nothing (matches|found)/.test(tc.textContent)) tc.innerHTML = ""; } }, 0); };
+  try { const s0 = search; search = function (q) { const r = s0.apply(this, arguments); try { show(String(q || "")); } catch (e) { console.error(e); } return r; }; } catch (e) { console.error(e); }
+})();
+// ---- end verse search ----
 
 /* ===== Accessibility pass (16 Nov 2026, qa/a11y_check.md): keyboard and screen-reader behavior only, nothing visible changes =====
    Used by the app (after rb.js) and by the Speakers page (build_speakers_rebrand.py); each part runs only where its elements exist.
@@ -3957,8 +3982,10 @@ const SPK = {"https://americanchristianministries.org/?s=&spid=asscherick-david-
   const needTopic0 = raw => NEEDS.filter(n => n.re.test(raw) && !(n.not && n.not.test(raw) && !/\b(hungry|starving|no food|out of food|nothing to eat|evicted|shut off)\b/i.test(raw)));   // audit 18 Nov: a meal for 50 people is a recipe; money for outreach is a church budget
   // search v3: needs the homework words find in each part of a story ("my fridge is empty"), after the ones the patterns above find
   const needTopic = (raw, keys) => { if (keys) return NEEDS.filter(n => keys.includes(n.k));   // story search plus (24 Nov 2026): the needs the pastor kept or added
+    const raw0 = raw; raw = window.PRLES ? PRLES.q(raw) : raw;   // spanishlive (24 Nov 2026): a Spanish search's need words, in the glossary English (spanish.js)
     const t = window.SP ? SP.clean(raw) : raw, h = needTopic0(t); ((window.SV3 && SV3.needs && SV3.needs(t)) || []).forEach(k => { const n = NEEDS.find(n => n.k === k); if (n && !h.includes(n)) h.push(n); });
     if (window.SP) SP.implied(raw).sure.forEach(k => { const n = NEEDS.find(n => n.k === k); if (n && !h.includes(n)) h.push(n); });
+    if (!h.length && window.PRLES) { const m = PRLES.memNeeds(raw0).map(k => NEEDS.find(n => n.k === k)).filter(Boolean); if (m.length) return m; }   // spanishlive: no need words: what the Spanish topic memory voted, best first (meaning.js, Wi-Fi only)
     return h.sort((a, b) => NEEDS.indexOf(a) - NEEDS.indexOf(b)); };
   window.lpNeedTopic = raw => needTopic(raw).map(n => n.k);   // for the search tests (design/search_v3)
   window.lpHelpHint = raw => {   // one small "help plan" link above the results (same pill look as the speaker names)
@@ -5615,7 +5642,8 @@ window.SV3 = (() => {
   const words = q => toks(norm(q)).filter(w => w.length > 1 && !STOPW.has(w)).map(w => stem(spell(w)));
   if (window.SV3) SV3.words = words;
   function rank3(raw) { const r = rank3w(raw); return window.PRLM && r ? PRLM.blend(raw, r, rank3w) : r; }   // push90: meaning search re-orders once its answer for this exact search is ready (meaning.js)
-  function rank3w(raw) {   // search v3: a sentence whose homework topic is clear shows that topic first, then the word matches
+  function rank3w(raw, sw) {   // search v3: a sentence whose homework topic is clear shows that topic first, then the word matches
+    if (!sw && window.PRLES) { const e = PRLES.q(raw); if (e !== raw) { const nm = rank(raw).filter(h => h[0] >= 200), r = rank3w(e, 1); if (!nm.length) return r; const s = new Set(nm.map(h => h[1])), o = [...nm, ...r.filter(h => !s.has(h[1]))]; o.miss = r.miss; o.full = r.full; return o; } }   // spanishlive (24 Nov 2026): a Spanish search ranks with its glossary English (spanish.js), an exact item name ("Iglesia Adventista Betel") still first; English searches unchanged
     const r0 = rank(raw), g = window.SV3 && SV3.topic(raw, r0); if (!g) return r0;
     const inT = x => (x.sets || []).includes(g), a = r0.filter(h => inT(h[1])), seen = new Set(a.map(h => h[1]));
     if (a.length < 8) rank(g.replace(/[^A-Za-z ]+/g, " ")).forEach(h => { if (inT(h[1]) && !seen.has(h[1])) { seen.add(h[1]); a.push(h); } });
@@ -6142,12 +6170,69 @@ const SPT = {"big":{"newyork":["NY"],"losangeles":["CA"],"chicago":["IL"],"houst
   G.SP = SP;
 })();
 
+/* ---- Spanish search (spanishlive, 24 Nov 2026; work/design/search_v3/spanish/SPANISH_LIVE_REPORT.md) ----
+   A search that looks Spanish gets: (1) the Spanish glossary (Adventist words, help needs, immigration/legal help) swapped into the English words
+   the list uses, for word search and the help plan; (2) speaker names found inside Spanish wording ("sermones de Mark Finley"); (3) on Wi-Fi,
+   the multilingual meaning model (meaning.js, Spanish block). English searches are untouched. Nothing typed is sent anywhere. */
+window.PRLES = (() => {
+  const G = /*ESGLOSS*/[["\\b(?:daca|asilo|asylum|abogad\\w*|abogao|lawyer|inmigra\\w*|imigra\\w*|immigra\\w*|migra|migrante\\w*|migrator\\w*|migracion|migrasion|ice|deport\\w*|permiso de (trabajo|travajo)|work permit|green card|tarjeta verde|(papeles|tramites|formularios|tarjeta) de residencia|residencia permanente|ciudadania|naturalizacion|visa u|visas?|tps|parole|papeles|tramites|legal aid|asesoria legal|ayuda legal|clinica legal|orientacion legal|problemas legales|derechos|detenid[oa]s?|audiencia|corte de inmigracion|notario)\\b", "immigration legal aid lawyer interpreter"], ["\\b(?:tradu[cksz]\\w*|interpret\\w*)\\b", "translator interpreter"], ["\\b(?:(se|me) (k|qu)iere matar|ya no (k|qu)iero vivir|(hacer|aser)me (dano|da\\w*)|no aguanto mas|tomarme (todas )?las pastillas|linea de (emergencia|crisis)|peligro inmediato|emergency)\\b", "suicide"], ["\\b(?:no (estoy|me siento) segur[oa] en (mi )?casa|casa insegura|(refugio|refujio|albergue)s?( secreto| confidencial)? (para|pa) mujeres|tengo miedo (de )?(volver|bolver) a (mi )?casa|controla mi (money|dinero)|me empuja|golpe\\w*|orden de proteccion|orden de restriccion|restraining order)\\b", "domestic violence abuse"], ["\\b(?:lugar (pa|para) dormir|pasar la noche|(ando )?durmiendo en (el|la|mi|un) (carro|camioneta|troca|coche|parque|calle)|me sacaron de (la|el|mi) (casa|apartamento|cuarto)|desocup\\w*|indigentes|kaye|cuartos para gente)\\b", "homeless shelter evicted"], ["\\b(?:gasolina|bus pass|pasajes|boletos de autobus|prestad[oa]s?|no me alcanza|ni un dolar|dolares|cortar la (luz|lus)|lus)\\b", "money rent bills gas money"], ["\\b(?:ebt|canasta basica|mercado solidario|comda)\\b", "food"], ["\\b(?:calzado|ropero\\w*|uniformes? (escolares|para (mis )?(ninos|hijos))|sueteres|sweaters?)\\b", "clothes coats"], ["\\b(?:insulina|pruebas? de embarazo|examen(es)? (gratis|medicos?)|asen examenes|centros? de salud)\\b", "clinic dental medical care"], ["\\b(?:therapist|sicolog\\w*|apoyo emocional)\\b", "depression anxiety mental health"], ["\\b(?:viud[oa]s?|perdieron (a )?(un |una |sus |a sus )?(hijos?|familiares|bebes?)|perdi (a )?mi (bebe|hijo|hija)|perdimos a|gastos funerarios|enterrar|repatriar)\\b", "grief funeral death"], ["\\b(?:dejar de (tomar|beber)|volvi a consumir|toma (mucho|demasiado)|anos tomando)\\b", "addiction recovery rehab"], ["\\b(?:trabajos|contratando|warehouse|sin experiencia)\\b", "job work"], ["\\b(?:inundad\\w*|fema|red cross|cruz roja|afectados|reparar techos|reconstruccion de vivienda|el agua entro)\\b", "disaster"], ["\\b(?:escuela sabatica)\\b", "Sabbath School"], ["\\b(?:leccion(es)? de escuela sabatica|folleto|trimestral|leccion(es)?)\\b", "Sabbath School lesson quarterly"], ["\\b(?:sabados?|sabatic\\w*)\\b", "Sabbath"], ["\\b(?:adventistas?|iasd|septimo dia|7mo dia|7 dia)\\b", "Adventist"], ["\\b(?:conquistador\\w*)\\b", "Pathfinders"], ["\\b(?:aventurer\\w*)\\b", "Adventurers"], ["\\b(?:especialidad\\w*)\\b", "honors"], ["\\b(?:colport\\w*)\\b", "literature evangelism canvassing"], ["\\b(?:diezmos?)\\b", "tithe"], ["\\b(?:ofrendas?)\\b", "offering"], ["\\b(?:mayordomia)\\b", "stewardship"], ["\\b(?:tesorer\\w*)\\b", "treasurer"], ["\\b(?:secretari\\w*)\\b", "clerk"], ["\\b(?:asociacion\\w*)\\b", "conference"], ["\\b(?:union\\w*)\\b", "union"], ["\\b(?:division\\w*)\\b", "division"], ["\\b(?:santa cena|comunion|lavamiento de pies|rito de humildad)\\b", "communion foot washing"], ["\\b(?:pan sin levadura)\\b", "unleavened bread communion"], ["\\b(?:ungimiento|uncion)\\b", "anointing"], ["\\b(?:bautism\\w*|bautiz\\w*)\\b", "baptism"], ["\\b(?:himnari\\w*)\\b", "hymnal hymns"], ["\\b(?:himnos?|alabanza\\w*|cantos?|canciones|musica)\\b", "hymns worship music"], ["\\b(?:coro|partituras?)\\b", "choir sheet music"], ["\\b(?:sermon\\w*|predica\\w*|predicacion\\w*|mensaje\\w*)\\b", "sermons"], ["\\b(?:bosquejo\\w*)\\b", "sermon outlines"], ["\\b(?:ilustracion\\w*)\\b", "illustrations"], ["\\b(?:elena g\\.? de white|elena white|ellen white|espiritu de profecia)\\b", "Ellen White"], ["\\b(?:el camino a cristo)\\b", "Steps to Christ"], ["\\b(?:el conflicto de los siglos|conflicto)\\b", "Great Controversy"], ["\\b(?:el deseado de todas las gentes|deseado)\\b", "Desire of Ages"], ["\\b(?:estudios? biblic\\w*|estudiar la biblia)\\b", "Bible studies"], ["\\b(?:biblias?)\\b", "Bible"], ["\\b(?:devocion\\w*|matutina\\w*|meditacion\\w*)\\b", "devotionals"], ["\\b(?:creencias|doctrina\\w*)\\b", "beliefs"], ["\\b(?:profecia\\w*|apocalipsis|daniel)\\b", "prophecy Daniel Revelation"], ["\\b(?:segunda venida)\\b", "second coming"], ["\\b(?:evangelism\\w*|campana\\w* evangelistic\\w*|semana de oracion|series? evangelistic\\w*)\\b", "evangelism evangelistic series"], ["\\b(?:jovenes|juveni\\w*|adolescentes)\\b", "youth"], ["\\b(?:ninos|ninas|infantil\\w*|escuelita|vacaciones biblic\\w*|ebv)\\b", "kids children"], ["\\b(?:diacon\\w*)\\b", "deacons"], ["\\b(?:ancian\\w*)\\b", "elders"], ["\\b(?:junta|comision|nombramientos|administracion|liderazgo|lideres)\\b", "church board leadership"], ["\\b(?:ministerio de la mujer|damas|mujeres)\\b", "women's ministries"], ["\\b(?:hombres|varones)\\b", "men's ministry"], ["\\b(?:matrimonio\\w*|parejas|famili\\w*)\\b", "family marriage"], ["\\b(?:dorcas|servicio comunitario|accion comunitaria|asa\\b)\\b", "Community Services"], ["\\b(?:voluntari\\w*)\\b", "volunteer"], ["\\b(?:misione\\w*|viaje\\w* misionero\\w*)\\b", "mission trips"], ["\\b(?:libros? misioner\\w*|folletos? para repartir|literatura)\\b", "books to share literature"], ["\\b(?:expo de salud|feria de salud|exposicion de salud)\\b", "health expo screening"], ["\\b(?:salud(?! mental))\\b", "health"], ["\\b(?:diabet\\w*)\\b", "diabetes"], ["\\b(?:vegetarian\\w*|vegan\\w*|recetas?)\\b", "vegan vegetarian recipes"], ["\\b(?:cocina\\w*)\\b", "cooking"], ["\\b(?:libertad religiosa)\\b", "religious liberty"], ["\\b(?:trabajar en sabado|trabajo en sabado|trabajando en sabado)\\b", "Sabbath work religious liberty"], ["\\b(?:diapositivas|powerpoint|proyectar|propresenter|letras)\\b", "slides projection"], ["\\b(?:equipo de sonido|sonido|microfono\\w*|camara\\w*)\\b", "sound audio video equipment"], ["\\b(?:transmitir|en vivo|streaming|pagina web|sitio web)\\b", "livestream website"], ["\\b(?:impresion|imprimir|imprenta|copias)\\b", "print printing"], ["\\b(?:camisetas|playeras|gorras|uniformes?)\\b", "custom shirts apparel"], ["\\b(?:radio|podcast\\w*|audio\\w*)\\b", "radio podcasts audio"], ["\\b(?:videos?|peliculas?)\\b", "videos"], ["\\b(?:anciano\\w* de iglesia)\\b", "elders"], ["\\b(?:personas mayores|adultos mayores|tercera edad|abuel\\w*)\\b", "seniors older adults"], ["\\b(?:discapacidad\\w*|sordos|ciegos)\\b", "disability special needs"], ["\\b(?:capellan\\w*)\\b", "chaplain"], ["\\b(?:pastor\\w*)\\b", "pastor"], ["\\b(?:iglesias? hispana\\w*|en espanol|hispan\\w*|latin\\w*)\\b", "Spanish"], ["\\b(?:iglesias?|templos?|congregacion\\w*|culto)\\b", "church"], ["\\b(?:comida|komida|almuerzo|desayuno|cena caliente|comedor\\w*|despensa|mandado|leche para|formula para bebe|panales|pañales)\\b", "food"], ["\\b(?:quitar(me|se)? la vida|matar(me|se)|no quiere?o? (seguir )?vivi\\w*|ya no quiero vivir|me quiero morir|quiero morir\\w*|kiero morir\\w*|suicid\\w*|suisid\\w*|hacerme dano|cortarme|sobredosis)\\b", "suicide"], ["\\b(?:lastimar\\w*|me amenaz\\w*|amenaz\\w*|en peligro|me quiere matar|me sigue|acoso|me persigue)\\b", "in danger threaten me"], ["\\b(?:maltrat\\w*|me golpe\\w*|me pega\\w*|golpea|violencia|abusa\\w*|abuso\\w*|no me deja salir|me controla|controla todo|celos\\w*|agresi\\w*)\\b", "domestic violence abuse"], ["\\b(?:ansiedad|anciedad|ansios\\w*|deprimid\\w*|depresion|depre|triste\\w*|me siento sol\\w*|panico|psicolog\\w*|psiquiatr\\w*|terapeuta|terapia|consejer\\w*|counseling|salud mental|estres\\w*|no puedo dormir)\\b", "depression anxiety mental health"], ["\\b(?:alcocol|alcohol\\w*|borrach\\w*|droga\\w*|adict\\w*|adiccion\\w*|apuesta\\w*|apostar|casino|ludopatia|vicio\\w*|rehab\\w*|recaer|fentanilo|metanfetamina|cristal|aa\\b|alcoholicos anonimos|narcoticos anonimos)\\b", "addiction recovery rehab"], ["\\b(?:fallec\\w*|muri\\w*|murio|muerte|funeral\\w*|funeraria|entierro|velorio|duelo|luto|perdi a mi|perdida|aborto espontaneo)\\b", "grief funeral death"], ["\\b(?:huracan\\w*|uracan\\w*|inundacion\\w*|inundo|se inundo|incendio\\w*|se quemo|quemo|tornado\\w*|terremoto\\w*|tormenta\\w*|desastre\\w*|damnificad\\w*|perdimos todo|perdi todo|muebles)\\b", "disaster"], ["\\b(?:donde quedarme|donde dormir|no tengo donde|sin techo|techo|hospedaje|refugio\\w*|albergue\\w*|vivo en mi (carro|coche|troca)|viviendo en mi (carro|coche|troca)|duermo en (la calle|mi carro)|me corrieron|me corieron|me echaron|desalojo\\w*|desaloj\\w*|desahucio\\w*|homeless|en la calle)\\b", "homeless shelter evicted"], ["\\b(?:muela\\w*|dientes?|dentist\\w*|dentadura|embarazad\\w*|prenatal\\w*|seguro medico|sin seguro|no tengo seguro|aseguranza|medicamento\\w*|medicina\\w*|meds|receta\\w* medica\\w*|lentes|anteojos|vacunas?|doctor\\w*|medic\\w*|clinica\\w*|hospital\\w*)\\b", "clinic dental medical care"], ["\\b(?:ropa\\w*|tenis|zapat\\w*|botas|chamarra\\w*|abrigo\\w*|chaqueta\\w*|uniforme\\w* escolar\\w*|cobija\\w*|frazada\\w*)\\b", "clothes coats"], ["\\b(?:trabajo|trabajar|empleo\\w*|chamba|jale|oficio\\w*|entrevista\\w*|curriculum|aplico|aplicar para|me despidieron|despid\\w*|recortaron las horas|housekeeping|limpieza de casas)\\b", "job work"], ["\\b(?:renta|rentas|alquiler|deposito|depocito|casero|luz|electricidad|biles|bills?|facturas?|recibos?|cuentas?|gas|dinero|money|pagar|deudas?|ayuda economica|asistencia economica|ayuda financiera|car seat)\\b", "money rent bills"], ["\\b(?:comida|alimento\\w*|despensa\\w*|banco de comida|banco de alimentos|viveres|hambre|comer)\\b", "food pantry"], ["\\b(?:cupones|estampillas|snap|wic)\\b", "food stamps SNAP"], ["\\b(?:albergue\\w*|refugio\\w*|donde dormir|sin casa|sin hogar|vivo en (mi )?(carro|coche|auto)|duermo en|desaloj\\w*|desahuci\\w*)\\b", "shelter homeless eviction"], ["\\b(?:renta|alquiler|vivienda|casero|dueno de la casa|arrendador)\\b", "rent housing landlord"], ["\\b(?:(la )?luz|electricidad|biles|biles|facturas?|cuentas?|recibos?|gas)\\b", "utility bills"], ["\\b(?:dinero|ayuda economica|ayuda financiera|pagar|deudas?)\\b", "money financial assistance"], ["\\b(?:ropa|zapatos|abrigos?|chamarras?|cobijas|frazadas)\\b", "clothes coats blankets"], ["\\b(?:clinica\\w*|doctor\\w*|medic\\w*|dentista|dental|seguro medico|sin seguro|medicinas?|receta medica)\\b", "free clinic doctor dental"], ["\\b(?:huracan\\w*|inundacion\\w*|incendio\\w*|tornado\\w*|terremoto\\w*|desastre\\w*|damnificad\\w*)\\b", "disaster relief"], ["\\b(?:trabajo|empleo|chamba|jale|entrevista|curriculum)\\b", "job employment"], ["\\b(?:violencia domestica|me golpea|me pega|abuso|maltrato|abusad\\w*)\\b", "domestic violence abuse"], ["\\b(?:orden de restriccion|orden de proteccion)\\b", "restraining order"], ["\\b(?:suicid\\w*|matarme|quitarme la vida|no quiero vivir|crisis)\\b", "suicide crisis hotline"], ["\\b(?:peligro|amenaza\\w*|me persigue|trata de personas)\\b", "danger safety"], ["\\b(?:depresion|deprimid\\w*|ansiedad|estres|salud mental|psicolog\\w*|terapia|consejer\\w*)\\b", "mental health counseling depression"], ["\\b(?:adiccion\\w*|alcohol\\w*|drogas?|apuestas|vicio\\w*|rehabilitacion|fumar|tabaco)\\b", "addiction recovery"], ["\\b(?:duelo|luto|fallecio|murio|muerte|funeral\\w*|perdi a)\\b", "grief funeral"], ["\\b(?:abogad\\w*|inmigracion|migratori\\w*|papeles|residencia|ciudadania|asilo|deportacion|permiso de trabajo|daca|visa)\\b", "immigration legal aid lawyer"], ["\\b(?:traductor\\w*|traduccion|interprete|interpreter)\\b", "translator interpreter"], ["\\b(?:corte|tribunal)\\b", "court"], ["\\b(?:cuidado de ninos|guarderia|ninera)\\b", "child care"], ["\\b(?:transporte|raite|aventon)\\b", "transportation ride"], ["\\b(?:utiles escolares|mochilas)\\b", "school supplies"], ["\\b(?:ayuda|ayudar|apoyo)\\b", "help"], ["\\b(?:gratis|gratuit\\w*)\\b", "free"], ["\\b(?:cerca de mi|cerca)\\b", "near me"]]/*/ESGLOSS*/;   // written by design/search_v3/spanish/glossary.py (tuned on tune rows only)
+  const RX = G.map(([p, e]) => [new RegExp(p, "g"), e]);
+  const fold = s => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  // Spanish small words; one is enough ("ropa para ninos"). English words the glossary also knows (radio, sermons, money) never count alone.
+  const SW = /\b(de|la|el|los|las|para|del|y|en|con|por|una|unos|unas|que|mis|tu|su|sus|donde|como|cual|quien|necesito|nesesito|ocupo|quiero|kiero|busco|hay|tengo|estoy|esta|se|nos|muy|mas|pero|porque|cuando|hijo|hija|hijos|ninos|esposo|esposa|mama|gratis|ayuda|iglesia|iglesias|hermanos?|sabado|semana|dia|dias|ano)\b/;   // not "mi" alone (Jackson MI; see isES0), "pa" (PA system), "me" (help me find), "sin"
+  const EN = new Set(("radio audio audios video videos podcast podcasts pastor pastors pastoral daniel union unions division divisions crisis gas money bill bills homeless counseling " +
+    "housekeeping meds snap wic casino aa ice visa visas daca tps parole asylum lawyer immigration immigrant immigrants interpreter interpreters interpretation interpreting " +
+    "legal aid work permit green card emergency warehouse therapist sweater sweaters ebt fema red cross bus pass restraining order streaming powerpoint propresenter car seat " +
+    "dorcas rehab hospital hospitals hospitality doctor doctors medical medicine medicare medicaid medication medications clinical dental dentist dentists sermon sermons " +
+    "predicate colporteur colporteurs colporteuring conquistador conquistadors secretariat junta families familiar familiarity diabetes diabetic vegetarian vegan vegans veganism " +
+    "hispanic hispanics latin latino latina latinos latinas suicide suicidal alcohol alcoholic alcoholics alcoholism funeral funerals tribunal gratis conflicto botas tenis " +
+    "interpret interpreted curriculum curriculums evangelism evangelistic evangelist evangelists ellen white prenatal tornado tornadoes pastoring pastored audiobook audiobooks " +
+    "podcasting medicine medicines doctorate daniels audioquip audioverse").split(" "));
+  const ENF = new Set("the and for near my does anyone know that has have is are was to of in with i want her his take how what where can who our we you it this good next need looking find there".split(" "));
+  const isES0 = q => { q = q || ""; if (/[ñ¿¡]|[a-z][áéíóú]|[áéíóú][a-z]/i.test(q)) return true;
+    if (fold(q).split(/[^a-z]+/).filter(w => ENF.has(w)).length >= 3) return false;   // an English sentence with a Spanish word in it ("does anyone know an iglesia adventista near me ...") stays English
+    q = q.replace(/(las vegas|los angeles|el paso|las cruces|la crosse|los alamos|el centro|la mesa|la jolla|del rio|san antonio|san diego|san francisco|san jose|san bernardino|santa fe|santa ana|santa barbara|santa rosa|santa cruz|santa clara)/gi, " ");   // US towns typed in lower case
+    // a capitalized town (El Paso, Las Vegas, La Crosse), a state code (DE, LA), St Vincent de Paul: not Spanish words
+    const t = fold(q.replace(/\b(El|La|Los|Las|De|Del|San|Santa) [A-Z][a-z]+/g, " ").replace(/\b[A-Z]{2}\b/g, " ").replace(/\bvincent de paul\b/gi, " "));
+    if (SW.test(t) || /(^|\s)[Mm]i [a-z\u00e1-\u00fa\u00f1]/.test(q)) return true;   // "mi casa", not "Jackson MI got"
+    for (const [re] of RX) { re.lastIndex = 0; let m; while ((m = re.exec(t))) { if (!m[0].trim().split(/\s+/).every(w => EN.has(w))) return true; if (!m[0]) re.lastIndex++; } } return false; };
+  const swap = q => { let sw = fold(q); const hold = [];   // swap mode: each glossary term replaced in place by its English (design/search_v3/spanish/inj_swap.js)
+    for (const [re, e] of RX) { re.lastIndex = 0; if (re.test(sw)) { re.lastIndex = 0; sw = sw.replace(re, () => { hold.push(e); return " zq" + (hold.length - 1) + "qz "; }); } }
+    return sw.replace(/zq(\d+)qz/g, (m, i) => hold[+i]).replace(/\s+/g, " ").trim(); };
+  const memo = new Map(), isES = q => { q = (q || "").trim(); let r = memo.get(q); if (r === undefined) { r = isES0(q); memo.set(q, r); if (memo.size > 300) memo.delete(memo.keys().next().value); } return r; };
+  const sq = new Map(), q = raw => { if (!isES(raw)) return raw; let r = sq.get(raw); if (r === undefined) { r = swap(raw); sq.set(raw, r); if (sq.size > 300) sq.delete(sq.keys().next().value); } return r; };
+  // speakers (design/search_v3/spanish/speaker_eval.py): drop Spanish sermon words and words that are no part of any speaker name, Spanish first names
+  // to English (Esteban -> Stephen); if no card, the same words with one left out (a misspelled first or last name), keeping only a short answer
+  const fl = s => (s || "").normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+  const ed1 = (a, b) => { let i = 0, j = 0, d = 0; while (i < a.length && j < b.length) { if (a[i] === b[j]) { i++; j++; continue; } if (++d > 1) return false;
+    if (a.length > b.length) i++; else if (b.length > a.length) j++; else if (i + 1 < a.length && j + 1 < b.length && a[i + 1] === b[j] && a[i] === b[j + 1]) { i += 2; j += 2; } else { i++; j++; } }
+    return d + (a.length - i) + (b.length - j) <= 1; };
+  const STOP = new Set(fl("sermones sermon sermons predicas prédicas predica predicaciones predicacion pastor pastora del de la el los las en al español espanol ingles " +
+    "traducidos traducidas traducido subtitulados subtituladas subtitulos mensajes mensaje biblicos biblicas cristianos adventistas adventista conferencias conferencia " +
+    "estudios estudio completos completas completo videos video doctor dr evangelista predicador predicadora sobre profecias profecia apocalipsis salud santuario " +
+    "arqueologia biblica historia esta escrito programas antiguos oracion y con para youtube audio mp3 todos todas mejores nuevos ultimos hermano hermana elder anciano").split(" "));
+  const EQ = {esteban: "stephen", jorge: "george", luis: "louis", jon: "john", rey: "ray", estefani: "stephanie", estefania: "stephanie", juan: "john", pablo: "paul", pedro: "peter",
+    miguel: "michael", santiago: "james", jose: "joseph", guillermo: "william", roberto: "robert", ricardo: "richard", maicol: "michael", cristopher: "christopher", rebeca: "rebecca", melisa: "melissa"};
+  let TOK = null, TN = null;
+  const spk = (raw, names, hit) => { if (!names || !names.length) return [];
+    if (TN !== names) { TN = names; TOK = [...new Set(names.flatMap(n => fl(n).split(" ")))]; }
+    const near = w => TOK.some(k => k === w || (k[0] === w[0] && (k.startsWith(w) || (w.length >= 4 && ed1(w, k)))));
+    const page = t => { const ws = fl(t).split(" ").filter(w => w.length > 1), m = ws.length && ws.length <= 4 ? names.filter(n => hit(n, ws)) : []; return m.length <= 8 ? m : []; };
+    const ws = fl(raw).split(" ").filter(w => w.length > 1 && !STOP.has(w)).map(w => EQ[w] || w).filter(near), m = page(ws.join(" "));
+    if (m.length || ws.length < 2) return m;
+    const alt = new Set(); ws.forEach((_, i) => { const p = page(ws.filter((_, j) => j !== i).join(" ")); if (p.length <= 3) p.forEach(n => alt.add(n)); });
+    return [...alt].sort(); };
+  // meaning.js (Spanish block) fills this: needs the topic memory voted for a Spanish search whose words found none
+  const memNeeds = new Map();
+  return {isES, q, swap, spk, memNeeds: raw => memNeeds.get((raw || "").trim()) || [], _setNeeds: (raw, ks) => { memNeeds.set(raw, ks); if (memNeeds.size > 60) memNeeds.delete(memNeeds.keys().next().value); }};
+})();
+
 /* ---- meaning search (push90, 24 Nov 2026; work/design/search_v3/push90/PUSH90_REPORT.md "Final recipe", LIVE_REPORT.md) ----
    Word results always show first. Then, on this device only, the small gte-small model (self-hosted in meaning/, never Hugging Face)
    turns the search into numbers, asks the topic memory (7,966 labelled questions, 666 of them Reddit-style) which topics it belongs to, and re-orders the list
    quietly, unless the visitor has touched the page since. Nothing typed is ever sent anywhere.
    Daniel's rules: download only on Wi-Fi or an unknown connection (desktop, iPhone), never on a phone network or with Save-Data on;
-   download once (browser cache) and ask the browser to keep it (storage.persist). Spanish searches keep word search only. */
+   download once (browser cache) and ask the browser to keep it (storage.persist). Spanish searches: the spanishlive block below (own model). */
 window.PRLM = (() => {
   const LIB = "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.1", BASE = new URL("meaning/", location.href).href, CN = "prl-meaning-v2";
   const KW = {a: 0.4, b: 3, k: 20, p: 4, guard: 0.8, cap: 2, ntop: 3, K: 100, gate: 0.85};   // fast.py Ranker.rank settings; gate: meaning-only results (word search found nothing) need a training question this close (gate.py)
@@ -6206,8 +6291,13 @@ window.PRLM = (() => {
     w.forEach((i, j) => sc.set(i, (sc.get(i) || 0) + (1 - a) / (1 + j / 5)));
     const s = dots(TV, q), best = s[topk(s, 1)[0]];
     if (!w.length && best < KW.gate) return null;   // word search found nothing and nothing in the topic memory is close: keep "Nothing on ..."
-    const qs = new Set(nm(raw)), ns = w.length ? new Set(nm(itemAt[w[0]].n)) : null, both = ns ? [...qs].filter(x => ns.has(x)).length : 0;
-    const isname = !!ns && qs.size > 0 && both / qs.size >= 0.75 && both / Math.max(1, ns.size) >= 0.5;
+    const qs = new Set(nm(raw));
+    /* ---- storyfix (24 Nov 2026, push90/STORYFIX_REPORT.md): a title search keeps its word top-1. The name test also looks at the word top-1 of the
+       story search as typed (r0, stories only), not only of the expanded search (rw): "...by John Bradshaw" adds "It Is Written TV; ..." and moved the exact story out. ---- */
+    const named = i => { if (i === undefined) return false; const ns = new Set(nm(itemAt[i].n)), both = [...qs].filter(x => ns.has(x)).length;
+      return qs.size > 0 && both / qs.size >= 0.75 && both / Math.max(1, ns.size) >= 0.5; };
+    const r0t = r0.length ? rowOf.get(r0[0][1]) : undefined, pin = named(r0t) && (itemAt[r0t].sets || [])[0] === "Sermon Illustrations" ? r0t : (w.length && named(w[0]) ? w[0] : undefined), isname = pin !== undefined;
+    /* ---- end storyfix ---- */
     let fuzzy = null;
     if (!isname) { const qn = nm(raw).join(" ");
       for (const i of [...top.slice(0, 10), ...w.slice(0, 10)]) { const n = nm(itemAt[i].n).join(" ");
@@ -6218,20 +6308,61 @@ window.PRLM = (() => {
       topk(v, ntop).forEach(t => { topk(c, 5, i => !!itemAt[i] && M.sets[i].includes(t)).forEach(i => { if (!sc.has(i)) sc.set(i, mean(i)); }); });
       sc.forEach((x, i) => sc.set(i, x + b * [...new Set(M.sets[i])].reduce((z, t) => z + v[t], 0))); }
     let out = [...sc.keys()].sort((x, y) => sc.get(y) - sc.get(x) || x - y);
-    if (isname) out = [w[0], ...out.filter(i => i !== w[0])]; else if (fuzzy !== null) out = [fuzzy, ...out.filter(i => i !== fuzzy)];
+    if (isname) out = [pin, ...out.filter(i => i !== pin)]; else if (fuzzy !== null) out = [fuzzy, ...out.filter(i => i !== fuzzy)];   // storyfix: pin (was w[0])
     const got = [], rest = [], cnt = new Map();   // at most `cap` items of one first topic in the top 5
     out.forEach(i => { const t = (itemAt[i].sets || [])[0] || ""; if (got.length < 5 && (cnt.get(t) || 0) < cap) { got.push(i); cnt.set(t, (cnt.get(t) || 0) + 1); } else rest.push(i); });
     const all = got.concat(rest);   // a search that asks for sermon stories keeps the stories first, as word search does (search_v2.js storyQ)
     if (!/\b(illustrat\w*|anecdotes?)\b/i.test(raw) && !(/\bstor(y|ies)\b/i.test(raw) && /\b(sermons?|preach\w*)\b/i.test(raw))) return all;   // "story hour", "children's story ideas" are not asks for sermon stories
     const ill = i => (itemAt[i].sets || [])[0] === "Sermon Illustrations"; return all.filter(ill).concat(all.filter(i => !ill(i))); }
-  const skip = raw => !raw || (window.searchV2Spanish && searchV2Spanish(raw));
+  /* ---- spanishlive (24 Nov 2026, work/design/search_v3/spanish/SPANISH_LIVE_REPORT.md) ----
+     A Spanish search (spanish.js PRLES.isES) uses the multilingual model instead: multilingual-e5-small fine-tuned on the Spanish tune questions
+     (meaning/models/prl/me5-es, int8), its own item vectors and the Spanish topic memory (meaning/es/). Same rules as above: Wi-Fi or an unknown
+     connection only, never with Save-Data, downloaded once and only when a Spanish search is made (English visitors never load it).
+     Recipe = design/search_v3/spanish/ft/ft_eval.py (F3): word order + meaning (a) + memory topic votes (b); memory need votes when words found none. */
+  const ESW = /*ESW*/{a: 0.5, b: 0.25, k: 40, p: 4, gate: 0.84, share: 0.5, ntop: 2}/*/ESW*/   /* calibrated on TUNE rows only: every tune query clears gate 0.84; share 0.5 + ntop 2 = 29/756 false need pills on topic rows */;
+  let esReady = null, EM = null, eext = null, EIV = null, ETV = null, eItemAt = null, eTix = null;
+  const esCached = async () => { try { return !!(await caches.match(BASE + "models/prl/me5-es/onnx/model_quantized.onnx")) && !!(await caches.match(BASE + "es/items_i8.bin?" + CN)); } catch (e) { return false; } };
+  const initES = () => esReady || (esReady = (async () => {
+    const c = conn(); if (c && c.saveData) { esReady = null; return false; }   // data-saver: never (0 bytes)
+    if (c && c.type && !/^(wifi|ethernet|wimax|unknown|other)$/.test(c.type) && !(await esCached())) { esReady = null; return false; }   // a phone network: only what is already downloaded
+    try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
+    const T = await import(LIB); Object.assign(T.env, {allowRemoteModels: false, allowLocalModels: true, localModelPath: BASE + "models/", useBrowserCache: true});
+    const [e, iv, tv, m] = await Promise.all([T.pipeline("feature-extraction", "prl/me5-es", {dtype: "q8", device: "wasm"}), get("es/items_i8.bin"), get("es/train_i8.bin"), get("es/meta.json", "json")]);
+    eext = e; EIV = new Int8Array(iv); ETV = new Int8Array(tv); EM = m; eTix = new Map(EM.topics.map((t, i) => [t, i]));
+    const byKey = new Map(); EM.keys.forEach((k, i) => byKey.set(k, i)); eItemAt = [];
+    ITEMS.forEach(x => { if (x.local) return; const r = byKey.get(key(x.n + "\u0001" + (x.sets || []).slice(0, 3).join("\u0001"))); if (r !== undefined) eItemAt[r] = x; });
+    return true;
+  })().catch(e => { console.warn("Spanish meaning search off:", e); return false; }));
+  const edots = (A, q) => { const n = A.length / 384, s = new Float32Array(n);
+    for (let i = 0, o = 0; i < n; i++, o += 384) { let a = 0; for (let k = 0; k < 384; k++) a += A[o + k] * q[k]; s[i] = a / EM.scale; } return s; };
+  function orderES(raw, q, rw) {   // -> items best first (or null: keep "Nothing on ..."); also the memory's need votes for the help plan
+    const {a, b, k, p} = ESW, sc = new Map(), add = (x, v) => sc.set(x, (sc.get(x) || 0) + v);
+    rw.slice(0, 100).forEach((h, j) => add(h[1], (1 - a) / (1 + j / 5)));
+    const s = edots(ETV, q), nb = topk(s, k); if (!rw.length && s[nb[0]] < ESW.gate) return null;   // words found nothing and no Spanish question is close
+    const c = edots(EIV, q), top = topk(c, 100, i => !!eItemAt[i]), lo = c[top[top.length - 1]], hi = c[top[0]];
+    top.forEach(i => add(eItemAt[i], a * (c[i] - lo) / (hi - lo + 1e-9)));
+    const vt = new Map(), vn = new Map(); let wn = 0, wa = 0;
+    nb.forEach(j => { const w = Math.max(s[j], 0) ** p; wa += w; if (EM.tt[j] >= 0) vt.set(EM.tt[j], (vt.get(EM.tt[j]) || 0) + w); if (EM.tn[j] >= 0) { vn.set(EM.tn[j], (vn.get(EM.tn[j]) || 0) + w); wn += w; } });
+    const mx = vt.size ? Math.max(...vt.values()) : 1;
+    sc.forEach((v, x) => { let m = 0; (x.sets || []).slice(0, 3).forEach(t => { const i = eTix.get(t); if (i !== undefined && vt.has(i)) m = Math.max(m, vt.get(i) / mx); }); sc.set(x, v + b * m); });
+    const out = [...sc.keys()].sort((x, y) => sc.get(y) - sc.get(x));
+    out.needs = wa && wn / wa >= ESW.share ? [...vn.keys()].sort((x, y) => vn.get(y) - vn.get(x)).slice(0, ESW.ntop).map(i => EM.needs[i]) : [];   // a need pill only when most close questions were needs
+    return out; }
+  const workES = async (raw, rank3w) => { if (!(await initES())) return false;
+    let q = vecs.get("es\u0001" + raw); if (!q) { q = (await eext("query: " + raw, {pooling: "mean", normalize: true})).data; vecs.set("es\u0001" + raw, q); if (vecs.size > 60) vecs.delete(vecs.keys().next().value); }
+    const r0 = rank3w(raw) || [], o = orderES(raw, q, r0.filter(h => !h[1].local)); if (!o) return false;
+    if (o.needs.length && !PRLES.memNeeds(raw).length && !(window.lpNeedTopic && lpNeedTopic(raw).length)) { PRLES._setNeeds(raw, o.needs); r0.esNeeds = true; }   // the help-plan pill, when the words found no need
+    done.set(raw, o); if (done.size > 60) done.delete(done.keys().next().value); return r0; };
+  /* ---- /spanishlive ---- */
+  const skip = raw => !raw || (!(window.PRLES && PRLES.isES(raw)) && window.searchV2Spanish && searchV2Spanish(raw));   // spanishlive: a Spanish search PRLES knows goes to workES
   // rank3 (search_v2.js) asks: the word hits r re-ordered, when this exact search's meaning answer is ready; else r unchanged
   const blend = (raw, r) => { const o = done.get(raw); if (!o) return r;
-    const seen = new Set(), res = []; o.forEach(i => { const x = itemAt[i]; if (x && !seen.has(x)) { seen.add(x); res.push([0, x]); } });
+    const seen = new Set(), res = []; o.forEach(i => { const x = typeof i === "object" ? i : itemAt[i]; if (x && !seen.has(x)) { seen.add(x); res.push([0, x]); } });
     r.forEach(h => { if (!seen.has(h[1])) { seen.add(h[1]); res.push(h); } });
     res.miss = r.miss || []; res.full = r.full; return res; };
   const work = async (raw, rank3w) => {   // -> truthy when this search now has a meaning order
-    if (done.has(raw)) return true; if (skip(raw) || !(await init())) return false;
+    if (done.has(raw)) return true; if (raw && window.PRLES && PRLES.isES(raw)) return workES(raw, rank3w);   // spanishlive
+    if (skip(raw) || !(await init())) return false;
     const e = expand(raw); let q = vecs.get(e);
     if (!q) { q = (await ext(e, {pooling: "mean", normalize: true})).data; vecs.set(e, q); if (vecs.size > 60) vecs.delete(vecs.keys().next().value); }
     const r0 = rank3w(raw) || [], rw = e !== raw ? rank3w(e) || [] : r0, o = order(raw, q, r0.filter(h => !h[1].local), rw);
@@ -6243,7 +6374,7 @@ window.PRLM = (() => {
     last = (async () => { if (!R3 || skip(raw)) return; if (done.has(raw)) return;   // a repeat search already drew the meaning order
       await new Promise(r => requestAnimationFrame(() => setTimeout(r, 0))); if (my !== seq || touched) return;   // let the word results paint before the model runs on this thread
       const r0 = await work(raw, R3); if (!r0 || my !== seq || touched) return;
-      const before = r0.slice(0, 12).map(h => h[1]), now = blend(raw, r0).slice(0, 12).map(h => h[1]); if (now.length === before.length && now.every((x, i) => x === before[i])) return;
+      const before = r0.slice(0, 12).map(h => h[1]), now = blend(raw, r0).slice(0, 12).map(h => h[1]); if (now.length === before.length && now.every((x, i) => x === before[i]) && !r0.esNeeds) return;   // spanishlive: or a new help-plan pill
       const t = document.getElementById("tTitle"); if (!t || t.textContent !== `“${raw}”` || typeof stack === "undefined" || stack[stack.length - 1].id !== "L-topic") return;
       const n = stack.length; upgrading = true; try { s0.call(window, raw, pt); } finally { upgrading = false; }
       if (stack.length === n + 1 && stack[n].id === stack[n - 1].id) { stack.pop(); if (typeof trail === "function") trail(); }   // a redraw, not a new page: Back still goes where it went
@@ -6522,7 +6653,7 @@ if ("serviceWorker" in navigator) {
   // No reload when a new helper takes over (Daniel, 9 Nov 2026: the app "blinks" 1-2 s after opening).
   // sw.js is network-first, so the page that just opened is already the newest; the new helper only refreshes the offline copy.
 }
-document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 24 Nov 2026, 05:50"; document.body.appendChild(f); });
+document.addEventListener("DOMContentLoaded", () => { const f = document.createElement("p"); f.className = "note"; f.style.cssText = "text-align:center;padding:8px 16px 24px"; f.textContent = "App version: updated 25 Nov 2026, 02:05"; document.body.appendChild(f); });
 (() => {
   const bar = document.getElementById("installBar"), btn = document.getElementById("installBtn");
   const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone;

@@ -1161,6 +1161,7 @@ html.rb .layer:focus{outline:none}
 html.rb #rbTBack{display:inline-flex;align-items:center;padding:9px 18px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:700;margin-bottom:10px;cursor:pointer}
 html.rb #rbTBack[hidden]{display:none}
 </style>
+<script src="verse.js"></script>
 <style id="illuCss">
 /* ===== Bridge: the rebrand's site look on everything AROUND the v29 covers. Cover rules (.cover, .c2, .s-*) are not touched. ===== */
 :root.rb.rb{--link:var(--acc);--peek:var(--side)}
@@ -1422,7 +1423,7 @@ const ILSYN={forgiveness:["forgiv","forgave","pardon"],forgive:["forgiv","forgav
 // tabs5: "3 minute story" keeps stories up to 3 minutes; "short" keeps the Under 2 min ones (same as the length chip).
 // A typed word (4+ letters) no story has gives {miss} and no list ("No story about Kenya yet"), not unrelated stories;
 // in a longer search (4+ words) one such word only adds a note above the list ({part}).
-function found(q0){const MIN=/\b(\d+)[ -]?(?:min|mins|minute|minutes|minuto|minutos)\b/,SHORT=/\b(short|quick|brief|corta|corto|breve)\b/g;
+function found(q0){const vh=window.VERSE&&VERSE.find(q0,ITEMS);if(vh)return vh.length?{miss:null,hit:[],part:null,r:vh}:{miss:[q0.trim()],hit:[],part:null,r:[]};const MIN=/\b(\d+)[ -]?(?:min|mins|minute|minutes|minuto|minutos)\b/,SHORT=/\b(short|quick|brief|corta|corto|breve)\b/g;
   const mm=q0.match(MIN),sh=SHORT.test(q0),fit=x=>(!mm||x.mins<=+mm[1])&&(!sh||len(x.mins)==="short");
   const q1=q0.replace(MIN," ").replace(SHORT," "),fl=x=>[[x.t,3],[x.themes,2.5],[x.lesson,1.5],[x.gist,1],[SRC[x.k].one+(x.kids?" children kids child":""),1],[x.by,1]];
   const w=wsearch(ITEMS,q1,fl,ILSYN,ILSTOP)||wsearch(ITEMS,q1,fl,ILSYN,ILFILL);
